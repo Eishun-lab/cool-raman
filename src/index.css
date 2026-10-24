@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+@theme {
+  --color-note-cream: #FAF7F2;
+  --color-note-paper: #FFFFFF;
+  --color-note-border: #E8E2D5;
+  --color-note-border-subtle: #F0EBE1;
+  --color-note-ink: #1B2A38;
+  --color-note-sub-ink: #544D45;
+  --color-note-pencil: #756D63;
+  --color-note-muted: #948C82;
+  --color-note-terracotta: #B84E34;
+  --color-note-terracotta-light: #FAF0EC;
+  --color-note-terracotta-border: #F0D5CD;
+  --color-note-matcha: #3A5A40;
+  --color-note-matcha-light: #EEF4F0;
+  --font-serif: "Noto Serif KR", "Noto Serif JP", "Yu Mincho", "Hiragino Mincho ProN", serif;
+  --shadow-notebook: 0 2px 12px -2px rgba(40, 30, 20, 0.06), 0 1px 3px rgba(40, 30, 20, 0.04);
+  --shadow-spread: 0 10px 30px -5px rgba(35, 25, 15, 0.08), 0 4px 12px rgba(35, 25, 15, 0.04);
+}
+
+@layer base {
+  html, body {
+    overscroll-behavior-y: none;
+  }
+  body {
+    background-color: #FAF7F2;
+    color: #1B2A38;
+    font-family: 'Noto Sans JP', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+}
