@@ -107,6 +107,17 @@ const TEXTBOOK_STAGES = [
     lessonsCount: 5,
     firstLessonId: 'lesson-31',
   },
+  {
+    id: 'stage-5',
+    range: '36-40' as const,
+    chapter: '第5章',
+    badge: '中級完成・上級突破',
+    title: '推量・状態・口語感情・高級論述',
+    desc: '推量配慮・動作持続・感情終結語尾・TOPIK論述総決算',
+    target: 'TOPIK II 4〜6級・ネイティブ実戦会話',
+    lessonsCount: 5,
+    firstLessonId: 'lesson-36',
+  },
 ];
 
 // 辞書 6大テーマブロック定義（初級4ブロック＋中級2ブロック）
@@ -190,6 +201,14 @@ const DICT_BLOCKS = [
     title: '【上級】論理展開・限定・背水・終結',
     desc: '-에 비추어 볼 때, -는 한편, -은/는 고사하고, -을 리 만무하다 など',
     firstDictId: 'dict-201',
+  },
+  {
+    id: 'block-11',
+    range: '226-250' as const,
+    label: 'No.226〜250',
+    title: '【最上級】TOPIK最高峰・ビジネス・格調論述',
+    desc: '-다시피, -기 짝이 없다, -아/어 마지않다, -을 턱이 만무하다 など',
+    firstDictId: 'dict-226',
   },
 ];
 
@@ -509,10 +528,10 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
   const [showColoNav, setShowColoNav] = useState(false);
 
   // 教科書の範囲選択（初期表示は第1章 1-10課にして情報過多を防止）
-  const [lessonRange, setLessonRange] = useState<'all' | '1-10' | '11-20' | '21-30' | '31-35'>('1-10');
+  const [lessonRange, setLessonRange] = useState<'all' | '1-10' | '11-20' | '21-30' | '31-35' | '36-40'>('1-10');
 
   // 辞書の範囲選択（デフォルトで '1-20' にしてスクロール地獄を防止）
-  const [dictRange, setDictRange] = useState<'all' | '1-20' | '21-40' | '41-60' | '61-80' | '81-100' | '101-130' | '131-155' | '156-180' | '181-200' | '201-225'>('1-20');
+  const [dictRange, setDictRange] = useState<'all' | '1-20' | '21-40' | '41-60' | '61-80' | '81-100' | '101-130' | '131-155' | '156-180' | '181-200' | '201-225' | '226-250'>('1-20');
 
   // 参考書タブ：似ていて紛らわしい表現 90選 vs 疑問Q&A 47選 vs 特別コラム 6選 vs 👑四字熟語 40選 vs 👑時事論述・統計 40選
   const [refSubTab, setRefSubTab] = useState<'pairs' | 'qa' | 'columns' | 'hanja' | 'writing'>('pairs');
@@ -535,7 +554,7 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
       if (refSubTab === 'hanja' || refSubTab === 'writing') setRefSubTab('pairs');
     } else if (mode === 'intermediate') {
       setLessonRange('31-35');
-      if (['181-200', '201-225'].includes(dictRange)) setDictRange('81-100');
+      if (['181-200', '201-225', '226-250'].includes(dictRange)) setDictRange('81-100');
       else if (dictRange === '1-20') setDictRange('81-100');
       setConversationSubTab('idioms');
       if (refSubTab === 'hanja' || refSubTab === 'writing') setRefSubTab('pairs');
@@ -1077,6 +1096,7 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
         else if (lessonRange === '11-20') list = LESSONS_DATA.slice(10, 20);
         else if (lessonRange === '21-30') list = LESSONS_DATA.slice(20, 30);
         else if (lessonRange === '31-35') list = LESSONS_DATA.slice(30, 35);
+        else if (lessonRange === '36-40') list = LESSONS_DATA.slice(35, 40);
       }
     }
     return list.filter((l) => matchesStatusFilter(l.id));
@@ -1112,6 +1132,7 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
       else if (dictRange === '156-180') list = GRAMMAR_DICT_DATA.slice(155, 180);
       else if (dictRange === '181-200') list = GRAMMAR_DICT_DATA.slice(180, 200);
       else if (dictRange === '201-225') list = GRAMMAR_DICT_DATA.slice(200, 225);
+      else if (dictRange === '226-250') list = GRAMMAR_DICT_DATA.slice(225, 250);
       else if (dictRange === 'all') {
         if (levelMode === 'beginner') list = list.slice(0, 80);
         else if (levelMode === 'intermediate') list = list.slice(0, 180);
@@ -2168,21 +2189,25 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
 
                   {/* 第1章〜第4章ボタン（初級モード時は第4章を完全非表示） */}
                   {TEXTBOOK_STAGES
-                    .filter((stg) => levelMode !== 'beginner' || stg.id !== 'stage-4')
+                    .filter((stg) => levelMode !== 'beginner' || (stg.id !== 'stage-4' && stg.id !== 'stage-5'))
                     .map((stg) => {
                       const isCurrent = lessonRange === stg.range;
                       const isStage4 = stg.id === 'stage-4';
+                      const isStage5 = stg.id === 'stage-5';
                       return (
                         <button
                           key={stg.id}
                           type="button"
                           onClick={() => {
                             setLessonRange(stg.range);
-                            if (isStage4) setLevelMode('intermediate');
+                            if (isStage5 && levelMode !== 'advanced') setLevelMode('advanced');
+                            else if (isStage4 && levelMode === 'beginner') setLevelMode('intermediate');
                           }}
                           className={`px-2.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer border flex items-center gap-1.5 shrink-0 ${
                             isCurrent
-                              ? isStage4
+                              ? isStage5
+                                ? 'bg-gradient-to-r from-amber-600 to-amber-700 text-white border-amber-600 shadow-xs'
+                                : isStage4
                                 ? 'bg-[#1E3A5F] text-white border-[#1E3A5F] shadow-xs'
                                 : 'bg-[#B84E34] text-white border-[#B84E34] shadow-xs'
                               : 'bg-white text-[#1B2A38] border-[#EDE7DC] hover:border-[#B84E34]'
@@ -2191,8 +2216,12 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                           <span>{stg.chapter}</span>
                           <span className={`text-[9px] px-1 py-0.2 rounded font-medium ${
                             isCurrent
-                              ? isStage4 ? 'bg-blue-300/30 text-white' : 'bg-white/20 text-white'
-                              : isStage4 ? 'bg-blue-100 text-[#1E3A5F]' : 'bg-[#FAF0EC] text-[#B84E34]'
+                              ? 'bg-white/20 text-white'
+                              : isStage5
+                              ? 'bg-amber-100 text-amber-800'
+                              : isStage4
+                              ? 'bg-blue-100 text-[#1E3A5F]'
+                              : 'bg-[#FAF0EC] text-[#B84E34]'
                           }`}>
                             {stg.range}課
                           </span>
@@ -3888,7 +3917,7 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                         .map((blk) => {
                         const isCurrent = dictRange === blk.range;
                         const isIntermediate = ['81-100', '101-130', '131-155', '156-180'].includes(blk.range);
-                        const isAdvanced = ['181-200', '201-225'].includes(blk.range);
+                        const isAdvanced = ['181-200', '201-225', '226-250'].includes(blk.range);
                         return (
                           <button
                             key={blk.id}

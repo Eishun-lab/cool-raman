@@ -35,7 +35,7 @@ export const GUIDE_INDEX: GuideIndexItem[] = [
   },
 
 
-  // 【教科書編】15課
+  // 【教科書編】全40課
   ...LESSONS_DATA.map((lesson) => ({
     id: lesson.id,
     tab: 'textbook' as const,
@@ -71,7 +71,7 @@ export const GUIDE_INDEX: GuideIndexItem[] = [
     keywords: `${pair.pairTitle} ${pair.theme} ${pair.coreDifference} ${pair.trap} ${pair.exA.ko} ${pair.exA.ja} ${pair.exB.ko} ${pair.exB.ja} ${pair.tip}`,
   })),
 
-  // 【辞書編】130選（初級80＋中級50）
+  // 【辞書編】全250選（初級80＋中級100＋上級70）
   ...GRAMMAR_DICT_DATA.map((dict) => ({
     id: dict.id,
     tab: 'dictionary' as const,
@@ -80,7 +80,7 @@ export const GUIDE_INDEX: GuideIndexItem[] = [
     keywords: `${dict.grammar} ${dict.meaning} ${dict.connection} ${dict.tip} ${dict.example}`,
   })),
 
-  // 【会話チャンク編】50選
+  // 【会話チャンク編】60選
   ...CONVERSATION_CHUNKS_DATA.map((chunk) => ({
     id: chunk.id,
     tab: 'chunks' as const,
@@ -98,7 +98,7 @@ export const GUIDE_INDEX: GuideIndexItem[] = [
     keywords: `${colo.expression} ${colo.pronunciation} ${colo.meaning} ${colo.trap} ${colo.tip} ${colo.category} ${colo.exampleKo} ${colo.exampleJa}`,
   })),
 
-  // 【直感キラーフレーズ編】80選
+  // 【直感キラーフレーズ編】全110選（推し活・旅行特化30選を含む）
   ...KILLER_PHRASES_DATA.map((phrase) => ({
     id: phrase.id,
     tab: 'chunks' as const,

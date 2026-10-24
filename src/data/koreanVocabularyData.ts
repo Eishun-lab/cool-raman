@@ -13,7 +13,8 @@ export type VocabCategory =
   | 'town_travel'
   | 'home_daily'
   | 'school_work'
-  | 'emotion_relation';
+  | 'emotion_relation'
+  | 'onomatopoeia';
 
 export interface EssentialVocabItem {
   no: number;
@@ -37,12 +38,14 @@ export interface EssentialVocabItem {
 }
 
 import { VOCAB_PART_2 } from './koreanVocabularyDataPart2';
+import { VOCAB_PART3_ONOMATOPOEIA } from './vocab/vocabPart3_onomatopoeia';
 
 export const VOCAB_CATEGORIES: { id: 'all' | VocabCategory | 'noun_all'; label: string; count: number }[] = [
-  { id: 'all', label: 'すべて', count: 1000 },
+  { id: 'all', label: 'すべて', count: 1050 },
   { id: 'verb', label: '動詞', count: 250 },
   { id: 'adj', label: '形容詞・存在詞', count: 170 },
   { id: 'adverb', label: '副詞・接続詞', count: 90 },
+  { id: 'onomatopoeia', label: '✨ オノマトペ（擬音・擬態語）', count: 50 },
   { id: 'noun_all', label: '名詞全般', count: 490 },
   { id: 'family_body', label: '家族・身体', count: 55 },
   { id: 'food_cafe', label: '食事・カフェ', count: 55 },
@@ -6570,5 +6573,6 @@ const VOCAB_PART_1: EssentialVocabItem[] = [
 export const ESSENTIAL_VOCAB_DATA: EssentialVocabItem[] = [
   ...VOCAB_PART_1,
   ...VOCAB_PART_2,
+  ...VOCAB_PART3_ONOMATOPOEIA,
 ];
 

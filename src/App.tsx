@@ -139,7 +139,7 @@ export const App: React.FC = () => {
                     📖
                   </div>
                   <span className="px-2.5 sm:px-3 py-1 bg-stone-100 text-stone-600 text-[11px] sm:text-xs font-bold rounded-full">
-                    全35課 ＋ 8大リファレンス
+                    全40課 ＋ 8大リファレンス
                   </span>
                 </div>
                 <h3 className="text-xl sm:text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
