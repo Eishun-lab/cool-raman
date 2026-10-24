@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
   ArrowLeft,
   Search,
@@ -1854,7 +1854,7 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
     <div className="min-h-screen bg-[#FAF7F2] text-[#1B2A38] font-sans selection:bg-[#F0D5CD] selection:text-[#B84E34] pb-28">
       {/* ===================== 上部固定ツールバー（極薄1段・スクロール連動自動収納） ===================== */}
       <header
-        className={`sticky top-[53px] sm:top-[61px] z-30 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#E8E2D5] px-2.5 sm:px-6 py-2 transition-transform duration-300 transform-gpu ${
+        className={`sticky top-[56px] sm:top-[64px] z-30 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#E8E2D5] px-2.5 sm:px-6 py-2 transition-transform duration-300 transform-gpu ${
           showBars ? 'translate-y-0' : '-translate-y-full'
         }`}
         style={{
@@ -1864,16 +1864,16 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
         }}
       >
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-1.5 sm:gap-2">
-          {/* 授業ノートに戻るボタン（スマホではコンパクト表示、PCではフルテキスト） */}
+          {/* ホームに戻るボタン（スマホではコンパクト表示、PCではフルテキスト） */}
           <button
             type="button"
             onClick={onBackToNote}
-            title="授業ノートに戻る"
-            className="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-xl border border-[#E2DDD2] bg-white hover:bg-[#FAF7F2] text-xs font-bold text-[#1B2A38] transition-all shadow-2xs cursor-pointer shrink-0 active:scale-95 h-8"
+            title="ホームへ戻る"
+            className="flex items-center gap-1 sm:gap-1.5 px-2.5 py-1 rounded-xl border border-[#E2DDD2] bg-white hover:bg-[#FAF7F2] text-xs font-bold text-[#1B2A38] transition-all shadow-2xs cursor-pointer shrink-0 active:scale-95 h-8"
           >
             <ArrowLeft className="w-3.5 h-3.5 text-[#B84E34]" />
-            <span className="hidden sm:inline">授業ノートに戻る</span>
-            <span className="sm:hidden text-xs">ノート</span>
+            <span className="hidden sm:inline">ホームへ戻る</span>
+            <span className="sm:hidden text-xs">ホーム</span>
           </button>
 
           {/* リアルタイムインデックス検索バー（十分な横幅を確保） */}
@@ -1883,7 +1883,7 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="教科書・Q&A・辞書・会話を検索..."
+              placeholder="教科書・辞書・会話を検索..."
               className="w-full pl-7 pr-7 py-1 rounded-xl bg-white border border-[#E2DDD2] focus:border-[#B84E34] focus:outline-none text-xs text-[#1B2A38] placeholder-[#948C82] transition-colors h-8"
             />
             {searchQuery && (

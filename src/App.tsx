@@ -24,32 +24,33 @@ export const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#FAF7F2] text-[#1B2A38] font-sans flex flex-col">
       {/* 🍜 トップヘッダー */}
-      <header className="sticky top-0 z-40 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#E8E2D5] px-4 sm:px-8 py-3">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+      <header className="sticky top-0 z-40 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#E8E2D5] px-3 sm:px-6 h-14 sm:h-16 flex items-center">
+        <div className="max-w-7xl mx-auto w-full flex items-center justify-between gap-2">
+          {/* ロゴ */}
           <div
             onClick={() => setActiveTab('dashboard')}
-            className="flex items-center gap-3 cursor-pointer group"
+            className="flex items-center gap-2 sm:gap-3 cursor-pointer group shrink-0 select-none"
           >
-            <div className="w-10 h-10 rounded-2xl bg-[#B84E34] text-white flex items-center justify-center font-black text-xl shadow-md group-hover:scale-105 transition-all">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-[#B84E34] text-white flex items-center justify-center font-black text-lg sm:text-xl shadow-xs group-hover:scale-105 transition-all shrink-0">
               🍜
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-extrabold text-xl tracking-tight text-[#1B2A38]">
+            <div className="shrink-0">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="font-black text-base sm:text-xl tracking-tight text-[#1B2A38] whitespace-nowrap">
                   クールラーメン
                 </span>
-                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD]">
+                <span className="hidden md:inline-flex text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD] whitespace-nowrap">
                   Korean Master Hub
                 </span>
               </div>
-              <p className="text-xs text-stone-500 hidden sm:block">
+              <p className="text-[11px] text-stone-500 hidden lg:block leading-tight">
                 韓国語 総合テスト ＆ 完全攻略リファレンス大辞典
               </p>
             </div>
           </div>
 
           {/* ナビゲーション */}
-          <nav className="flex items-center gap-1 sm:gap-2">
+          <nav className="flex items-center gap-1 sm:gap-1.5 shrink-0">
             {[
               { id: 'dashboard', label: 'ホーム', icon: '🏠' },
               { id: 'levelCheck', label: '総合レベル診断', icon: '⏱️' },
@@ -59,6 +60,7 @@ export const App: React.FC = () => {
             ].map(tab => (
               <button
                 key={tab.id}
+                title={tab.label}
                 onClick={() => {
                   if (tab.id === 'levelCheck') {
                     setIsLevelCheckModalOpen(true);
@@ -66,14 +68,14 @@ export const App: React.FC = () => {
                     setActiveTab(tab.id as MainTab);
                   }
                 }}
-                className={`px-3 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 ${
+                className={`h-8 sm:h-9 px-2 sm:px-3 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 shrink-0 active:scale-95 ${
                   activeTab === tab.id
-                    ? 'bg-[#B84E34] text-white shadow-sm'
-                    : 'text-stone-600 hover:bg-stone-200/60'
+                    ? 'bg-[#B84E34] text-white shadow-xs'
+                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
                 }`}
               >
-                <span>{tab.icon}</span>
-                <span className="hidden md:inline">{tab.label}</span>
+                <span className="text-sm sm:text-base leading-none shrink-0">{tab.icon}</span>
+                <span className="hidden md:inline whitespace-nowrap">{tab.label}</span>
               </button>
             ))}
           </nav>
@@ -99,30 +101,30 @@ export const App: React.FC = () => {
             </div>
 
             {/* 4大コア機能カード */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-12">
               {/* ① 総合診断 */}
               <div
                 onClick={() => setIsLevelCheckModalOpen(true)}
-                className="group relative bg-gradient-to-br from-[#B84E34] to-[#8f3a24] text-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all cursor-pointer overflow-hidden"
+                className="group relative bg-gradient-to-br from-[#B84E34] to-[#8f3a24] text-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-md hover:shadow-2xl transition-all cursor-pointer overflow-hidden"
               >
                 <div className="absolute top-0 right-0 -mr-6 -mt-6 w-36 h-36 bg-white/10 rounded-full blur-2xl group-hover:scale-125 transition-all" />
-                <div className="flex items-start justify-between mb-6">
-                  <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-2xl">
+                <div className="flex items-start justify-between mb-4 sm:mb-6">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-xl sm:text-2xl">
                     ⏱️
                   </div>
-                  <span className="px-3 py-1 bg-white/20 text-white text-xs font-bold rounded-full backdrop-blur-sm">
+                  <span className="px-2.5 sm:px-3 py-1 bg-white/20 text-white text-[11px] sm:text-xs font-bold rounded-full backdrop-blur-sm">
                     所要時間 5分
                   </span>
                 </div>
-                <h3 className="text-2xl font-bold mb-2 flex items-center gap-2">
+                <h3 className="text-xl sm:text-2xl font-bold mb-2 flex items-center gap-2">
                   総合レベル診断テスト
                   <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </h3>
-                <p className="text-white/80 text-sm leading-relaxed mb-6">
+                <p className="text-white/80 text-xs sm:text-sm leading-relaxed mb-6">
                   語彙・文法・リスニング・会話理解の4領域を5分で徹底測定。
                   レーダーチャートで弱点を即座に分析し、学習ロードマップをご案内します。
                 </p>
-                <div className="inline-flex items-center gap-2 text-sm font-bold bg-white text-[#B84E34] px-4 py-2 rounded-xl shadow">
+                <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold bg-white text-[#B84E34] px-3.5 sm:px-4 py-2 rounded-xl shadow">
                   <span>今すぐ診断を始める</span>
                 </div>
               </div>
@@ -130,25 +132,25 @@ export const App: React.FC = () => {
               {/* ② 体系教科書＆大辞典 */}
               <div
                 onClick={() => setActiveTab('textbook')}
-                className="group relative bg-white border border-stone-200 rounded-3xl p-8 shadow-sm hover:shadow-xl transition-all cursor-pointer"
+                className="group relative bg-white border border-stone-200 rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-sm hover:shadow-xl transition-all cursor-pointer"
               >
-                <div className="flex items-start justify-between mb-6">
-                  <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center text-2xl border border-amber-200">
+                <div className="flex items-start justify-between mb-4 sm:mb-6">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center text-xl sm:text-2xl border border-amber-200">
                     📖
                   </div>
-                  <span className="px-3 py-1 bg-stone-100 text-stone-600 text-xs font-bold rounded-full">
-                    全15課 ＋ 8大リファレンス
+                  <span className="px-2.5 sm:px-3 py-1 bg-stone-100 text-stone-600 text-[11px] sm:text-xs font-bold rounded-full">
+                    全35課 ＋ 8大リファレンス
                   </span>
                 </div>
-                <h3 className="text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
+                <h3 className="text-xl sm:text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
                   完全攻略 教科書＆大辞典
                   <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform text-[#B84E34]" />
                 </h3>
-                <p className="text-stone-600 text-sm leading-relaxed mb-6">
+                <p className="text-stone-600 text-xs sm:text-sm leading-relaxed mb-6">
                   初級から上級までの体系文法、コロケーション、紛らわしい表現、キラーフレーズ、
                   新造語・スラング、四字熟語を辞書形式で一発検索・学習できます。
                 </p>
-                <div className="inline-flex items-center gap-2 text-sm font-bold text-[#B84E34]">
+                <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-[#B84E34]">
                   <span>教科書を開く ➔</span>
                 </div>
               </div>
@@ -156,25 +158,25 @@ export const App: React.FC = () => {
               {/* ③ 数字完全攻略 */}
               <div
                 onClick={() => setActiveTab('numbers')}
-                className="group relative bg-white border border-stone-200 rounded-3xl p-8 shadow-sm hover:shadow-xl transition-all cursor-pointer"
+                className="group relative bg-white border border-stone-200 rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-sm hover:shadow-xl transition-all cursor-pointer"
               >
-                <div className="flex items-start justify-between mb-6">
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-2xl border border-emerald-200">
+                <div className="flex items-start justify-between mb-4 sm:mb-6">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-xl sm:text-2xl border border-emerald-200">
                     🔢
                   </div>
-                  <span className="px-3 py-1 bg-stone-100 text-stone-600 text-xs font-bold rounded-full">
+                  <span className="px-2.5 sm:px-3 py-1 bg-stone-100 text-stone-600 text-[11px] sm:text-xs font-bold rounded-full">
                     漢数詞 ＆ 固有数詞
                   </span>
                 </div>
-                <h3 className="text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
+                <h3 className="text-xl sm:text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
                   数字完全攻略ガイド
                   <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform text-[#B84E34]" />
                 </h3>
-                <p className="text-stone-600 text-sm leading-relaxed mb-6">
+                <p className="text-stone-600 text-xs sm:text-sm leading-relaxed mb-6">
                   韓国語学習者が最もつまずきやすい「漢数詞」「固有数詞」「助数詞」「時間・日付」を
                   一目で判別・即答できるように整理された特化リファレンスです。
                 </p>
-                <div className="inline-flex items-center gap-2 text-sm font-bold text-[#B84E34]">
+                <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-[#B84E34]">
                   <span>数字ガイドを見る ➔</span>
                 </div>
               </div>
@@ -182,25 +184,25 @@ export const App: React.FC = () => {
               {/* ④ 実力テスト（クイズ） */}
               <div
                 onClick={() => setActiveTab('quiz')}
-                className="group relative bg-white border border-stone-200 rounded-3xl p-8 shadow-sm hover:shadow-xl transition-all cursor-pointer"
+                className="group relative bg-white border border-stone-200 rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-sm hover:shadow-xl transition-all cursor-pointer"
               >
-                <div className="flex items-start justify-between mb-6">
-                  <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-700 flex items-center justify-center text-2xl border border-purple-200">
+                <div className="flex items-start justify-between mb-4 sm:mb-6">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-purple-50 text-purple-700 flex items-center justify-center text-xl sm:text-2xl border border-purple-200">
                     🎯
                   </div>
-                  <span className="px-3 py-1 bg-stone-100 text-stone-600 text-xs font-bold rounded-full">
+                  <span className="px-2.5 sm:px-3 py-1 bg-stone-100 text-stone-600 text-[11px] sm:text-xs font-bold rounded-full">
                     ランダム四択クイズ
                   </span>
                 </div>
-                <h3 className="text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
+                <h3 className="text-xl sm:text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
                   ジャンル別 実力テスト
                   <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform text-[#B84E34]" />
                 </h3>
-                <p className="text-stone-600 text-sm leading-relaxed mb-6">
+                <p className="text-stone-600 text-xs sm:text-sm leading-relaxed mb-6">
                   必修単語、文法、日常チャンク、キラーフレーズ、四字熟語からランダム出題。
                   ネイティブ音声を聞きながら、テンポよく解いて定着度を確かめられます。
                 </p>
-                <div className="inline-flex items-center gap-2 text-sm font-bold text-[#B84E34]">
+                <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-[#B84E34]">
                   <span>クイズに挑戦する ➔</span>
                 </div>
               </div>
@@ -212,15 +214,15 @@ export const App: React.FC = () => {
             onOpenLevelCheck={() => setIsLevelCheckModalOpen(true)}
           />
         ) : activeTab === 'numbers' ? (
-          <div className="max-w-5xl mx-auto px-4 py-8">
-            <div className="mb-6 flex items-center justify-between">
+          <div className="max-w-5xl mx-auto px-3 sm:px-6 py-6 sm:py-8">
+            <div className="mb-6 flex items-center justify-between gap-3">
               <div>
-                <h2 className="text-2xl font-black text-stone-800">数字完全攻略マスター</h2>
-                <p className="text-sm text-stone-500">漢数詞・固有数詞・時刻・日付の完全攻略ガイド</p>
+                <h2 className="text-xl sm:text-2xl font-black text-stone-800">数字完全攻略マスター</h2>
+                <p className="text-xs sm:text-sm text-stone-500">漢数詞・固有数詞・時刻・日付の完全攻略ガイド</p>
               </div>
               <button
                 onClick={() => setActiveTab('dashboard')}
-                className="text-xs font-bold px-3 py-1.5 bg-stone-100 hover:bg-stone-200 rounded-xl"
+                className="text-xs font-bold px-3 py-1.5 bg-white border border-stone-200 hover:bg-stone-50 rounded-xl shadow-2xs shrink-0 cursor-pointer"
               >
                 ホームへ戻る
               </button>
@@ -229,11 +231,14 @@ export const App: React.FC = () => {
           </div>
         ) : activeTab === 'quiz' ? (
           <div className="py-6">
-            <div className="max-w-3xl mx-auto px-4 mb-4 flex items-center justify-between">
-              <h2 className="text-2xl font-black text-stone-800">ジャンル別 実力テスト</h2>
+            <div className="max-w-3xl mx-auto px-3 sm:px-6 mb-4 flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-black text-stone-800">ジャンル別 実力テスト</h2>
+                <p className="text-xs sm:text-sm text-stone-500">四択テストで弱点を即座にあぶり出し定着</p>
+              </div>
               <button
                 onClick={() => setActiveTab('dashboard')}
-                className="text-xs font-bold px-3 py-1.5 bg-stone-100 hover:bg-stone-200 rounded-xl"
+                className="text-xs font-bold px-3 py-1.5 bg-white border border-stone-200 hover:bg-stone-50 rounded-xl shadow-2xs shrink-0 cursor-pointer"
               >
                 ホームへ戻る
               </button>
