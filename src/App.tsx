@@ -13,13 +13,15 @@ import {
 import { StudyGuideView } from './components/StudyGuideView';
 import { KoreanNumbersGuideView } from './components/KoreanNumbersGuideView';
 import { ComprehensiveQuizView } from './components/ComprehensiveQuizView';
+import { MockExamView } from './components/mockExam/MockExamView';
 import { LevelCheckModal } from './components/levelCheck/LevelCheckModal';
 
-type MainTab = 'dashboard' | 'levelCheck' | 'textbook' | 'numbers' | 'quiz';
+type MainTab = 'dashboard' | 'levelCheck' | 'textbook' | 'numbers' | 'exam' | 'quiz';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<MainTab>('dashboard');
   const [isLevelCheckModalOpen, setIsLevelCheckModalOpen] = useState(false);
+  const [studyGuideAnchor, setStudyGuideAnchor] = useState<string | undefined>(undefined);
 
   return (
     <div className="min-h-screen bg-[#FAF7F2] text-[#1B2A38] font-sans flex flex-col">
@@ -56,7 +58,7 @@ export const App: React.FC = () => {
               { id: 'levelCheck', label: '総合レベル診断', icon: '⏱️' },
               { id: 'textbook', label: '教科書・大辞典', icon: '📖' },
               { id: 'numbers', label: '数字攻略', icon: '🔢' },
-              { id: 'quiz', label: '実力テスト', icon: '🎯' },
+              { id: 'exam', label: '模擬試験', icon: '🎓' },
             ].map(tab => (
               <button
                 key={tab.id}
@@ -181,29 +183,29 @@ export const App: React.FC = () => {
                 </div>
               </div>
 
-              {/* ④ 実力テスト（クイズ） */}
+              {/* ④ TOPIK・ハン検 模擬試験 */}
               <div
-                onClick={() => setActiveTab('quiz')}
+                onClick={() => setActiveTab('exam')}
                 className="group relative bg-white border border-stone-200 rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-sm hover:shadow-xl transition-all cursor-pointer"
               >
                 <div className="flex items-start justify-between mb-4 sm:mb-6">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-purple-50 text-purple-700 flex items-center justify-center text-xl sm:text-2xl border border-purple-200">
-                    🎯
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-indigo-50 text-indigo-700 flex items-center justify-center text-xl sm:text-2xl border border-indigo-200">
+                    🎓
                   </div>
                   <span className="px-2.5 sm:px-3 py-1 bg-stone-100 text-stone-600 text-[11px] sm:text-xs font-bold rounded-full">
-                    ランダム四択クイズ
+                    TOPIK ＆ ハン検 4大模試
                   </span>
                 </div>
                 <h3 className="text-xl sm:text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
-                  ジャンル別 実力テスト
+                  TOPIK・ハン検 模擬試験
                   <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform text-[#B84E34]" />
                 </h3>
                 <p className="text-stone-600 text-xs sm:text-sm leading-relaxed mb-6">
-                  必修単語、文法、日常チャンク、キラーフレーズ、四字熟語からランダム出題。
-                  ネイティブ音声を聞きながら、テンポよく解いて定着度を確かめられます。
+                  TOPIK I・II、ハングル検定（4/5級・3/準2級）の制限時間付き本格模擬試験。
+                  リスニング音声、自動採点・合否判定、教科書・辞書への復習リンクを完備。
                 </p>
                 <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-[#B84E34]">
-                  <span>クイズに挑戦する ➔</span>
+                  <span>模擬試験に挑む ➔</span>
                 </div>
               </div>
             </div>
@@ -211,6 +213,7 @@ export const App: React.FC = () => {
         ) : activeTab === 'textbook' ? (
           <StudyGuideView
             onBackToNote={() => setActiveTab('dashboard')}
+            initialAnchor={studyGuideAnchor}
             onOpenLevelCheck={() => setIsLevelCheckModalOpen(true)}
           />
         ) : activeTab === 'numbers' ? (
@@ -228,6 +231,20 @@ export const App: React.FC = () => {
               </button>
             </div>
             <KoreanNumbersGuideView showPronunciation={true} isLargeFont={false} />
+          </div>
+        ) : activeTab === 'exam' ? (
+          <div className="py-6">
+            <MockExamView
+              onNavigateToTextbookLesson={(lessonId) => {
+                setStudyGuideAnchor(lessonId);
+                setActiveTab('textbook');
+              }}
+              onNavigateToDictionary={(dictId) => {
+                setStudyGuideAnchor(dictId);
+                setActiveTab('textbook');
+              }}
+              onBackToDashboard={() => setActiveTab('dashboard')}
+            />
           </div>
         ) : activeTab === 'quiz' ? (
           <div className="py-6">
