@@ -15,6 +15,7 @@ import { KoreanNumbersGuideView } from './components/KoreanNumbersGuideView';
 import { ComprehensiveQuizView } from './components/ComprehensiveQuizView';
 import { MockExamView } from './components/mockExam/MockExamView';
 import { LevelCheckModal } from './components/levelCheck/LevelCheckModal';
+import hanmoaLogo from './assets/logo.jpg';
 
 type MainTab = 'dashboard' | 'levelCheck' | 'textbook' | 'numbers' | 'exam' | 'quiz';
 
@@ -33,20 +34,27 @@ export const App: React.FC = () => {
             onClick={() => setActiveTab('dashboard')}
             className="flex items-center gap-2 sm:gap-3 cursor-pointer group shrink-0 select-none"
           >
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-[#B84E34] text-white flex items-center justify-center font-black text-lg sm:text-xl shadow-xs group-hover:scale-105 transition-all shrink-0">
-              🍜
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl overflow-hidden border border-[#E8E2D5] shadow-xs group-hover:scale-105 transition-all shrink-0 bg-[#FAF7F2]">
+              <img
+                src={hanmoaLogo}
+                alt="HanMoa Logo"
+                className="w-full h-full object-cover"
+              />
             </div>
             <div className="shrink-0">
               <div className="flex items-center gap-1.5 sm:gap-2">
                 <span className="font-black text-base sm:text-xl tracking-tight text-[#1B2A38] whitespace-nowrap">
-                  クールラーメン
+                  HanMoa
+                </span>
+                <span className="text-[11px] sm:text-xs font-bold text-stone-500 whitespace-nowrap">
+                  ハンモア
                 </span>
                 <span className="hidden md:inline-flex text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD] whitespace-nowrap">
-                  Korean Master Hub
+                  한모아 · All-in-One Hub
                 </span>
               </div>
               <p className="text-[11px] text-stone-500 hidden lg:block leading-tight">
-                韓国語 総合テスト ＆ 完全攻略リファレンス大辞典
+                韓国語 総合学習 ＆ TOPIK・ハン検 模擬試験ハブ
               </p>
             </div>
           </div>
@@ -98,7 +106,7 @@ export const App: React.FC = () => {
               </h1>
               <p className="text-base sm:text-lg text-stone-600 leading-relaxed">
                 入門から上級までの文法・語彙・コロケーション・スラング・数字を完全網羅。
-                5分総合診断テストと実力テストで、あなたの現在地と弱点を可視化します。
+                5分総合診断テストとTOPIK・ハン検模擬試験で、あなたの現在地と実力を証明します。
               </p>
             </div>
 

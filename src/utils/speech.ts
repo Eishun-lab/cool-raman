@@ -1,4 +1,4 @@
-// クールラーメン - 韓国語音声再生サービス (Web Speech API ＆ オプションTTS)
+// HanMoa (ハンモア) - 韓国語音声再生サービス (Web Speech API ＆ オプションTTS)
 
 export interface SpeakOptions {
   rate?: number;
