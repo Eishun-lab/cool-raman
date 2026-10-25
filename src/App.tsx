@@ -46,11 +46,8 @@ export const App: React.FC = () => {
                 <span className="font-black text-base sm:text-xl tracking-tight text-[#1B2A38] whitespace-nowrap">
                   HanMoa
                 </span>
-                <span className="text-[11px] sm:text-xs font-bold text-stone-500 whitespace-nowrap">
-                  ハンモア
-                </span>
                 <span className="hidden md:inline-flex text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD] whitespace-nowrap">
-                  한모아 · All-in-One Hub
+                  All-in-One Hub
                 </span>
               </div>
               <p className="text-[11px] text-stone-500 hidden lg:block leading-tight">
