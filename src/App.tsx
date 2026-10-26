@@ -14,14 +14,12 @@ import { StudyGuideView } from './components/StudyGuideView';
 import { KoreanNumbersGuideView } from './components/KoreanNumbersGuideView';
 import { ComprehensiveQuizView } from './components/ComprehensiveQuizView';
 import { MockExamView } from './components/mockExam/MockExamView';
-import { LevelCheckModal } from './components/levelCheck/LevelCheckModal';
 import hanmoaLogo from './assets/logo.jpg';
 
-type MainTab = 'dashboard' | 'levelCheck' | 'textbook' | 'numbers' | 'exam' | 'quiz';
+type MainTab = 'dashboard' | 'textbook' | 'exam' | 'numbers' | 'quiz';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<MainTab>('dashboard');
-  const [isLevelCheckModalOpen, setIsLevelCheckModalOpen] = useState(false);
   const [studyGuideAnchor, setStudyGuideAnchor] = useState<string | undefined>(undefined);
 
   return (
@@ -60,21 +58,14 @@ export const App: React.FC = () => {
           <nav className="flex items-center gap-1 sm:gap-1.5 shrink-0">
             {[
               { id: 'dashboard', label: 'ホーム', icon: '🏠' },
-              { id: 'levelCheck', label: '総合レベル診断', icon: '⏱️' },
               { id: 'textbook', label: '教科書・大辞典', icon: '📖' },
-              { id: 'numbers', label: '数字攻略', icon: '🔢' },
               { id: 'exam', label: '模擬試験', icon: '🎓' },
+              { id: 'numbers', label: '数字攻略', icon: '🔢' },
             ].map(tab => (
               <button
                 key={tab.id}
                 title={tab.label}
-                onClick={() => {
-                  if (tab.id === 'levelCheck') {
-                    setIsLevelCheckModalOpen(true);
-                  } else {
-                    setActiveTab(tab.id as MainTab);
-                  }
-                }}
+                onClick={() => setActiveTab(tab.id as MainTab)}
                 className={`h-8 sm:h-9 px-2 sm:px-3 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 shrink-0 active:scale-95 ${
                   activeTab === tab.id
                     ? 'bg-[#B84E34] text-white shadow-xs'
@@ -107,57 +98,61 @@ export const App: React.FC = () => {
               </p>
             </div>
 
-            {/* 4大コア機能カード */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-12">
-              {/* ① 総合診断 */}
+            {/* 3大コア機能カード */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-12">
+              {/* ① TOPIK・ハン検 模擬試験 */}
               <div
-                onClick={() => setIsLevelCheckModalOpen(true)}
-                className="group relative bg-gradient-to-br from-[#B84E34] to-[#8f3a24] text-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-md hover:shadow-2xl transition-all cursor-pointer overflow-hidden"
+                onClick={() => setActiveTab('exam')}
+                className="group relative bg-gradient-to-br from-[#B84E34] to-[#8f3a24] text-white rounded-2xl sm:rounded-3xl p-6 sm:p-7 shadow-md hover:shadow-2xl transition-all cursor-pointer overflow-hidden flex flex-col justify-between"
               >
                 <div className="absolute top-0 right-0 -mr-6 -mt-6 w-36 h-36 bg-white/10 rounded-full blur-2xl group-hover:scale-125 transition-all" />
-                <div className="flex items-start justify-between mb-4 sm:mb-6">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-xl sm:text-2xl">
-                    ⏱️
+                <div>
+                  <div className="flex items-start justify-between mb-4 sm:mb-6">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-xl sm:text-2xl">
+                      🎓
+                    </div>
+                    <span className="px-2.5 sm:px-3 py-1 bg-white/20 text-white text-[11px] sm:text-xs font-bold rounded-full backdrop-blur-sm">
+                      TOPIK ＆ ハン検 4大模試
+                    </span>
                   </div>
-                  <span className="px-2.5 sm:px-3 py-1 bg-white/20 text-white text-[11px] sm:text-xs font-bold rounded-full backdrop-blur-sm">
-                    所要時間 5分
-                  </span>
+                  <h3 className="text-xl sm:text-2xl font-bold mb-2 flex items-center gap-2">
+                    TOPIK・ハン検 模擬試験
+                    <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  </h3>
+                  <p className="text-white/80 text-xs sm:text-sm leading-relaxed mb-6">
+                    TOPIK I・II、ハングル検定（4/5級・3/準2級）の制限時間付き本格模擬試験。
+                    リスニング音声、自動採点・合否判定、教科書・辞書への復習リンクを完備。
+                  </p>
                 </div>
-                <h3 className="text-xl sm:text-2xl font-bold mb-2 flex items-center gap-2">
-                  総合レベル診断テスト
-                  <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </h3>
-                <p className="text-white/80 text-xs sm:text-sm leading-relaxed mb-6">
-                  語彙・文法・リスニング・会話理解の4領域を5分で徹底測定。
-                  レーダーチャートで弱点を即座に分析し、学習ロードマップをご案内します。
-                </p>
-                <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold bg-white text-[#B84E34] px-3.5 sm:px-4 py-2 rounded-xl shadow">
-                  <span>今すぐ診断を始める</span>
+                <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold bg-white text-[#B84E34] px-3.5 sm:px-4 py-2 rounded-xl shadow self-start">
+                  <span>模擬試験に挑む ➔</span>
                 </div>
               </div>
 
               {/* ② 体系教科書＆大辞典 */}
               <div
                 onClick={() => setActiveTab('textbook')}
-                className="group relative bg-white border border-stone-200 rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-sm hover:shadow-xl transition-all cursor-pointer"
+                className="group relative bg-white border border-stone-200 rounded-2xl sm:rounded-3xl p-6 sm:p-7 shadow-sm hover:shadow-xl transition-all cursor-pointer flex flex-col justify-between"
               >
-                <div className="flex items-start justify-between mb-4 sm:mb-6">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center text-xl sm:text-2xl border border-amber-200">
-                    📖
+                <div>
+                  <div className="flex items-start justify-between mb-4 sm:mb-6">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center text-xl sm:text-2xl border border-amber-200">
+                      📖
+                    </div>
+                    <span className="px-2.5 sm:px-3 py-1 bg-stone-100 text-stone-600 text-[11px] sm:text-xs font-bold rounded-full">
+                      全40課 ＋ 8大リファレンス
+                    </span>
                   </div>
-                  <span className="px-2.5 sm:px-3 py-1 bg-stone-100 text-stone-600 text-[11px] sm:text-xs font-bold rounded-full">
-                    全40課 ＋ 8大リファレンス
-                  </span>
+                  <h3 className="text-xl sm:text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
+                    完全攻略 教科書＆大辞典
+                    <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform text-[#B84E34]" />
+                  </h3>
+                  <p className="text-stone-600 text-xs sm:text-sm leading-relaxed mb-6">
+                    初級から上級までの体系文法、コロケーション、紛らわしい表現、キラーフレーズ、
+                    新造語・スラング、四字熟語を辞書形式で一発検索・学習できます。
+                  </p>
                 </div>
-                <h3 className="text-xl sm:text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
-                  完全攻略 教科書＆大辞典
-                  <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform text-[#B84E34]" />
-                </h3>
-                <p className="text-stone-600 text-xs sm:text-sm leading-relaxed mb-6">
-                  初級から上級までの体系文法、コロケーション、紛らわしい表現、キラーフレーズ、
-                  新造語・スラング、四字熟語を辞書形式で一発検索・学習できます。
-                </p>
-                <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-[#B84E34]">
+                <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-[#B84E34] self-start">
                   <span>教科書を開く ➔</span>
                 </div>
               </div>
@@ -165,52 +160,28 @@ export const App: React.FC = () => {
               {/* ③ 数字完全攻略 */}
               <div
                 onClick={() => setActiveTab('numbers')}
-                className="group relative bg-white border border-stone-200 rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-sm hover:shadow-xl transition-all cursor-pointer"
+                className="group relative bg-white border border-stone-200 rounded-2xl sm:rounded-3xl p-6 sm:p-7 shadow-sm hover:shadow-xl transition-all cursor-pointer flex flex-col justify-between"
               >
-                <div className="flex items-start justify-between mb-4 sm:mb-6">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-xl sm:text-2xl border border-emerald-200">
-                    🔢
+                <div>
+                  <div className="flex items-start justify-between mb-4 sm:mb-6">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-xl sm:text-2xl border border-emerald-200">
+                      🔢
+                    </div>
+                    <span className="px-2.5 sm:px-3 py-1 bg-stone-100 text-stone-600 text-[11px] sm:text-xs font-bold rounded-full">
+                      漢数詞 ＆ 固有数詞
+                    </span>
                   </div>
-                  <span className="px-2.5 sm:px-3 py-1 bg-stone-100 text-stone-600 text-[11px] sm:text-xs font-bold rounded-full">
-                    漢数詞 ＆ 固有数詞
-                  </span>
+                  <h3 className="text-xl sm:text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
+                    数字完全攻略ガイド
+                    <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform text-[#B84E34]" />
+                  </h3>
+                  <p className="text-stone-600 text-xs sm:text-sm leading-relaxed mb-6">
+                    韓国語学習者が最もつまずきやすい「漢数詞」「固有数詞」「助数詞」「時間・日付」を
+                    一目で判別・即答できるように整理された特化リファレンスです。
+                  </p>
                 </div>
-                <h3 className="text-xl sm:text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
-                  数字完全攻略ガイド
-                  <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform text-[#B84E34]" />
-                </h3>
-                <p className="text-stone-600 text-xs sm:text-sm leading-relaxed mb-6">
-                  韓国語学習者が最もつまずきやすい「漢数詞」「固有数詞」「助数詞」「時間・日付」を
-                  一目で判別・即答できるように整理された特化リファレンスです。
-                </p>
-                <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-[#B84E34]">
+                <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-[#B84E34] self-start">
                   <span>数字ガイドを見る ➔</span>
-                </div>
-              </div>
-
-              {/* ④ TOPIK・ハン検 模擬試験 */}
-              <div
-                onClick={() => setActiveTab('exam')}
-                className="group relative bg-white border border-stone-200 rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-sm hover:shadow-xl transition-all cursor-pointer"
-              >
-                <div className="flex items-start justify-between mb-4 sm:mb-6">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-indigo-50 text-indigo-700 flex items-center justify-center text-xl sm:text-2xl border border-indigo-200">
-                    🎓
-                  </div>
-                  <span className="px-2.5 sm:px-3 py-1 bg-stone-100 text-stone-600 text-[11px] sm:text-xs font-bold rounded-full">
-                    TOPIK ＆ ハン検 4大模試
-                  </span>
-                </div>
-                <h3 className="text-xl sm:text-2xl font-bold text-stone-800 mb-2 flex items-center gap-2">
-                  TOPIK・ハン検 模擬試験
-                  <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform text-[#B84E34]" />
-                </h3>
-                <p className="text-stone-600 text-xs sm:text-sm leading-relaxed mb-6">
-                  TOPIK I・II、ハングル検定（4/5級・3/準2級）の制限時間付き本格模擬試験。
-                  リスニング音声、自動採点・合否判定、教科書・辞書への復習リンクを完備。
-                </p>
-                <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-[#B84E34]">
-                  <span>模擬試験に挑む ➔</span>
                 </div>
               </div>
             </div>
@@ -219,7 +190,6 @@ export const App: React.FC = () => {
           <StudyGuideView
             onBackToNote={() => setActiveTab('dashboard')}
             initialAnchor={studyGuideAnchor}
-            onOpenLevelCheck={() => setIsLevelCheckModalOpen(true)}
           />
         ) : activeTab === 'numbers' ? (
           <div className="max-w-5xl mx-auto px-3 sm:px-6 py-6 sm:py-8">
@@ -269,16 +239,6 @@ export const App: React.FC = () => {
           </div>
         ) : null}
       </main>
-
-      {/* ⏱️ 5分総合レベル診断モーダル */}
-      <LevelCheckModal
-        isOpen={isLevelCheckModalOpen}
-        onClose={() => setIsLevelCheckModalOpen(false)}
-        onNavigateToLesson={() => {
-          setIsLevelCheckModalOpen(false);
-          setActiveTab('textbook');
-        }}
-      />
     </div>
   );
 };

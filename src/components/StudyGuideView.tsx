@@ -29,7 +29,6 @@ import {
   Clock,
   Award,
 } from 'lucide-react';
-import { LevelCheckModal } from './levelCheck/LevelCheckModal';
 import { GuideTab, GuideProgressState, ItemManualStatus, LevelMode } from '../types/guide';
 import {
   GUIDE_INDEX,
@@ -279,7 +278,6 @@ interface StudyGuideViewProps {
   onAddWordToVocab?: (newWord: WordItem) => void;
   existingWords?: WordItem[];
   onOpenShadowing?: () => void;
-  onOpenLevelCheck?: () => void;
 }
 
 export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
@@ -290,19 +288,9 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
   onAddWordToVocab,
   existingWords,
   onOpenShadowing,
-  onOpenLevelCheck,
 }) => {
   const [activeTab, setActiveTab] = useState<GuideTab>('textbook');
   const [searchQuery, setSearchQuery] = useState('');
-  const [isLevelCheckOpen, setIsLevelCheckOpen] = useState(false);
-
-  const handleStartLevelCheck = () => {
-    if (onOpenLevelCheck) {
-      onOpenLevelCheck();
-    } else {
-      setIsLevelCheckOpen(true);
-    }
-  };
 
   // 🧭 生徒・講師の現在地・ステータス（⚪未開拓 / 🟡練習中 / 🟢習得）・次回ミッションの永続化管理
   const [guideProgress, setGuideProgress] = useState<GuideProgressState>(() => {
@@ -2117,38 +2105,6 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                   <X className="w-4 h-4" />
                 </button>
               </div>
-            </div>
-
-            {/* ⏱️ 5分総合レベル診断 バナー（現在地・会話直感力測定） */}
-            <div className="bg-gradient-to-r from-[#FFF5F2] via-white to-[#FAF7F2] p-3 rounded-xl border border-[#F0D5C7] shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
-              <div className="flex items-start gap-2.5 min-w-0">
-                <div className="w-8 h-8 rounded-lg bg-[#B84E34]/10 border border-[#B84E34]/20 flex items-center justify-center shrink-0 text-[#B84E34] mt-0.5">
-                  <Clock className="w-4 h-4" />
-                </div>
-                <div className="min-w-0 space-y-0.5">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-xs sm:text-sm font-bold text-[#1B2A38]">5分総合レベルチェック</span>
-                    <span className="text-[10px] bg-[#B84E34] text-white px-1.5 py-0.2 rounded font-bold">
-                      おすすめ
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-[#756D63] leading-relaxed">
-                    4技能（聞く・読む・語彙・文法）×16問で現在の習熟度と会話瞬発力を診断。最適な教科書の開始課を提案します。
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowDashboard(false);
-                  handleStartLevelCheck();
-                }}
-                className="w-full sm:w-auto px-3.5 py-1.5 rounded-xl bg-[#B84E34] hover:bg-[#A33D24] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
-              >
-                <Award className="w-3.5 h-3.5" />
-                <span>診断スタート（5分）</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
             </div>
 
             {/* ② 📚 教科書 章選択 ＆ すべて開く/閉じる */}
@@ -5758,32 +5714,6 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
           </div>
         </div>
       )}
-
-      {/* ⏱️ 5分総合レベルチェック モーダル */}
-      <LevelCheckModal
-        isOpen={isLevelCheckOpen}
-        onClose={() => setIsLevelCheckOpen(false)}
-        onNavigateToLesson={(lessonNum) => {
-          setIsLevelCheckOpen(false);
-          setActiveTab('textbook');
-          const lesson = LESSONS_DATA.find((l) => l.number === lessonNum);
-          if (lesson) {
-            setReadingLessonId(lesson.id);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }
-        }}
-        onNavigateToConversation={() => {
-          setIsLevelCheckOpen(false);
-          setActiveTab('chunks');
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
-        onNavigateToShadowing={() => {
-          setIsLevelCheckOpen(false);
-          if (onOpenShadowing) {
-            onOpenShadowing();
-          }
-        }}
-      />
     </div>
   );
 };
