@@ -56,6 +56,7 @@ import {
   VOCAB_CATEGORIES,
 } from '../data/koreanVocabularyData';
 import { KoreanNumbersGuideView } from './KoreanNumbersGuideView';
+import { VisualRoadmapView } from './roadmap/VisualRoadmapView';
 import { TestLesson, WordItem } from '../types';
 import { findMyLessonExamplesForGuide } from '../utils/guideMatcher';
 import { speechService } from '../utils/speech';
@@ -278,6 +279,7 @@ interface StudyGuideViewProps {
   onAddWordToVocab?: (newWord: WordItem) => void;
   existingWords?: WordItem[];
   onOpenShadowing?: () => void;
+  onNavigateToExam?: (examId?: string) => void;
 }
 
 export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
@@ -288,6 +290,7 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
   onAddWordToVocab,
   existingWords,
   onOpenShadowing,
+  onNavigateToExam,
 }) => {
   const [activeTab, setActiveTab] = useState<GuideTab>('textbook');
   const [searchQuery, setSearchQuery] = useState('');
@@ -2578,243 +2581,13 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                   </div>
                 )}
 
-                {/* 🗺️ 完全制覇ロードマップ（地下鉄路線図風タイムライン・タップで開閉） */}
-                <section
-                  id="sec-roadmap"
-                  className="scroll-mt-24 bg-white border border-[#E8E2D5] rounded-2xl p-3 sm:p-4 shadow-2xs transition-all mt-4"
-                >
-                  <div
-                    onClick={() => setShowRoadmap(!showRoadmap)}
-                    className="flex items-center justify-between gap-2 cursor-pointer select-none"
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                      <div className="w-8 h-8 rounded-xl bg-[#FAF0EC] text-[#B84E34] flex items-center justify-center shrink-0 shadow-2xs">
-                        <Map className="w-4 h-4" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <h2 className="text-xs sm:text-sm font-serif font-bold text-[#1B2A38]">
-                            韓国語 完全制覇ロードマップ
-                          </h2>
-                          <span className="text-[10px] font-bold text-[#B84E34] bg-[#FAF0EC] px-1.5 py-0.2 rounded-full whitespace-nowrap">
-                            TOPIK・ハン検・SLA準拠
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-[#756D63] font-sans truncate">
-                          文字からネイティブ級（C2）までの8大ステーション
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1 text-xs text-[#B84E34] font-bold shrink-0 whitespace-nowrap bg-[#FAF0EC] hover:bg-[#F5E5DF] px-2.5 py-1.5 rounded-xl transition-colors">
-                      <span>{showRoadmap ? '閉じる' : '開く'}</span>
-                      {showRoadmap ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
-                    </div>
-                  </div>
-
-                  {showRoadmap && (
-                    <div className="pt-3.5 border-t border-[#F2ECE1] mt-3 space-y-4">
-                      {/* イントロ＆一括開閉バー */}
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 sm:p-3 bg-[#FAF7F2] rounded-xl border border-[#EDE7DC] text-xs">
-                        <div className="text-[#544D45] leading-relaxed">
-                          <span className="font-bold text-[#1B2A38]">🚆 公的シラバス（国立国語院・TOPIK・ハン検）準拠: </span>
-                          日本語話者の強みを活かし、最速（約800〜1,100時間）で最上級へ到達する8段階科学的ルートです。
-                        </div>
-                        <button
-                          type="button"
-                          onClick={toggleAllRoadmapDetails}
-                          className="self-end sm:self-center text-[11px] font-bold text-[#B84E34] hover:underline whitespace-nowrap shrink-0 flex items-center gap-1 cursor-pointer bg-white px-2 py-1 rounded-lg border border-[#EDE7DC] shadow-2xs"
-                        >
-                          <span>{expandAllRoadmapDetails ? '全詳細を閉じる' : '全詳細を展開'}</span>
-                          {expandAllRoadmapDetails ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
-                        </button>
-                      </div>
-
-                      {/* 路線図タイムライン本体 */}
-                      <div className="relative pl-6 sm:pl-8 space-y-4 before:absolute before:left-3 sm:before:left-4 before:top-4 before:bottom-4 before:w-0.5 before:bg-gradient-to-b before:from-emerald-500 before:via-blue-500 before:to-rose-500 before:rounded-full">
-                        {ROADMAP_STEPS.map((step) => {
-                          const stationColor = step.stationColor || '#B84E34';
-                          const isDetailOpen = !!openRoadmapDetails[step.step];
-
-                          return (
-                            <div key={step.step} className="relative group">
-                              {/* 駅マーカー（ナンバリングサークル） */}
-                              <div
-                                style={{ backgroundColor: stationColor }}
-                                className="absolute -left-[27px] sm:-left-[31px] top-3.5 w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-white font-bold text-[11px] sm:text-xs ring-4 ring-white shadow-xs shrink-0 select-none z-10"
-                              >
-                                {step.step}
-                              </div>
-
-                              {/* ステップカード */}
-                              <div className="bg-white rounded-2xl border border-[#E8E2D5] shadow-2xs hover:border-[#D9CFBF] transition-all overflow-hidden">
-                                {/* ① ヘッダー行 */}
-                                <div className="px-3.5 py-2.5 bg-gradient-to-r from-[#FAF7F2] to-white border-b border-[#F2ECE1] flex items-center justify-between gap-2 flex-wrap">
-                                  <div className="flex items-center gap-1.5 flex-wrap min-w-0">
-                                    <span
-                                      style={{ color: stationColor, borderColor: `${stationColor}30`, backgroundColor: `${stationColor}10` }}
-                                      className="text-[11px] font-bold px-2 py-0.5 rounded-full border whitespace-nowrap flex items-center gap-1"
-                                    >
-                                      <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: stationColor }} />
-                                      Step {step.step}: {step.stage}
-                                    </span>
-                                    <span className="text-[11px] font-bold text-[#1B2A38] bg-white px-2 py-0.5 rounded-md border border-[#EDE7DC] shadow-2xs whitespace-nowrap">
-                                      {step.badge}
-                                    </span>
-                                  </div>
-                                  <div className="text-[11px] font-mono text-[#756D63] font-bold shrink-0">
-                                    ⏱️ {step.timeHours}
-                                  </div>
-                                </div>
-
-                                {/* カード本文領域 */}
-                                <div className="p-3 sm:p-3.5 space-y-2.5">
-                                  {/* ② 到達基準 (Can-Do) */}
-                                  <div className="space-y-1">
-                                    <div className="text-[10.5px] font-bold text-[#756D63] flex items-center gap-1">
-                                      <Target className="w-3.5 h-3.5 text-[#B84E34] shrink-0" />
-                                      <span>到達指標 (公式Can-Do達成基準)</span>
-                                    </div>
-                                    <p className="text-xs sm:text-sm text-[#1B2A38] leading-relaxed font-sans pl-3 border-l-2 border-[#B84E34]/30">
-                                      {step.academicBasis.officialCanDo}
-                                    </p>
-                                  </div>
-
-                                  {/* ③ 累積語彙 & 出題文法（2分割ミニカード） */}
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-[11px] bg-[#FAF7F2] p-2.5 rounded-xl border border-[#EDE7DC]">
-                                    <div className="flex items-start gap-1">
-                                      <span className="font-bold text-[#1B2A38] shrink-0">📚 累積語彙:</span>
-                                      <span className="text-[#544D45] leading-snug">{step.academicBasis.vocabCount}</span>
-                                    </div>
-                                    <div className="flex items-start gap-1 sm:border-l sm:border-[#EDE7DC] sm:pl-2">
-                                      <span className="font-bold text-[#1B2A38] shrink-0">🔖 出題文法:</span>
-                                      <span className="text-[#544D45] leading-snug">{step.academicBasis.grammarScope}</span>
-                                    </div>
-                                  </div>
-
-                                  {/* ④ 象徴的モデルセリフ（スピーチカード） */}
-                                  <div className="bg-[#FAF0EC]/30 rounded-xl p-3 border border-[#F2DED7] space-y-1.5">
-                                    <div className="flex items-center justify-between gap-1 text-[10px] font-bold text-[#B84E34]">
-                                      <span className="flex items-center gap-1">
-                                        <MessageCircle className="w-3.5 h-3.5" />
-                                        <span>該当級の象徴的モデルセリフ</span>
-                                      </span>
-                                      <span className="text-[#8A8075] font-normal text-[10px]">
-                                        TOPIK 말하기 / 面接基準
-                                      </span>
-                                    </div>
-
-                                    <div className="flex items-start justify-between gap-2">
-                                      <div className="space-y-0.5 min-w-0 flex-1">
-                                        <p className="font-bold text-[#1B2A38] text-sm sm:text-base leading-snug">
-                                          {step.representativeSpeech.ko}
-                                        </p>
-                                        {showPronunciation && step.representativeSpeech.reading && (
-                                          <p className="text-[11px] text-[#8A8075] font-mono">
-                                            {step.representativeSpeech.reading}
-                                          </p>
-                                        )}
-                                        <p className="text-xs text-[#544D45]">
-                                          {step.representativeSpeech.ja}
-                                        </p>
-                                      </div>
-                                      <button
-                                        type="button"
-                                        onClick={() => speechService.speak(step.representativeSpeech.ko)}
-                                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white hover:bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CC] flex items-center justify-center transition-colors cursor-pointer shrink-0 shadow-2xs"
-                                        title="ネイティブ発音を聴く"
-                                        aria-label="発音再生"
-                                      >
-                                        <Volume2 className="w-3.5 h-3.5" />
-                                      </button>
-                                    </div>
-
-                                    {/* 言語学的評価点 */}
-                                    <div className="pt-1.5 border-t border-[#F0D5CC]/50 text-[11px] text-[#6B635B] leading-relaxed">
-                                      <span className="font-bold text-[#B84E34]">💡 言語学的評価点: </span>
-                                      <span>{step.representativeSpeech.linguisticPoint}</span>
-                                    </div>
-                                  </div>
-
-                                  {/* ⑤ SLA科学的アクション ＆ 誤用分析（アコーディオン式でスッキリ開閉） */}
-                                  <div className="pt-0.5">
-                                    <button
-                                      type="button"
-                                      onClick={() => toggleRoadmapDetail(step.step)}
-                                      className="w-full py-1.5 px-2.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200/70 text-xs font-bold text-[#1B2A38] flex items-center justify-between transition-colors cursor-pointer"
-                                    >
-                                      <span className="flex items-center gap-1.5 text-[11px] sm:text-xs">
-                                        <span>🧠 SLA科学的学習法 ＆ 誤用分析の罠</span>
-                                        <span className="text-[10px] font-normal text-slate-500">
-                                          ({isDetailOpen ? '閉じる' : '3アクション＋母語干渉対策'})
-                                        </span>
-                                      </span>
-                                      {isDetailOpen ? (
-                                        <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
-                                      ) : (
-                                        <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
-                                      )}
-                                    </button>
-
-                                    {isDetailOpen && (
-                                      <div className="mt-2 space-y-2 pt-0.5">
-                                        {/* 最短突破アクション */}
-                                        {step.actionRoutines && step.actionRoutines.length > 0 && (
-                                          <div className="p-2.5 bg-emerald-50/50 border border-emerald-100 rounded-xl space-y-1.5">
-                                            <span className="text-[11px] font-bold text-emerald-900 flex items-center gap-1">
-                                              <span>🏃 最短突破の科学的アクション (SLA):</span>
-                                            </span>
-                                            <ul className="space-y-1.5">
-                                              {step.actionRoutines.map((act, aIdx) => (
-                                                <li key={aIdx} className="text-xs text-emerald-950 flex items-start gap-1.5 leading-relaxed">
-                                                  <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                                                  <span>{act}</span>
-                                                </li>
-                                              ))}
-                                            </ul>
-                                          </div>
-                                        )}
-
-                                        {/* 誤用分析 & 突破法 */}
-                                        {step.slaTips && (
-                                          <div className="p-2.5 bg-amber-50/50 border border-amber-200/70 rounded-xl space-y-1.5 text-xs">
-                                            <div className="flex items-start gap-1">
-                                              <span className="font-bold text-amber-900 shrink-0 whitespace-nowrap">⚠️ 誤用分析の罠:</span>
-                                              <span className="text-amber-950 leading-relaxed">{step.slaTips.frequentError}</span>
-                                            </div>
-                                            <div className="flex items-start gap-1 pt-1.5 border-t border-amber-200/60">
-                                              <span className="font-bold text-emerald-900 shrink-0 whitespace-nowrap">💡 科学的突破法:</span>
-                                              <span className="text-emerald-950 leading-relaxed">{step.slaTips.breakthrough}</span>
-                                            </div>
-                                          </div>
-                                        )}
-                                      </div>
-                                    )}
-                                  </div>
-
-                                  {/* ⑥ アプリ内直結リンク（ピルタグスタイル） */}
-                                  {step.links && step.links.length > 0 && (
-                                    <div className="flex flex-wrap items-center gap-1.5 pt-1.5 border-t border-[#F2ECE1]">
-                                      <span className="text-[10px] font-bold text-[#8A8075] shrink-0 mr-0.5">直結教材:</span>
-                                      {step.links.map((link) => (
-                                        <button
-                                          key={link.id}
-                                          type="button"
-                                          onClick={() => scrollTo(link.id, link.tab)}
-                                          className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#FAF7F2] hover:bg-[#FAF0EC] border border-[#E2DDD2] hover:border-[#B84E34] text-[11px] text-[#B84E34] font-medium transition-all cursor-pointer shadow-2xs"
-                                        >
-                                          <span>▶ {link.label}</span>
-                                        </button>
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
+                {/* 🗺️ 完全制覇ロードマップ（動的メトロ路線図 ＆ インタラクティブハブ） */}
+                <section id="sec-roadmap" className="scroll-mt-24 mt-6">
+                  <VisualRoadmapView
+                    onNavigateToExam={onNavigateToExam}
+                    onNavigateToContent={(id, tab) => scrollTo(id, tab)}
+                    showPronunciation={showPronunciation}
+                  />
                 </section>
               </div>
             )}

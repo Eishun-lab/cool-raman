@@ -190,6 +190,7 @@ export const App: React.FC = () => {
           <StudyGuideView
             onBackToNote={() => setActiveTab('dashboard')}
             initialAnchor={studyGuideAnchor}
+            onNavigateToExam={() => setActiveTab('exam')}
           />
         ) : activeTab === 'numbers' ? (
           <div className="max-w-5xl mx-auto px-3 sm:px-6 py-6 sm:py-8">
