@@ -2,14 +2,23 @@ import { MockExam } from '../../types/mockExam';
 
 export const TOPIK1_MOCK_EXAM: MockExam = {
   id: 'topik1',
+  category: 'topik',
+  levelName: 'TOPIK I',
   title: 'TOPIK I 実戦模擬試験',
   badge: 'TOPIK I (1〜2級)',
   subtitle: '初級の総決算！聞き取り＆読解の公式出題パターンを完全再現',
   targetLevel: 'TOPIK 1級・2級 合格目標（初級）',
   timeLimitSeconds: 1200, // 20分
   totalScore: 100,
+  passScore: 50,
   questionCount: 20,
   overview: '本番TOPIK Iの形式（聞き取り10問＋読解10問）を20分で解く実戦ハーフ模擬試験です。音声を聞いて状況や続く言葉を即答する瞬発力と、短文・案内文を正確に読み解く基礎力を測定します。',
+  canDoList: [
+    '自己紹介、飲食店の注文、日常の買い物など身近な話題について短い対話を聞き取れる',
+    '案内板、チラシ、領収書、短い日記などから必要な情報を読み取れる',
+    'ヘヨ体・ハムニダ体・過去形・基本助詞を正確に適用できる',
+    '理由、目的、否定、接続の基本構造を理解して文を組み立てられる',
+  ],
   passCriteria: [
     {
       level: 'TOPIK 2級 合格水準',

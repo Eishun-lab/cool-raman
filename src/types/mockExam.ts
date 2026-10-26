@@ -2,15 +2,56 @@
 // 🎓 TOPIK（韓国語能力試験）＆ ハングル検定 模擬試験 型定義
 // ==============================================================================
 
-export type ExamType = 'topik1' | 'topik2' | 'hanken_basic' | 'hanken_intermediate';
+export type ExamType =
+  | 'hanken_5'
+  | 'hanken_4'
+  | 'hanken_3'
+  | 'hanken_pre2'
+  | 'topik1'
+  | 'topik2'
+  | 'hanken_basic'
+  | 'hanken_intermediate'; // 後方互換
+
+export type ExamCategory = 'hanken' | 'topik';
 
 export type ExamSection = 'listening' | 'vocab' | 'grammar' | 'reading' | 'pronunciation';
 
 export interface PassCriterion {
-  level: string;        // 例: "TOPIK 2級", "TOPIK 1級", "ハン検4級"
+  level: string;        // 例: "TOPIK 2級", "ハン検5級合格", "不合格（あと8点）"
   minScore: number;     // 必要得点
   color: string;        // バッジ色
   description: string;  // 判定基準説明
+}
+
+export interface StrengthItem {
+  title: string;
+  description: string;
+}
+
+export interface WeaknessItem {
+  title: string;
+  description: string;
+  reason: string;
+  section: ExamSection;
+  relatedLessonId?: string;
+  relatedDictId?: string;
+  lessonLabel?: string;
+}
+
+export interface NextActionItem {
+  priority: 'high' | 'medium';
+  title: string;
+  description: string;
+  targetId?: string;
+  targetTab?: 'textbook' | 'dictionary' | 'reference' | 'chunks';
+  actionLabel: string;
+}
+
+export interface DiagnosticReport {
+  overallCanDoSummary: string;  // 公式Can-Doに基づく総合到達度評価
+  strengths: StrengthItem[];    // 現在できること（Can-Do達成・定着済スキル）
+  weaknesses: WeaknessItem[];   // まだ不足していること（弱点と根拠）
+  nextActions: NextActionItem[];// 次に何をすべきか（具体的道筋とアクションプラン）
 }
 
 export interface MockQuestion {
@@ -36,15 +77,19 @@ export interface MockQuestion {
 
 export interface MockExam {
   id: ExamType;
+  category: ExamCategory;   // 'hanken' | 'topik'
+  levelName: string;        // 例: "5級", "4級", "3級", "準2級", "TOPIK I", "TOPIK II"
   title: string;
   badge: string;
   subtitle: string;
   targetLevel: string;
   timeLimitSeconds: number; // 制限時間（秒単位、例: 1200秒＝20分）
   totalScore: number;       // 100点満点
+  passScore: number;        // 合格基準点（例: 60点、70点）
   questionCount: number;    // 問題数（20問）
   passCriteria: PassCriterion[];
   overview: string;
+  canDoList: string[];      // この級で身につく公的Can-Do一覧
   questions: MockQuestion[];
 }
 
@@ -74,4 +119,6 @@ export interface ExamEvaluation {
   sectionBreakdowns: SectionBreakdown[];
   correctCount: number;
   totalCount: number;
+  diagnosticReport: DiagnosticReport;
 }
+

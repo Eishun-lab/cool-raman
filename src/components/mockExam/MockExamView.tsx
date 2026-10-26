@@ -13,9 +13,12 @@ import {
   Sparkles,
   BookOpen,
   Bookmark,
-  Share2,
-  HelpCircle,
-  FileText
+  FileText,
+  Target,
+  Check,
+  Compass,
+  Layers,
+  Filter
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { speechService } from '../../utils/speech';
@@ -24,30 +27,46 @@ import {
   MockQuestion,
   ExamType,
   ExamEvaluation,
-  SectionBreakdown
+  SectionBreakdown,
+  DiagnosticReport,
+  StrengthItem,
+  WeaknessItem,
+  NextActionItem,
+  ExamCategory,
 } from '../../types/mockExam';
 import { ALL_MOCK_EXAMS, getMockExamById } from '../../data/mockExams';
 
 interface MockExamViewProps {
+  initialExamId?: ExamType;
   onNavigateToTextbookLesson?: (lessonId: string) => void;
   onNavigateToDictionary?: (dictId: string) => void;
   onBackToDashboard?: () => void;
 }
 
 export const MockExamView: React.FC<MockExamViewProps> = ({
+  initialExamId,
   onNavigateToTextbookLesson,
   onNavigateToDictionary,
   onBackToDashboard,
 }) => {
   // 画面状態: 'list' (選択画面) | 'exam' (試験中) | 'result' (結果発表)
   const [viewState, setViewState] = useState<'list' | 'exam' | 'result'>('list');
-  const [selectedExamId, setSelectedExamId] = useState<ExamType>('topik1');
+  const [selectedExamId, setSelectedExamId] = useState<ExamType>(initialExamId || 'hanken_5');
+  const [categoryFilter, setCategoryFilter] = useState<'all' | 'hanken' | 'topik'>('all');
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<Record<string, number>>({});
   const [timeLeftSeconds, setTimeLeftSeconds] = useState(1200);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [showFinishConfirm, setShowFinishConfirm] = useState(false);
+  const [activeReportTab, setActiveReportTab] = useState<'prescription' | 'strengths' | 'weaknesses'>('prescription');
+
+  // initialExamIdが変更された場合の同期
+  useEffect(() => {
+    if (initialExamId) {
+      setSelectedExamId(initialExamId);
+    }
+  }, [initialExamId]);
 
   const activeExam = useMemo(() => {
     return getMockExamById(selectedExamId) || ALL_MOCK_EXAMS[0];
@@ -117,17 +136,22 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
     });
   };
 
-  // 採点と評価計算
+  // 採点と評価計算（Can-Do到達度と学習カルテ処方箋の自動算出）
   const evaluation: ExamEvaluation = useMemo(() => {
     let earnedScore = 0;
     let correctCount = 0;
     const sectionMap: Record<string, { earned: number; total: number; label: string }> = {};
+    const correctQuestions: MockQuestion[] = [];
+    const missedQuestions: MockQuestion[] = [];
 
     activeExam.questions.forEach((q) => {
       const isCorrect = userAnswers[q.id] === q.correctIndex;
       if (isCorrect) {
         earnedScore += q.score;
         correctCount += 1;
+        correctQuestions.push(q);
+      } else {
+        missedQuestions.push(q);
       }
 
       if (!sectionMap[q.section]) {
@@ -147,7 +171,7 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
       achievedRank = activeExam.passCriteria[activeExam.passCriteria.length - 1];
     }
 
-    const passed = earnedScore >= (activeExam.passCriteria[0]?.minScore || 60);
+    const passed = earnedScore >= (activeExam.passScore || 60);
 
     const sectionBreakdowns: SectionBreakdown[] = Object.entries(sectionMap).map(
       ([sectionKey, data]) => ({
@@ -159,6 +183,114 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
       })
     );
 
+    // ========================================================================
+    // 診断カルテ（根拠と道筋）：Can-Do到達度、強み、失点根拠、処方箋の自動生成
+    // ========================================================================
+    
+    // 1. 総合到達度サマリー
+    let overallCanDoSummary = '';
+    if (passed) {
+      overallCanDoSummary = `🎉【合格基準到達】得点 ${earnedScore}点（正答率 ${percentage}% / 合格ライン ${activeExam.passScore || 60}点クリア）。${activeExam.title}の要求水準を充足しています。公式Can-Do基準に基づき、基礎知識および実戦運用能力が確立されていると判定されます。`;
+    } else {
+      const diff = (activeExam.passScore || 60) - earnedScore;
+      overallCanDoSummary = `⚠️【要補強判定】得点 ${earnedScore}点（正答率 ${percentage}% / 合格ライン ${activeExam.passScore || 60}点まであと${diff}点）。現時点で重要規則・語彙の定着にムラがあり、特に失点した設問の文法規則・パターンの再確認が必要です。以下のカルテに従って復習を進めてください。`;
+    }
+
+    // 2. 現在できること（公的Can-Do達成・あなたの強み）
+    const strengths: StrengthItem[] = [];
+    
+    // 正答率の高いセクションから強みを抽出
+    sectionBreakdowns.forEach((sec) => {
+      if (sec.percentage >= 60) {
+        strengths.push({
+          title: `【${sec.label}】の安定した攻略力（正答率 ${sec.percentage}%）`,
+          description: `${sec.label}分野の基本パターン・設問形式を確実に正解できています。あなたの強力な得点源です。`,
+        });
+      }
+    });
+
+    // 試験固有のCan-Doから達成度を反映
+    if (activeExam.canDoList && activeExam.canDoList.length > 0) {
+      const canDoPassedCount = Math.min(
+        activeExam.canDoList.length,
+        Math.max(1, Math.round((percentage / 100) * activeExam.canDoList.length))
+      );
+      for (let i = 0; i < canDoPassedCount; i++) {
+        strengths.push({
+          title: `公的Can-Do到達: ${activeExam.canDoList[i]}`,
+          description: `本模擬試験の正答状況から、このスキルの基礎運用能力が客観的に実証されています。`,
+        });
+      }
+    }
+
+    if (strengths.length === 0) {
+      strengths.push({
+        title: '基礎問題への着手と語彙認識',
+        description: '正解できた設問から、初歩的な単語や定型挨拶の聞き取り・識別はできています。',
+      });
+    }
+
+    // 3. まだ不足していること（失点の根拠と弱点分析）
+    const weaknesses: WeaknessItem[] = [];
+    missedQuestions.slice(0, 6).forEach((q) => {
+      const userChoiceStr = userAnswers[q.id] !== undefined ? `（あなたの回答: ${['①', '②', '③', '④'][userAnswers[q.id]]}）` : '（未回答）';
+      weaknesses.push({
+        title: `第${q.questionNumber}問 ${q.sectionLabel}`,
+        description: q.instruction,
+        reason: `${userChoiceStr} 正解は ${['①', '②', '③', '④'][q.correctIndex]} です。${q.explanation}`,
+        section: q.section,
+        relatedLessonId: q.linkReview?.id,
+        relatedDictId: q.linkReview?.tab === 'dictionary' ? q.linkReview.id : undefined,
+        lessonLabel: q.linkReview?.label,
+      });
+    });
+
+    // 4. 次にすべきこと（処方箋 ＆ 教科書・大辞典への一発リンク）
+    const nextActions: NextActionItem[] = [];
+    const seenLinks = new Set<string>();
+
+    missedQuestions.forEach((q) => {
+      if (q.linkReview && !seenLinks.has(q.linkReview.id)) {
+        seenLinks.add(q.linkReview.id);
+        nextActions.push({
+          priority: nextActions.length < 2 ? 'high' : 'medium',
+          title: `教科書・大辞典『${q.linkReview.label}』の集中復習`,
+          description: `第${q.questionNumber}問で失点した項目の文法公式と例文を再確認し、音読トレーニングを行いましょう。`,
+          targetId: q.linkReview.id,
+          targetTab: q.linkReview.tab as any,
+          actionLabel: `${q.linkReview.label} を開く`,
+        });
+      }
+    });
+
+    // 苦手セクションのアクション
+    sectionBreakdowns.forEach((sec) => {
+      if (sec.percentage < 60) {
+        nextActions.push({
+          priority: 'high',
+          title: `【${sec.label}】の重点特訓`,
+          description: `正答率${sec.percentage}%に留まっています。音声リスニングや基本文法ドリルを繰り返し解いて、瞬時に識別できる耳と目を鍛えましょう。`,
+          actionLabel: `${sec.label}の集中復習`,
+        });
+      }
+    });
+
+    if (nextActions.length === 0) {
+      nextActions.push({
+        priority: 'high',
+        title: '上位級・次ステージへの挑戦',
+        description: 'この級の十分な実力が証明されました。ロードマップの次の駅（上位級の模擬試験や新文法）へステップアップしましょう！',
+        actionLabel: 'ロードマップを確認する',
+      });
+    }
+
+    const diagnosticReport: DiagnosticReport = {
+      overallCanDoSummary,
+      strengths,
+      weaknesses,
+      nextActions,
+    };
+
     return {
       score: earnedScore,
       totalScore: activeExam.totalScore,
@@ -168,6 +300,7 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
       sectionBreakdowns,
       correctCount,
       totalCount: activeExam.questionCount,
+      diagnosticReport,
     };
   }, [activeExam, userAnswers]);
 
@@ -182,84 +315,253 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
   const answeredCount = Object.keys(userAnswers).length;
   const unansweredCount = activeExam.questionCount - answeredCount;
 
+  // 試験リストのフィルタリング
+  const hankenExams = ALL_MOCK_EXAMS.filter((e) => e.category === 'hanken');
+  const topikExams = ALL_MOCK_EXAMS.filter((e) => e.category === 'topik');
+
   // ==========================================================================
-  // ① 模擬試験 選択画面（トップ一覧）
+  // ① 模擬試験 選択画面（トップ一覧：公式検定別の明確な区分）
   // ==========================================================================
   if (viewState === 'list') {
     return (
-      <div className="max-w-5xl mx-auto px-3 sm:px-6 py-6 sm:py-10">
+      <div className="max-w-6xl mx-auto px-3 sm:px-6 py-6 sm:py-10 space-y-10">
         {/* ヘッダー紹介セクション */}
-        <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-800 text-xs font-bold mb-3">
-            <Award className="w-3.5 h-3.5 text-indigo-600" /> TOPIK ＆ ハングル検定 公式完全準拠
+        <div className="text-center max-w-3xl mx-auto space-y-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 text-amber-900 text-xs font-black shadow-2xs">
+            <Award className="w-3.5 h-3.5 text-[#B84E34]" /> 公式検定完全準拠・級別単独模擬試験センター
           </div>
-          <h1 className="text-2xl sm:text-4xl font-extrabold text-[#1B2A38] tracking-tight mb-3">
+          <h1 className="text-2xl sm:text-4xl font-black text-[#1B2A38] tracking-tight">
             実戦 模擬試験センター
           </h1>
-          <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
-            過去問の出題傾向・形式・配点を忠実に再現した実戦ハーフ模試。<br className="hidden sm:inline" />
-            音声リスニング、制限時間タイマー、級判定、丁寧な解説と教科書復習リンクを完備しています。
+          <p className="text-xs sm:text-sm text-stone-600 leading-relaxed max-w-2xl mx-auto">
+            過去問の出題傾向・形式・配点を級ごとに忠実に再現した公式準拠の模擬試験。<br className="hidden sm:inline" />
+            受験後は、<strong>「何ができて、何が不足しているのか」</strong>の根拠と、
+            教科書への具体的処方箋を示す<strong>【学習カルテ（Can-Do到達度診断）】</strong>を即座に発行します。
           </p>
+
+          {/* カテゴリ切り替えフィルター */}
+          <div className="flex items-center justify-center gap-2 pt-2">
+            <button
+              type="button"
+              onClick={() => setCategoryFilter('all')}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                categoryFilter === 'all'
+                  ? 'bg-[#B84E34] text-white shadow-xs'
+                  : 'bg-white border border-stone-200 text-stone-600 hover:bg-stone-50'
+              }`}
+            >
+              すべて表示（全6試験）
+            </button>
+            <button
+              type="button"
+              onClick={() => setCategoryFilter('hanken')}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                categoryFilter === 'hanken'
+                  ? 'bg-[#B84E34] text-white shadow-xs'
+                  : 'bg-white border border-stone-200 text-stone-600 hover:bg-stone-50'
+              }`}
+            >
+              <span>🏛️ ハングル能力検定（4試験）</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setCategoryFilter('topik')}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                categoryFilter === 'topik'
+                  ? 'bg-[#B84E34] text-white shadow-xs'
+                  : 'bg-white border border-stone-200 text-stone-600 hover:bg-stone-50'
+              }`}
+            >
+              <span>🎓 TOPIK（2試験）</span>
+            </button>
+          </div>
         </div>
 
-        {/* 4大模擬試験カードグリッド */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-          {ALL_MOCK_EXAMS.map((exam) => (
-            <div
-              key={exam.id}
-              className="bg-white border border-stone-200 rounded-3xl p-6 sm:p-7 shadow-xs hover:shadow-xl transition-all flex flex-col justify-between group"
-            >
-              <div>
-                {/* バッジ行 */}
-                <div className="flex items-center justify-between gap-2 mb-4">
-                  <span className="px-3 py-1 rounded-full text-xs font-black tracking-wide bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD]">
-                    {exam.badge}
-                  </span>
-                  <div className="flex items-center gap-1.5 text-xs text-stone-500 font-bold">
-                    <Clock className="w-3.5 h-3.5 text-stone-400" />
-                    <span>{Math.round(exam.timeLimitSeconds / 60)}分 / {exam.questionCount}問</span>
-                  </div>
-                </div>
-
-                <h2 className="text-xl sm:text-2xl font-bold text-[#1B2A38] group-hover:text-[#B84E34] transition-colors mb-1.5">
-                  {exam.title}
-                </h2>
-                <p className="text-xs font-bold text-stone-500 mb-3">{exam.subtitle}</p>
-                <p className="text-xs text-stone-600 leading-relaxed mb-6">
-                  {exam.overview}
-                </p>
-
-                {/* 合格基準プレビュー */}
-                <div className="bg-[#FAF7F2] rounded-xl p-3 mb-6 border border-[#E8E2D5]/70 space-y-1.5">
-                  <div className="text-[11px] font-bold text-stone-500 flex items-center justify-between">
-                    <span>🎯 合格判定ボーダーライン</span>
-                    <span>100点満点</span>
-                  </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {exam.passCriteria.map((c, i) => (
-                      <span
-                        key={i}
-                        className={`text-[10px] px-2 py-0.5 rounded-md font-bold ${c.color}`}
-                      >
-                        {c.level} ({c.minScore}点〜)
-                      </span>
-                    ))}
-                  </div>
+        {/* ================================================================== */}
+        {/* ① ハングル能力検定試験（ハン検）セクション */}
+        {/* ================================================================== */}
+        {(categoryFilter === 'all' || categoryFilter === 'hanken') && (
+          <section className="space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#E8E2D5]">
+              <div className="flex items-center gap-2">
+                <span className="w-8 h-8 rounded-xl bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD] flex items-center justify-center text-lg">
+                  🏛️
+                </span>
+                <div>
+                  <h2 className="text-lg sm:text-xl font-black text-[#1B2A38]">
+                    ハングル能力検定試験（公式準拠・単独級別）
+                  </h2>
+                  <p className="text-[11px] sm:text-xs text-stone-500">
+                    日本国内で最も権威ある検定試験。文字・発音・助詞から敬語・慣用句・四字熟語まで各級独立して実力を測定
+                  </p>
                 </div>
               </div>
-
-              {/* 受験開始ボタン */}
-              <button
-                type="button"
-                onClick={() => startExam(exam.id)}
-                className="w-full py-3 rounded-2xl bg-[#B84E34] hover:bg-[#a2432c] active:scale-[0.98] text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <span>模擬試験を開始する</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
+              <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-stone-100 text-stone-600 self-start sm:self-auto">
+                5級・4級・3級・準2級 完備
+              </span>
             </div>
-          ))}
-        </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+              {hankenExams.map((exam) => (
+                <div
+                  key={exam.id}
+                  className="bg-white border border-stone-200 rounded-3xl p-6 shadow-xs hover:shadow-xl transition-all flex flex-col justify-between group"
+                >
+                  <div className="space-y-4">
+                    {/* バッジ行 */}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="px-3 py-1 rounded-full text-xs font-black tracking-wide bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD]">
+                          {exam.badge}
+                        </span>
+                        <span className="text-[11px] font-black px-2.5 py-0.5 rounded-md bg-stone-100 text-stone-700">
+                          合格基準: {exam.passScore}点以上
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-xs text-stone-500 font-bold shrink-0">
+                        <Clock className="w-3.5 h-3.5 text-stone-400" />
+                        <span>{Math.round(exam.timeLimitSeconds / 60)}分 / {exam.questionCount}問</span>
+                      </div>
+                    </div>
+
+                    {/* タイトルとサブタイトル */}
+                    <div>
+                      <h3 className="text-xl sm:text-2xl font-black text-[#1B2A38] group-hover:text-[#B84E34] transition-colors mb-1">
+                        {exam.title}
+                      </h3>
+                      <p className="text-xs font-bold text-stone-500">{exam.subtitle}</p>
+                    </div>
+
+                    <p className="text-xs text-stone-600 leading-relaxed">
+                      {exam.overview}
+                    </p>
+
+                    {/* この級で測定する公的Can-Doプレビュー */}
+                    <div className="bg-[#FAF7F2] rounded-2xl p-4 border border-[#E8E2D5]/70 space-y-2">
+                      <div className="text-[11px] font-black text-stone-700 flex items-center gap-1.5">
+                        <Target className="w-3.5 h-3.5 text-[#B84E34]" />
+                        <span>測定する公式Can-Do（到達能力基準）</span>
+                      </div>
+                      <ul className="space-y-1.5">
+                        {exam.canDoList.slice(0, 3).map((canDo, idx) => (
+                          <li key={idx} className="text-[11px] text-stone-600 flex items-start gap-1.5">
+                            <span className="text-emerald-600 font-bold shrink-0">✓</span>
+                            <span>{canDo}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+
+                  {/* 受験開始ボタン */}
+                  <div className="pt-5">
+                    <button
+                      type="button"
+                      onClick={() => startExam(exam.id)}
+                      className="w-full py-3 rounded-2xl bg-[#B84E34] hover:bg-[#a2432c] active:scale-[0.98] text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <span>この級の模擬試験を開始する</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ================================================================== */}
+        {/* ② TOPIK（韓国語能力試験）セクション */}
+        {/* ================================================================== */}
+        {(categoryFilter === 'all' || categoryFilter === 'topik') && (
+          <section className="space-y-4 pt-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#E8E2D5]">
+              <div className="flex items-center gap-2">
+                <span className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center justify-center text-lg">
+                  🎓
+                </span>
+                <div>
+                  <h2 className="text-lg sm:text-xl font-black text-[#1B2A38]">
+                    TOPIK（韓国教育省公認・世界共通基準）
+                  </h2>
+                  <p className="text-[11px] sm:text-xs text-stone-500">
+                    留学・就職・永住権基準として世界で通用する公認テスト。聞き取り・読解の実戦運用力を総合判定
+                  </p>
+                </div>
+              </div>
+              <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-800 self-start sm:self-auto border border-indigo-200">
+                TOPIK I・II 完備
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+              {topikExams.map((exam) => (
+                <div
+                  key={exam.id}
+                  className="bg-white border border-stone-200 rounded-3xl p-6 shadow-xs hover:shadow-xl transition-all flex flex-col justify-between group"
+                >
+                  <div className="space-y-4">
+                    {/* バッジ行 */}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="px-3 py-1 rounded-full text-xs font-black tracking-wide bg-indigo-50 text-indigo-800 border border-indigo-200">
+                          {exam.badge}
+                        </span>
+                        <span className="text-[11px] font-black px-2.5 py-0.5 rounded-md bg-stone-100 text-stone-700">
+                          合格基準: {exam.passScore}点以上
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-xs text-stone-500 font-bold shrink-0">
+                        <Clock className="w-3.5 h-3.5 text-stone-400" />
+                        <span>{Math.round(exam.timeLimitSeconds / 60)}分 / {exam.questionCount}問</span>
+                      </div>
+                    </div>
+
+                    {/* タイトルとサブタイトル */}
+                    <div>
+                      <h3 className="text-xl sm:text-2xl font-black text-[#1B2A38] group-hover:text-indigo-700 transition-colors mb-1">
+                        {exam.title}
+                      </h3>
+                      <p className="text-xs font-bold text-stone-500">{exam.subtitle}</p>
+                    </div>
+
+                    <p className="text-xs text-stone-600 leading-relaxed">
+                      {exam.overview}
+                    </p>
+
+                    {/* この級で測定する公的Can-Doプレビュー */}
+                    <div className="bg-[#FAF7F2] rounded-2xl p-4 border border-[#E8E2D5]/70 space-y-2">
+                      <div className="text-[11px] font-black text-stone-700 flex items-center gap-1.5">
+                        <Target className="w-3.5 h-3.5 text-indigo-600" />
+                        <span>測定する公式Can-Do（到達能力基準）</span>
+                      </div>
+                      <ul className="space-y-1.5">
+                        {exam.canDoList.slice(0, 3).map((canDo, idx) => (
+                          <li key={idx} className="text-[11px] text-stone-600 flex items-start gap-1.5">
+                            <span className="text-indigo-600 font-bold shrink-0">✓</span>
+                            <span>{canDo}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+
+                  {/* 受験開始ボタン */}
+                  <div className="pt-5">
+                    <button
+                      type="button"
+                      onClick={() => startExam(exam.id)}
+                      className="w-full py-3 rounded-2xl bg-indigo-700 hover:bg-indigo-800 active:scale-[0.98] text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <span>この模擬試験を開始する</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     );
   }
@@ -503,7 +805,7 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
                   'すべての問題に解答済みです。'
                 )}
                 <br />
-                採点後はすぐに詳細な解説と合否判定が表示されます。
+                採点後はすぐに詳細な解説と学習カルテ（根拠と道筋）が表示されます。
               </p>
               <div className="grid grid-cols-2 gap-2 pt-2">
                 <button
@@ -529,23 +831,23 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
   }
 
   // ==========================================================================
-  // ③ 模擬試験 採点・結果レポート画面（終了後）
+  // ③ 模擬試験 採点・結果レポート画面（終了後：Can-Do学習カルテ完備）
   // ==========================================================================
   return (
     <div className="max-w-4xl mx-auto px-3 sm:px-6 py-6 sm:py-10 space-y-8">
       {/* 総合スコアカード */}
       <div className="bg-white border border-stone-200 rounded-3xl p-6 sm:p-8 shadow-md text-center space-y-5">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black tracking-wide bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD]">
-          {activeExam.title} 判定結果
+          {activeExam.title} 公式判定結果
         </div>
 
-        {/* 合格バッジ */}
+        {/* 合格判定と得点 */}
         <div>
           <div className="text-3xl sm:text-5xl font-black text-[#1B2A38] tracking-tight">
             {evaluation.score} <span className="text-lg sm:text-2xl font-bold text-stone-400">/ {evaluation.totalScore}点</span>
           </div>
           <div className="text-xs text-stone-500 font-bold mt-1">
-            正答数: {evaluation.correctCount} / {evaluation.totalCount}問（正答率 {evaluation.percentage}%）
+            正答数: {evaluation.correctCount} / {evaluation.totalCount}問（正答率 {evaluation.percentage}% / 合格ライン {activeExam.passScore}点）
           </div>
         </div>
 
@@ -576,7 +878,7 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
             onClick={() => setViewState('list')}
             className="px-5 py-2.5 rounded-xl border border-stone-200 bg-white text-xs font-bold text-stone-700 hover:bg-stone-50 transition-all cursor-pointer"
           >
-            他の模擬試験を選ぶ
+            他の級の模擬試験を選ぶ
           </button>
           {onBackToDashboard && (
             <button
@@ -589,6 +891,213 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
           )}
         </div>
       </div>
+
+      {/* ====================================================================== */}
+      {/* 🎯 【公的Can-Do到達度 ＆ 学習カルテ（根拠と道筋）】特設カード */}
+      {/* ====================================================================== */}
+      <section className="bg-gradient-to-br from-[#FAF7F2] to-white border-2 border-[#E8E2D5] rounded-3xl p-5 sm:p-8 shadow-sm space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#E8E2D5]">
+          <div className="flex items-center gap-2.5">
+            <div className="w-10 h-10 rounded-2xl bg-[#B84E34] text-white flex items-center justify-center text-xl shadow-xs">
+              📋
+            </div>
+            <div>
+              <h3 className="text-base sm:text-lg font-black text-[#1B2A38] flex items-center gap-2">
+                公的Can-Do到達度 ＆ 学習カルテ（根拠と道筋）
+              </h3>
+              <p className="text-[11px] sm:text-xs text-stone-500">
+                客観的な解答データから「何ができて」「何が不足しているのか」の根拠と次の具体的アクションを提示
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* 総合評価サマリーボックス */}
+        <div
+          className={`p-4 rounded-2xl border text-xs sm:text-sm font-medium leading-relaxed ${
+            evaluation.passed
+              ? 'bg-emerald-50/70 border-emerald-200 text-emerald-950'
+              : 'bg-amber-50/80 border-amber-200 text-amber-950'
+          }`}
+        >
+          {evaluation.diagnosticReport.overallCanDoSummary}
+        </div>
+
+        {/* カルテ内タブ切り替え */}
+        <div className="flex items-center gap-2 border-b border-stone-200">
+          <button
+            type="button"
+            onClick={() => setActiveReportTab('prescription')}
+            className={`pb-2.5 px-3 text-xs font-black transition-all border-b-2 flex items-center gap-1.5 cursor-pointer ${
+              activeReportTab === 'prescription'
+                ? 'border-[#B84E34] text-[#B84E34]'
+                : 'border-transparent text-stone-500 hover:text-stone-800'
+            }`}
+          >
+            <Compass className="w-3.5 h-3.5" />
+            <span>🎯 次にすべきこと（処方箋）</span>
+            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-stone-100">
+              {evaluation.diagnosticReport.nextActions.length}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveReportTab('strengths')}
+            className={`pb-2.5 px-3 text-xs font-black transition-all border-b-2 flex items-center gap-1.5 cursor-pointer ${
+              activeReportTab === 'strengths'
+                ? 'border-emerald-600 text-emerald-700'
+                : 'border-transparent text-stone-500 hover:text-stone-800'
+            }`}
+          >
+            <Check className="w-3.5 h-3.5" />
+            <span>🟢 現在できること（Can-Do到達）</span>
+            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-800">
+              {evaluation.diagnosticReport.strengths.length}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveReportTab('weaknesses')}
+            className={`pb-2.5 px-3 text-xs font-black transition-all border-b-2 flex items-center gap-1.5 cursor-pointer ${
+              activeReportTab === 'weaknesses'
+                ? 'border-rose-500 text-rose-700'
+                : 'border-transparent text-stone-500 hover:text-stone-800'
+            }`}
+          >
+            <AlertCircle className="w-3.5 h-3.5" />
+            <span>⚠️ まだ不足していること（失点根拠）</span>
+            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-rose-100 text-rose-800">
+              {evaluation.diagnosticReport.weaknesses.length}
+            </span>
+          </button>
+        </div>
+
+        {/* タブ①: 🎯 次にすべきこと（処方箋） */}
+        {activeReportTab === 'prescription' && (
+          <div className="space-y-3">
+            <p className="text-xs text-stone-600">
+              あなたの失点パターンと苦手分野に基づき、復習すべき教科書レッスンと大辞典の学習ルートを優先度順に処方します。
+            </p>
+            <div className="grid grid-cols-1 gap-3">
+              {evaluation.diagnosticReport.nextActions.map((action, i) => (
+                <div
+                  key={i}
+                  className="bg-white border border-stone-200 rounded-2xl p-4 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-[#B84E34]/50 transition-all"
+                >
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`text-[10px] font-black px-2 py-0.5 rounded-md ${
+                          action.priority === 'high'
+                            ? 'bg-rose-100 text-rose-700 border border-rose-200'
+                            : 'bg-amber-100 text-amber-800 border border-amber-200'
+                        }`}
+                      >
+                        {action.priority === 'high' ? '最優先' : '推奨'}
+                      </span>
+                      <h4 className="text-xs sm:text-sm font-black text-[#1B2A38]">
+                        {action.title}
+                      </h4>
+                    </div>
+                    <p className="text-xs text-stone-600 leading-relaxed">
+                      {action.description}
+                    </p>
+                  </div>
+
+                  {action.targetId && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (action.targetTab === 'dictionary' && onNavigateToDictionary) {
+                          onNavigateToDictionary(action.targetId!);
+                        } else if (onNavigateToTextbookLesson) {
+                          onNavigateToTextbookLesson(action.targetId!);
+                        }
+                      }}
+                      className="px-4 py-2 rounded-xl bg-[#FAF0EC] text-[#B84E34] hover:bg-[#B84E34] hover:text-white border border-[#F0D5CD] text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
+                    >
+                      <BookOpen className="w-3.5 h-3.5" />
+                      <span>{action.actionLabel} ➔</span>
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* タブ②: 🟢 現在できること（Can-Do到達度・強み） */}
+        {activeReportTab === 'strengths' && (
+          <div className="space-y-3">
+            <p className="text-xs text-stone-600">
+              今回の正答状況から客観的に実証された、あなたの定着済みスキルおよび公式Can-Do達成項目です。
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {evaluation.diagnosticReport.strengths.map((item, i) => (
+                <div
+                  key={i}
+                  className="bg-emerald-50/40 border border-emerald-200/80 rounded-2xl p-4 space-y-1.5"
+                >
+                  <div className="flex items-center gap-2 text-xs font-black text-emerald-900">
+                    <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>{item.title}</span>
+                  </div>
+                  <p className="text-xs text-emerald-800/80 leading-relaxed pl-6">
+                    {item.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* タブ③: ⚠️ まだ不足していること（失点の根拠と弱点分析） */}
+        {activeReportTab === 'weaknesses' && (
+          <div className="space-y-3">
+            <p className="text-xs text-stone-600">
+              なぜその問題で失点したのか、回答の選択理由と文法規則・語彙の混同原因を明確に提示します。
+            </p>
+            <div className="space-y-3">
+              {evaluation.diagnosticReport.weaknesses.map((item, i) => (
+                <div
+                  key={i}
+                  className="bg-white border border-rose-200 rounded-2xl p-4 space-y-2 shadow-2xs"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-lg bg-rose-100 text-rose-700 text-xs font-black flex items-center justify-center">
+                        ❌
+                      </span>
+                      <h4 className="text-xs sm:text-sm font-black text-[#1B2A38]">
+                        {item.title}
+                      </h4>
+                    </div>
+                    {item.relatedLessonId && onNavigateToTextbookLesson && (
+                      <button
+                        type="button"
+                        onClick={() => onNavigateToTextbookLesson(item.relatedLessonId!)}
+                        className="text-[11px] font-bold text-[#B84E34] hover:underline flex items-center gap-1 cursor-pointer"
+                      >
+                        <BookOpen className="w-3 h-3" />
+                        <span>{item.lessonLabel || '復習課'}を開く</span>
+                      </button>
+                    )}
+                  </div>
+                  <p className="text-xs text-stone-700 bg-stone-50 p-2.5 rounded-xl border border-stone-100">
+                    {item.description}
+                  </p>
+                  <div className="text-xs text-rose-900 bg-rose-50/60 p-2.5 rounded-xl border border-rose-100 leading-relaxed">
+                    <strong className="text-rose-700 font-bold">失点の根拠: </strong>
+                    {item.reason}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </section>
 
       {/* セクション別 正答率ブレイクダウン */}
       <div className="bg-white border border-stone-200 rounded-3xl p-5 sm:p-7 shadow-xs space-y-4">

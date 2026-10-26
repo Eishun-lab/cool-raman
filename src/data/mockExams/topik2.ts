@@ -2,14 +2,23 @@ import { MockExam } from '../../types/mockExam';
 
 export const TOPIK2_MOCK_EXAM: MockExam = {
   id: 'topik2',
+  category: 'topik',
+  levelName: 'TOPIK II',
   title: 'TOPIK II 実戦模擬試験',
   badge: 'TOPIK II (3〜6級)',
   subtitle: '中上級への登竜門！論理読解・類似文法・グラフ解釈・高度リスニング',
   targetLevel: 'TOPIK 3級〜6級 合格目標（中上級・最上級）',
-  timeLimitSeconds: 1200, // 20分
+  timeLimitSeconds: 1500, // 25分
   totalScore: 100,
+  passScore: 40,
   questionCount: 20,
-  overview: 'TOPIK II（中上級）の頻出重要パターンを20分で解く実戦ハーフ模擬試験です。語彙の言い換え、慣用句、グラフ統計読解、社説の主張把握、そして論理的なリスニングを聞き取る総合力を測定し、あなたの推定級を判定します。',
+  overview: 'TOPIK II（中上級）の頻出重要パターンを25分で解く実戦ハーフ模擬試験です。語彙の言い換え、慣用句、グラフ統計読解、社説の主張把握、そして論理的なリスニングを聞き取る総合力を測定し、あなたの推定級を判定します。',
+  canDoList: [
+    '社会・文化・科学などの一般的・抽象的な話題に関する説明文や社説を論理的に読解できる',
+    'グラフや統計データの増減傾向を読み取り、要約・比較できる',
+    'ニュース、講演、対談などの公式なリスニング音声から論点と話し手の意図を把握できる',
+    '高度な接続語尾、慣用句、ことわざ、四字熟語を文脈に応じて正しく判断できる',
+  ],
   passCriteria: [
     {
       level: 'TOPIK 6級 水準（最上級）',

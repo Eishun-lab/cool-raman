@@ -14,6 +14,7 @@ import { StudyGuideView } from './components/StudyGuideView';
 import { KoreanNumbersGuideView } from './components/KoreanNumbersGuideView';
 import { ComprehensiveQuizView } from './components/ComprehensiveQuizView';
 import { MockExamView } from './components/mockExam/MockExamView';
+import { ExamType } from './types/mockExam';
 import hanmoaLogo from './assets/logo.jpg';
 
 type MainTab = 'dashboard' | 'textbook' | 'exam' | 'numbers' | 'quiz';
@@ -21,6 +22,7 @@ type MainTab = 'dashboard' | 'textbook' | 'exam' | 'numbers' | 'quiz';
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<MainTab>('dashboard');
   const [studyGuideAnchor, setStudyGuideAnchor] = useState<string | undefined>(undefined);
+  const [targetExamId, setTargetExamId] = useState<ExamType | undefined>(undefined);
 
   return (
     <div className="min-h-screen bg-[#FAF7F2] text-[#1B2A38] font-sans flex flex-col">
@@ -102,7 +104,10 @@ export const App: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-12">
               {/* ① TOPIK・ハン検 模擬試験 */}
               <div
-                onClick={() => setActiveTab('exam')}
+                onClick={() => {
+                  setTargetExamId(undefined);
+                  setActiveTab('exam');
+                }}
                 className="group relative bg-gradient-to-br from-[#B84E34] to-[#8f3a24] text-white rounded-2xl sm:rounded-3xl p-6 sm:p-7 shadow-md hover:shadow-2xl transition-all cursor-pointer overflow-hidden flex flex-col justify-between"
               >
                 <div className="absolute top-0 right-0 -mr-6 -mt-6 w-36 h-36 bg-white/10 rounded-full blur-2xl group-hover:scale-125 transition-all" />
@@ -112,7 +117,7 @@ export const App: React.FC = () => {
                       🎓
                     </div>
                     <span className="px-2.5 sm:px-3 py-1 bg-white/20 text-white text-[11px] sm:text-xs font-bold rounded-full backdrop-blur-sm">
-                      TOPIK ＆ ハン検 4大模試
+                      TOPIK ＆ ハン検 全6大公式模試
                     </span>
                   </div>
                   <h3 className="text-xl sm:text-2xl font-bold mb-2 flex items-center gap-2">
@@ -120,8 +125,8 @@ export const App: React.FC = () => {
                     <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </h3>
                   <p className="text-white/80 text-xs sm:text-sm leading-relaxed mb-6">
-                    TOPIK I・II、ハングル検定（4/5級・3/準2級）の制限時間付き本格模擬試験。
-                    リスニング音声、自動採点・合否判定、教科書・辞書への復習リンクを完備。
+                    ハングル検定（5級・4級・3級・準2級）、TOPIK I・IIの制限時間付き本格模擬試験。
+                    リスニング音声、自動採点・合否判定、Can-Do学習カルテ（根拠と道筋）を完備。
                   </p>
                 </div>
                 <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold bg-white text-[#B84E34] px-3.5 sm:px-4 py-2 rounded-xl shadow self-start">
@@ -190,7 +195,10 @@ export const App: React.FC = () => {
           <StudyGuideView
             onBackToNote={() => setActiveTab('dashboard')}
             initialAnchor={studyGuideAnchor}
-            onNavigateToExam={() => setActiveTab('exam')}
+            onNavigateToExam={(examId) => {
+              if (examId) setTargetExamId(examId as ExamType);
+              setActiveTab('exam');
+            }}
           />
         ) : activeTab === 'numbers' ? (
           <div className="max-w-5xl mx-auto px-3 sm:px-6 py-6 sm:py-8">
@@ -211,6 +219,7 @@ export const App: React.FC = () => {
         ) : activeTab === 'exam' ? (
           <div className="py-6">
             <MockExamView
+              initialExamId={targetExamId}
               onNavigateToTextbookLesson={(lessonId) => {
                 setStudyGuideAnchor(lessonId);
                 setActiveTab('textbook');
