@@ -247,6 +247,8 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
   );
   const [questDisplayMode, setQuestDisplayMode] = useState<'focused' | 'all'>('focused');
   const [isDeepDiveOpen, setIsDeepDiveOpen] = useState(false);
+  const [showGuideModal, setShowGuideModal] = useState(false);
+  const [guideModalTab, setGuideModalTab] = useState<'goal' | 'matrix' | 'sla' | 'settings'>('goal');
 
   // クイック特訓ドリルモーダル状態
   const [activeDrill, setActiveDrill] = useState<QuestDrillData | null>(null);
@@ -445,384 +447,284 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
     );
 
     return (
-      <div
-        key={step.step}
-        className={`bg-white border-2 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 transition-all relative space-y-3.5 sm:space-y-4 ${
-          !isUnlocked
-            ? 'border-stone-200 bg-stone-50/70'
-            : isStageCleared
-            ? 'border-emerald-400 ring-2 ring-emerald-200/50 shadow-xs'
-            : 'border-stone-200/90 shadow-2xs hover:shadow-md'
-        }`}
-      >
-        {/* ロック時の案内オーバーレイ */}
-        {!isUnlocked && (
-          <div className="bg-stone-50 border border-stone-200 rounded-2xl p-5 text-center space-y-2.5">
-            <div className="w-11 h-11 rounded-2xl bg-stone-800 text-white flex items-center justify-center text-lg shadow-md mx-auto">
-              <Lock className="w-5 h-5" />
+      <div key={step.step} className="w-full space-y-4">
+        {/* ステージヘッダーカード */}
+        <div className="bg-white border border-stone-200/90 rounded-3xl p-3.5 sm:p-5 shadow-2xs space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+              <div
+                className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br ${qMeta.themeGradient} text-white flex items-center justify-center shadow-xs shrink-0`}
+              >
+                <StageIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-[10px] sm:text-[11px] font-black px-2 py-0.5 rounded-md bg-stone-100 text-stone-700">
+                    Stage {step.step} / 8
+                  </span>
+                  <span className="text-[10px] sm:text-[11px] font-black text-[#B84E34] bg-[#FAF0EC] px-2 py-0.5 rounded-full border border-[#F0D5CD]">
+                    {step.badge}
+                  </span>
+                  {isStageCleared && (
+                    <span className="text-[10px] sm:text-[11px] font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" /> 制覇
+                    </span>
+                  )}
+                </div>
+                <h3 className="text-base sm:text-lg font-black text-[#1B2A38] tracking-tight truncate mt-0.5">
+                  {qMeta.stageName}
+                </h3>
+              </div>
             </div>
-            <h4 className="text-sm sm:text-base font-black text-stone-800">
-              Stage {step.step} はロックされています
+
+            {/* 進捗プログレス */}
+            <div className="text-right shrink-0">
+              <span className={`text-xs sm:text-sm font-black ${isStageCleared ? 'text-emerald-700' : 'text-[#B84E34]'}`}>
+                {doneCount} / {totalQuests}
+              </span>
+              <div className="w-16 sm:w-20 bg-stone-200 rounded-full h-1.5 overflow-hidden mt-1">
+                <div
+                  className={`h-full rounded-full transition-all duration-500 ${
+                    isStageCleared ? 'bg-emerald-500' : 'bg-[#B84E34]'
+                  }`}
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ロック時の案内オーバーレイ */}
+        {!isUnlocked ? (
+          <div className="bg-stone-50 border border-stone-200 rounded-3xl p-6 text-center space-y-3">
+            <div className="w-12 h-12 rounded-2xl bg-stone-800 text-white flex items-center justify-center text-lg shadow-md mx-auto">
+              <Lock className="w-6 h-6" />
+            </div>
+            <h4 className="text-base font-black text-stone-800">
+              Stage {step.step} は順次解放中です
             </h4>
             <p className="text-xs text-stone-600 max-w-sm mx-auto">
-              前のステージ（Stage {step.step - 1}）のボス検定に合格するか、右上の「自由モード」で即座に挑戦できます。
+              前のステージ（Stage {step.step - 1}）のボス検定に合格するか、「自由解放」で即座に挑戦できます。
             </p>
-            <div className="flex items-center justify-center gap-2 pt-1 flex-wrap">
+            <div className="flex items-center justify-center gap-2 pt-1">
               {step.step > 1 && (
                 <button
                   type="button"
                   onClick={() => setSelectedStage(step.step - 1)}
-                  className="px-3.5 py-1.5 rounded-xl bg-[#B84E34] text-white text-xs font-bold hover:bg-[#a2432c] transition-all cursor-pointer shadow-xs"
+                  className="px-4 py-2 rounded-xl bg-[#B84E34] text-white text-xs font-bold hover:bg-[#a2432c] transition-all cursor-pointer shadow-xs"
                 >
-                  Stage {step.step - 1} のボスに挑む
+                  Stage {step.step - 1} へ戻る
                 </button>
               )}
               <button
                 type="button"
                 onClick={toggleFreeExplore}
-                className="px-3 py-1.5 rounded-xl border border-stone-300 bg-white text-stone-700 text-xs font-bold hover:bg-stone-50 transition-all cursor-pointer"
+                className="px-4 py-2 rounded-xl border border-stone-300 bg-white text-stone-700 text-xs font-bold hover:bg-stone-50 transition-all cursor-pointer"
               >
-                自由モードをONにする
+                自由解放をONにする
               </button>
             </div>
-          </div>
-        )}
-
-        {/* ステージヘッダー */}
-        <div className="flex items-center justify-between gap-3 pb-3 border-b border-stone-100 flex-wrap sm:flex-nowrap">
-          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <div
-              className={`w-11 h-11 sm:w-13 sm:h-13 rounded-2xl bg-gradient-to-br ${qMeta.themeGradient} text-white flex items-center justify-center shadow-xs shrink-0`}
-            >
-              <StageIcon className="w-5 h-5 sm:w-6 sm:h-6" />
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-[11px] font-black px-2 py-0.5 rounded-md bg-stone-100 text-stone-700">
-                  Stage {step.step} / 8
-                </span>
-                <span className="text-[11px] font-black text-[#B84E34] bg-[#FAF0EC] px-2 py-0.5 rounded-full border border-[#F0D5CD]">
-                  {step.badge}
-                </span>
-                {isStageCleared && (
-                  <span className="text-[11px] font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3" /> 制覇
-                  </span>
-                )}
-              </div>
-              <h3 className="text-base sm:text-xl font-black text-[#1B2A38] tracking-tight truncate mt-0.5">
-                {qMeta.stageName}
-              </h3>
-            </div>
-          </div>
-
-          {/* 達成度プログレスバー */}
-          <div className="w-full sm:w-44 bg-stone-50 p-2 sm:p-2.5 rounded-xl border border-stone-200 shrink-0 space-y-1">
-            <div className="flex items-center justify-between text-xs font-black">
-              <span className="text-stone-600">達成度</span>
-              <span className={isStageCleared ? 'text-emerald-700' : 'text-[#B84E34]'}>
-                {doneCount}/{totalQuests} ({progressPercent}%)
-              </span>
-            </div>
-            <div className="w-full bg-stone-200 rounded-full h-2 overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all duration-500 ${
-                  isStageCleared ? 'bg-emerald-500' : 'bg-[#B84E34]'
-                }`}
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* ⚡️ いま挑戦すべき特訓（迷わせない導線・最重要CTA） */}
-        {firstIncompleteIdx !== -1 ? (
-          <div className="bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/5 border-2 border-amber-300 rounded-2xl p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
-            <div className="space-y-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded-md bg-amber-500 text-white font-black text-[11px] flex items-center gap-1 shadow-2xs">
-                  <Zap className="w-3 h-3 fill-white" /> いま挑戦すべき特訓
-                </span>
-                <span className="text-xs font-bold text-amber-900">
-                  Quest {firstIncompleteIdx + 1} / {totalQuests}
-                </span>
-              </div>
-              <p className="text-sm sm:text-base font-black text-[#1B2A38] leading-snug">
-                {step.scopePriority.wbsBreakdown[firstIncompleteIdx]}
-              </p>
-              <div className="flex items-center gap-1.5 text-xs text-stone-600 line-clamp-1">
-                <ScenarioIcon className="w-3.5 h-3.5 text-amber-700 shrink-0" />
-                <span className="truncate">{qMeta.scenarioTitle}</span>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => startQuestDrill(step.step, firstIncompleteIdx)}
-              className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#B84E34] to-orange-600 text-white font-black text-xs sm:text-sm hover:opacity-95 shadow-sm transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer active:scale-95"
-            >
-              <Zap className="w-4 h-4 fill-amber-300 text-amber-300" />
-              <span>30秒クイック特訓を始める (+60 XP)</span>
-            </button>
           </div>
         ) : (
-          <div className="bg-gradient-to-r from-emerald-500/15 via-teal-500/10 to-emerald-500/5 border-2 border-emerald-300 rounded-2xl p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded-md bg-emerald-600 text-white font-black text-[11px] flex items-center gap-1 shadow-2xs">
-                  <CheckCircle2 className="w-3 h-3" /> 全クエスト制覇！
+          <>
+            {/* ★ ユーザー要望：今日やることは決まっているわけだから、そこだけでいい（Hero Card） */}
+            <div className="bg-white border-2 border-amber-300/80 rounded-3xl p-4 sm:p-5 shadow-xs space-y-3 relative overflow-hidden">
+              <div className="flex items-center justify-between gap-2">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10.5px] font-black uppercase tracking-wider">
+                  <Zap className="w-3 h-3 fill-amber-600 text-amber-600" />
+                  {firstIncompleteIdx !== -1
+                    ? `今日のNEXT STEP : 第 ${firstIncompleteIdx + 1} 問`
+                    : 'ステージ全特訓クリア！'}
                 </span>
-                <span className="text-xs font-bold text-emerald-900">
-                  {isBossCleared ? 'ステージ完全攻略済み！' : 'あとはボス検定を突破するだけ！'}
+                <span className="text-[11px] font-bold text-stone-500 font-mono">
+                  {doneCount}/{totalQuests} 達成
                 </span>
               </div>
-              <p className="text-sm sm:text-base font-black text-[#1B2A38] leading-snug">
-                {isBossCleared
-                  ? `Stage ${step.step} の全ミッションを制覇しました！次のStageへ進みましょう。`
-                  : `【${qMeta.bossLabel}】（合格基準 ${qMeta.bossPassScore}点）をクリアして次へ！`}
-              </p>
-            </div>
-            {onNavigateToExam && (
-              <button
-                type="button"
-                onClick={() => onNavigateToExam(stepMeta.examId)}
-                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#B84E34] to-[#8f3a24] text-white font-black text-xs sm:text-sm hover:opacity-95 shadow-sm transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer active:scale-95"
-              >
-                <Award className="w-4 h-4" />
-                <span>{isBossCleared ? 'ボスに再挑戦 ➔' : 'ボス戦（模試）に挑む ➔'}</span>
-              </button>
-            )}
-          </div>
-        )}
 
-        {/* 📋 クエスト一覧（チェックボックス ＆ 特訓ボタン） */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between px-1">
-            <span className="text-xs font-black text-[#1B2A38]">
-              必須クエスト一覧
-            </span>
-            <span className="text-[11px] text-stone-500">タップでチェック</span>
-          </div>
-
-          <div className="space-y-2">
-            {step.scopePriority.wbsBreakdown.map((task, tIdx) => {
-              const isDone = !!gameState.completedQuests[`s${step.step}_t${tIdx}`];
-              const hasDrill = !!STAGE_DRILLS[`s${step.step}_t${tIdx}`];
-
-              return (
-                <div
-                  key={tIdx}
-                  className={`p-3 sm:p-3.5 rounded-2xl border transition-all flex items-center justify-between gap-3 ${
-                    isDone
-                      ? 'bg-emerald-50/60 border-emerald-300 text-emerald-950'
-                      : 'bg-[#FAF7F2] border-stone-200/90 hover:border-stone-300 text-stone-800'
-                  }`}
-                >
-                  <div
-                    onClick={() => handleToggleQuest(step.step, tIdx, totalQuests)}
-                    className="flex items-center gap-2.5 sm:gap-3 cursor-pointer select-none flex-1 min-w-0"
-                  >
-                    <div
-                      className={`w-6 h-6 sm:w-7 sm:h-7 rounded-xl flex items-center justify-center font-black text-xs sm:text-sm shrink-0 transition-all ${
-                        isDone
-                          ? 'bg-emerald-600 text-white shadow-2xs'
-                          : 'bg-white border-2 border-stone-300 text-transparent hover:border-[#B84E34]'
-                      }`}
-                    >
-                      <Check className="w-3.5 h-3.5 stroke-[3]" />
-                    </div>
-                    <span
-                      className={`text-xs sm:text-sm font-bold leading-snug truncate ${
-                        isDone ? 'line-through text-emerald-800/80' : 'text-stone-800'
-                      }`}
-                    >
-                      {task}
-                    </span>
+              {firstIncompleteIdx !== -1 ? (
+                <>
+                  <div className="space-y-1">
+                    <h3 className="text-base sm:text-lg font-black text-[#1B2A38] leading-snug">
+                      {step.scopePriority.wbsBreakdown[firstIncompleteIdx]}
+                    </h3>
+                    <p className="text-xs text-stone-600 flex items-center gap-1">
+                      <Sparkles className="w-3.5 h-3.5 text-[#B84E34] shrink-0" />
+                      <span className="truncate">{qMeta.scenarioTitle}</span>
+                    </p>
                   </div>
 
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    {hasDrill && (
-                      <button
-                        type="button"
-                        onClick={() => startQuestDrill(step.step, tIdx)}
-                        className={`px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer shadow-2xs ${
-                          isDone
-                            ? 'bg-white border border-emerald-300 text-emerald-800 hover:bg-emerald-50'
-                            : 'bg-[#B84E34] hover:bg-[#a2432c] text-white active:scale-95'
-                        }`}
-                      >
-                        <Zap className="w-3 h-3 text-amber-300" />
-                        <span className="hidden sm:inline">{isDone ? '再特訓' : '30秒特訓'}</span>
-                        <span className="sm:hidden">{isDone ? '復習' : '特訓'}</span>
-                      </button>
-                    )}
-                    {onNavigateToContent && (
-                      <button
-                        type="button"
-                        onClick={() => onNavigateToContent(stepMeta.firstLessonId, 'textbook')}
-                        className="p-1.5 sm:px-2 sm:py-1.5 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-stone-600 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
-                        title="教科書の該当課を開く"
-                      >
-                        <BookOpen className="w-3.5 h-3.5 text-[#B84E34]" />
-                        <span className="hidden sm:inline">教科書</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* 👑 ステージボス検定 */}
-        <div className="bg-gradient-to-br from-[#FAF7F2] to-amber-50/40 border-2 border-[#E8E2D5] rounded-2xl p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
-          <div className="space-y-0.5">
-            <div className="flex items-center gap-2">
-              <span className="flex items-center gap-1 text-xs font-black text-[#B84E34]">
-                <Award className="w-3.5 h-3.5 text-amber-500" />
-                <span>ステージボス検定</span>
-              </span>
-              {isBossCleared && (
-                <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-300 flex items-center gap-1">
-                  <Trophy className="w-3 h-3 text-amber-600" />
-                  <span>撃破済み（最高: {bossScore}点）</span>
-                </span>
-              )}
-            </div>
-            <h4 className="text-sm sm:text-base font-black text-[#1B2A38]">
-              {qMeta.bossLabel}
-            </h4>
-            <p className="text-xs text-stone-500">
-              合格基準: {qMeta.bossPassScore}点以上クリアで次ステージがアンロック
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0">
-            {onNavigateToExam && (
-              <button
-                type="button"
-                onClick={() => onNavigateToExam(stepMeta.examId)}
-                className="w-full sm:w-auto px-4 py-2 rounded-xl bg-[#B84E34] hover:bg-[#a2432c] text-white text-xs font-bold shadow-2xs transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
-              >
-                <Award className="w-3.5 h-3.5" />
-                <span>{isBossCleared ? 'ボスに再挑戦 ➔' : 'ボス戦に挑む ➔'}</span>
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* 攻略ガイド・つまずき対策・会話例（アコーディオンで情報過多を防止） */}
-        <div className="border border-stone-200 rounded-2xl overflow-hidden bg-stone-50/50">
-          <button
-            type="button"
-            onClick={() => setIsDeepDiveOpen((prev) => !prev)}
-            className="w-full p-3 sm:p-3.5 flex items-center justify-between text-xs sm:text-sm font-bold text-stone-700 hover:text-stone-900 hover:bg-stone-100/60 transition-all cursor-pointer"
-          >
-            <span className="flex items-center gap-2">
-              <span className="w-5 h-5 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center text-xs">
-                <Lightbulb className="w-3.5 h-3.5 text-amber-700" />
-              </span>
-              <span>攻略ガイド・代表会話・つまずき対策</span>
-            </span>
-            <span className="text-xs text-stone-500 flex items-center gap-1">
-              <span>{isDeepDiveOpen ? '閉じる' : '詳細を見る'}</span>
-              <ChevronRight className={`w-4 h-4 transition-transform ${isDeepDiveOpen ? 'rotate-90' : ''}`} />
-            </span>
-          </button>
-
-          {isDeepDiveOpen && (
-            <div className="p-3.5 sm:p-4 bg-white border-t border-stone-200 space-y-3 animate-in fade-in">
-              {/* 代表会話フレーズ */}
-              <div className="bg-[#FAF0EC]/60 border border-[#F2DED7] rounded-xl p-3 space-y-1.5">
-                <div className="flex items-center justify-between text-xs font-bold text-[#B84E34]">
-                  <span className="flex items-center gap-1">
-                    <MessageCircle className="w-3.5 h-3.5" /> ステージ代表フレーズ
-                  </span>
+                  {/* Duolingo風 3D立体プッシュボタン */}
                   <button
                     type="button"
-                    onClick={() => playSpeech(step.representativeSpeech.ko, step.step)}
-                    className="px-2.5 py-1 rounded-lg bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD] hover:bg-[#F2DED7] text-xs font-bold flex items-center gap-1 cursor-pointer"
+                    onClick={() => startQuestDrill(step.step, firstIncompleteIdx)}
+                    className="w-full py-3.5 px-5 rounded-2xl bg-[#B84E34] hover:bg-[#a2432c] text-white font-black text-sm sm:text-base cursor-pointer transition-all duration-100 shadow-[0_5px_0_#853420] active:translate-y-1 active:shadow-[0_1px_0_#853420] flex items-center justify-center gap-2"
                   >
-                    <Volume2 className="w-3.5 h-3.5" />
-                    <span>{playingStep === step.step ? '再生中...' : '聴く'}</span>
+                    <Zap className="w-4 h-4 sm:w-5 sm:h-5 fill-amber-300 text-amber-300 animate-bounce" />
+                    <span>30秒特訓をスタート (+60 XP)</span>
                   </button>
+                </>
+              ) : (
+                <>
+                  <div className="space-y-1">
+                    <h3 className="text-base sm:text-lg font-black text-emerald-900 leading-snug">
+                      全クエスト制覇！次はボス検定（模試）です！
+                    </h3>
+                    <p className="text-xs text-stone-600">
+                      【{qMeta.bossLabel}】（合格基準: {qMeta.bossPassScore}点以上）で次のステージが解放されます。
+                    </p>
+                  </div>
+
+                  {onNavigateToExam && (
+                    <button
+                      type="button"
+                      onClick={() => onNavigateToExam(stepMeta.examId)}
+                      className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-amber-500 to-[#B84E34] hover:opacity-95 text-white font-black text-sm sm:text-base cursor-pointer transition-all duration-100 shadow-[0_5px_0_#853420] active:translate-y-1 active:shadow-[0_1px_0_#853420] flex items-center justify-center gap-2"
+                    >
+                      <Trophy className="w-5 h-5 text-amber-200 animate-bounce" />
+                      <span>{isBossCleared ? 'ボス検定に再挑戦 ➔' : 'ボス検定（模試）に挑む ➔'}</span>
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* ★ Duolingo風 冒険ステップトレイル（縦に並ぶ触覚ノード） */}
+            <div className="bg-white border border-stone-200/90 rounded-3xl p-5 sm:p-6 shadow-2xs">
+              <div className="text-center mb-2">
+                <span className="text-xs font-black text-stone-400 uppercase tracking-widest">
+                  QUEST PATH
+                </span>
+              </div>
+
+              <div className="relative py-4 flex flex-col items-center gap-7">
+                {/* 背景の縦方向コネクター線 */}
+                <div className="absolute top-6 bottom-14 left-1/2 w-1.5 -translate-x-1/2 bg-stone-100 rounded-full" />
+
+                {step.scopePriority.wbsBreakdown.map((task, tIdx) => {
+                  const isDone = !!gameState.completedQuests[`s${step.step}_t${tIdx}`];
+                  const isCurrent = tIdx === firstIncompleteIdx;
+                  const isLocked = !isDone && !isCurrent && !gameState.freeExploreMode;
+                  // S字交互配置
+                  const offsets = [
+                    'translate-x-0',
+                    'translate-x-6 sm:translate-x-8',
+                    'translate-x-10 sm:translate-x-12',
+                    'translate-x-4 sm:translate-x-6',
+                    '-translate-x-6 sm:-translate-x-8',
+                  ];
+                  const offsetClass = offsets[tIdx % offsets.length];
+
+                  return (
+                    <div
+                      key={tIdx}
+                      className={`relative flex flex-col items-center z-10 transition-transform ${offsetClass}`}
+                    >
+                      {/* 現在地の場合の浮遊吹き出しバッジ */}
+                      {isCurrent && (
+                        <div className="absolute -top-7 px-2.5 py-0.5 rounded-full bg-[#B84E34] text-white text-[10px] font-black shadow-md animate-bounce whitespace-nowrap z-20 flex items-center gap-1 ring-2 ring-white">
+                          <Zap className="w-2.5 h-2.5 fill-amber-300 text-amber-300" />
+                          <span>ここから！</span>
+                        </div>
+                      )}
+
+                      {/* 3D立体ノードボタン */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!isLocked) startQuestDrill(step.step, tIdx);
+                        }}
+                        disabled={isLocked}
+                        className={`w-14 h-14 sm:w-16 sm:h-16 rounded-3xl flex items-center justify-center font-black transition-all cursor-pointer relative ${
+                          isDone
+                            ? 'bg-emerald-500 text-white shadow-[0_5px_0_#047857] hover:bg-emerald-600 active:translate-y-1 active:shadow-[0_1px_0_#047857]'
+                            : isCurrent
+                            ? 'bg-[#B84E34] text-white shadow-[0_5px_0_#853420] ring-4 ring-[#B84E34]/30 hover:bg-[#a2432c] active:translate-y-1 active:shadow-[0_1px_0_#853420]'
+                            : 'bg-stone-200 text-stone-400 shadow-[0_4px_0_#a8a29e] cursor-not-allowed opacity-80'
+                        }`}
+                        title={task}
+                      >
+                        {isDone ? (
+                          <Check className="w-6 h-6 stroke-[3]" />
+                        ) : isCurrent ? (
+                          <Zap className="w-6 h-6 fill-amber-300 text-amber-300" />
+                        ) : (
+                          <Lock className="w-5 h-5 text-stone-400" />
+                        )}
+                      </button>
+
+                      {/* ノード下部のミニタイトル */}
+                      <span className="text-[11px] font-bold text-stone-700 mt-2 max-w-[140px] text-center leading-tight">
+                        {task.replace(/^[①-⑤\d\.\s]+/, '')}
+                      </span>
+                    </div>
+                  );
+                })}
+
+                {/* ボス検定ノード */}
+                <div className="relative flex flex-col items-center z-10 mt-3">
+                  <button
+                    type="button"
+                    onClick={() => onNavigateToExam && onNavigateToExam(stepMeta.examId)}
+                    className={`w-16 h-16 sm:w-18 sm:h-18 rounded-3xl flex items-center justify-center font-black transition-all cursor-pointer shadow-[0_6px_0_#b45309] active:translate-y-1 active:shadow-[0_2px_0_#b45309] ${
+                      isBossCleared
+                        ? 'bg-gradient-to-br from-amber-400 to-amber-600 text-white ring-4 ring-amber-300'
+                        : 'bg-gradient-to-br from-[#1B2A38] to-[#2E4256] text-white'
+                    }`}
+                    title={qMeta.bossLabel}
+                  >
+                    <Trophy className="w-7 h-7 text-amber-300" />
+                  </button>
+                  <div className="text-center mt-2 space-y-0.5">
+                    <span className="text-xs font-black text-[#1B2A38] block">{qMeta.bossLabel}</span>
+                    <span className="text-[10px] text-stone-500 font-bold block">
+                      {isBossCleared ? `撃破済 (${bossScore}点)` : `合格ライン: ${qMeta.bossPassScore}点`}
+                    </span>
+                  </div>
                 </div>
-                <p className="text-base sm:text-lg font-black text-[#1B2A38]">
-                  {step.representativeSpeech.ko}
-                </p>
-                {showPronunciation && step.representativeSpeech.reading && (
-                  <p className="text-xs text-stone-400 font-mono">
-                    {step.representativeSpeech.reading}
-                  </p>
-                )}
-                <p className="text-xs text-stone-600 font-bold">
-                  {step.representativeSpeech.ja}
-                </p>
-              </div>
-
-              {/* 挫折防止スコープガード */}
-              <div className="p-3 rounded-xl bg-stone-50 border border-stone-200 text-xs text-stone-700 flex items-start gap-2">
-                <ShieldAlert className="w-3.5 h-3.5 text-rose-600 shrink-0 mt-0.5" />
-                <span><strong>挫折防止の制約: </strong>{step.scopePriority.scopeGuard}</span>
-              </div>
-
-              {/* つまずきポイント */}
-              <div className="p-3 rounded-xl bg-amber-50/60 border border-amber-200 text-xs text-stone-700 flex items-start gap-2">
-                <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
-                <span><strong>つまずき予防: </strong>{step.learningExperience.commonStumblingBlock}</span>
-              </div>
-
-              {/* 5分縮小プロトコル */}
-              <div className="p-3 rounded-xl bg-rose-50/50 border border-rose-200 text-xs text-stone-700 flex items-start gap-2">
-                <LifeBuoy className="w-3.5 h-3.5 text-[#B84E34] shrink-0 mt-0.5" />
-                <span><strong>5分縮小プロトコル: </strong>{step.learningExperience.riskAndFallback.fallbackProtocol}</span>
               </div>
             </div>
-          )}
-        </div>
 
-        {/* 集中モード時の前後ステージ切り替えボタン */}
-        {isSingleView && (
-          <div className="flex items-center justify-between pt-2 border-t border-stone-100">
-            <button
-              type="button"
-              disabled={selectedStage <= 1}
-              onClick={() => {
-                setSelectedStage((prev) => Math.max(1, prev - 1));
-                setIsDeepDiveOpen(false);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
-                selectedStage <= 1
-                  ? 'text-stone-300 border border-stone-200 cursor-not-allowed'
-                  : 'text-stone-700 border border-stone-200 bg-white hover:bg-stone-50'
-              }`}
-            >
-              <ChevronLeft className="w-3.5 h-3.5" />
-              <span>前のStageへ</span>
-            </button>
+            {/* 前後Stage切り替えフッター */}
+            <div className="flex items-center justify-between pt-1">
+              <button
+                type="button"
+                disabled={selectedStage <= 1}
+                onClick={() => {
+                  setSelectedStage((prev) => Math.max(1, prev - 1));
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
+                  selectedStage <= 1
+                    ? 'text-stone-300 border border-stone-200 cursor-not-allowed'
+                    : 'text-stone-700 border border-stone-200 bg-white hover:bg-stone-50'
+                }`}
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+                <span>前のStage</span>
+              </button>
 
-            <span className="text-xs font-bold text-stone-500">
-              Stage {selectedStage} / 8
-            </span>
+              <span className="text-xs font-black text-stone-400">
+                Stage {selectedStage} / 8
+              </span>
 
-            <button
-              type="button"
-              disabled={selectedStage >= 8}
-              onClick={() => {
-                setSelectedStage((prev) => Math.min(8, prev + 1));
-                setIsDeepDiveOpen(false);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
-                selectedStage >= 8
-                  ? 'text-stone-300 border border-stone-200 cursor-not-allowed'
-                  : 'text-stone-700 border border-stone-200 bg-white hover:bg-stone-50'
-              }`}
-            >
-              <span>次のStageへ</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
+              <button
+                type="button"
+                disabled={selectedStage >= 8}
+                onClick={() => {
+                  setSelectedStage((prev) => Math.min(8, prev + 1));
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
+                  selectedStage >= 8
+                    ? 'text-stone-300 border border-stone-200 cursor-not-allowed'
+                    : 'text-stone-700 border border-stone-200 bg-white hover:bg-stone-50'
+                }`}
+              >
+                <span>次のStage</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </>
         )}
       </div>
     );
@@ -831,877 +733,584 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
   return (
     <div className="w-full space-y-3 sm:space-y-4">
       {/* ===================================================================== */}
-      {/* 🎮 ゲーミフィケーション HUD（コンパクト・省スペース設計）             */}
+      {/* 🌟 メインヘッダー：ステージカルーセル ＆ 1ボタン学習ガイド              */}
       {/* ===================================================================== */}
-      <div className="bg-white border border-stone-200/90 rounded-2xl p-2.5 sm:p-3 shadow-2xs flex items-center justify-between gap-2 flex-wrap">
-        {/* レベル・XP表示 */}
-        <div className="flex items-center gap-2 sm:gap-2.5">
-          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-[#B84E34] to-[#8f3a24] text-white flex items-center justify-center font-black shadow-2xs shrink-0">
-            <Award className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-          </div>
-          <div className="space-y-0.5">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-[11px] font-black px-2 py-0.5 rounded-full bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD]">
-                {levelInfo.currentTier.badge}
-              </span>
-              <span className="text-xs sm:text-sm font-black text-[#1B2A38]">
-                {levelInfo.currentTier.title}
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <div className="w-20 sm:w-28 bg-stone-200 rounded-full h-1.5 overflow-hidden">
-                <div
-                  className="bg-[#B84E34] h-full rounded-full transition-all duration-500"
-                  style={{ width: `${levelInfo.progressPercent}%` }}
-                />
-              </div>
-              <span className="text-[10px] font-mono font-bold text-stone-500">
-                {gameState.xp} XP
-              </span>
-            </div>
-          </div>
+      <div className="bg-white border border-stone-200/90 rounded-2xl p-2 sm:p-2.5 shadow-2xs flex items-center justify-between gap-2">
+        {/* ステージ切り替えカルーセル */}
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 min-w-0 flex-1">
+          {ROADMAP_STEPS.map((s) => {
+            const isSelected = s.step === selectedStage;
+            const isUnlocked = gameState.freeExploreMode || s.step <= gameState.unlockedStage;
+            const bossScore = gameState.clearedBossExams[STEP_META[s.step]?.examId];
+            const isBossCleared = bossScore !== undefined && bossScore >= STAGE_QUEST_META[s.step]?.bossPassScore;
+            const PillIcon = STAGE_ICONS[s.step] || Sparkles;
+
+            return (
+              <button
+                key={s.step}
+                type="button"
+                onClick={() => setSelectedStage(s.step)}
+                className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+                  isSelected
+                    ? 'bg-[#B84E34] text-white shadow-2xs ring-2 ring-[#B84E34]/30'
+                    : isUnlocked
+                    ? 'bg-stone-50 border border-stone-200 text-stone-700 hover:bg-stone-100'
+                    : 'bg-stone-100/60 border border-stone-200/50 text-stone-400'
+                }`}
+              >
+                <PillIcon className={`w-3.5 h-3.5 ${isSelected ? 'text-white' : 'text-[#B84E34]'}`} />
+                <span className="whitespace-nowrap">Stage {s.step}</span>
+                {isBossCleared ? (
+                  <Trophy className="w-3 h-3 text-amber-300" />
+                ) : !isUnlocked ? (
+                  <Lock className="w-3 h-3 text-stone-400" />
+                ) : null}
+              </button>
+            );
+          })}
         </div>
 
-        {/* ストリーク ＆ モード切替 */}
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          {/* ストリーク */}
-          <div className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 font-bold text-xs shadow-2xs">
+        {/* 右側：ストリーク ＆ 単一の「学習ガイド」ボタン */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 font-bold text-xs shadow-2xs">
             <Flame className="w-3.5 h-3.5 text-orange-500 animate-pulse" />
             <span>{gameState.streakDays}日</span>
           </div>
 
-          {/* 自由探索トグル */}
           <button
             type="button"
-            onClick={toggleFreeExplore}
-            className={`px-2.5 py-1 rounded-xl border text-xs font-bold transition-all flex items-center gap-1 cursor-pointer ${
-              gameState.freeExploreMode
-                ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
-                : 'bg-white border-stone-200 text-stone-600 hover:bg-stone-50'
-            }`}
-            title="ステージロックを全解除して自由に閲覧・挑戦できます"
+            onClick={() => setShowGuideModal(true)}
+            className="px-3 py-1.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+            title="目標定義・WBS・1枚シート・SLA母語干渉分析・設定を一括確認"
           >
-            {gameState.freeExploreMode ? <Unlock className="w-3.5 h-3.5 text-indigo-600" /> : <Lock className="w-3.5 h-3.5" />}
-            <span className="hidden sm:inline">{gameState.freeExploreMode ? '自由解放中' : '順次アンロック'}</span>
-            <span className="sm:hidden">{gameState.freeExploreMode ? '全開放' : '順次'}</span>
-          </button>
-        </div>
-      </div>
-
-      {/* 🧭 ロードマップ モード切替 */}
-      <div className="flex items-center justify-between gap-2 pb-1 border-b border-stone-200/80 flex-wrap">
-        <div className="flex items-center gap-2">
-          <Compass className="w-5 h-5 text-[#B84E34]" />
-          <span className="text-base sm:text-lg font-black text-[#1B2A38]">
-            クエストロードマップ
-          </span>
-          <span className="text-xs text-stone-500 hidden sm:inline">
-            30秒特訓とボス検定で能動的に進めよう
-          </span>
-        </div>
-
-        <div className="flex items-center gap-1 bg-stone-200/70 p-1 rounded-xl text-xs font-bold">
-          <button
-            type="button"
-            onClick={() => setViewMode('quest')}
-            className={`px-2.5 sm:px-3 py-1 rounded-lg transition-all flex items-center gap-1 cursor-pointer ${
-              viewMode === 'quest'
-                ? 'bg-white text-[#B84E34] shadow-2xs font-black'
-                : 'text-stone-600 hover:text-stone-900'
-            }`}
-          >
-            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-            <span>クエスト</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setViewMode('matrix')}
-            className={`px-2.5 sm:px-3 py-1 rounded-lg transition-all flex items-center gap-1 cursor-pointer ${
-              viewMode === 'matrix'
-                ? 'bg-white text-[#B84E34] shadow-2xs font-black'
-                : 'text-stone-600 hover:text-stone-900'
-            }`}
-          >
-            <Table className="w-3.5 h-3.5" />
-            <span>1枚シート</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setViewMode('focus')}
-            className={`px-2.5 sm:px-3 py-1 rounded-lg transition-all flex items-center gap-1 cursor-pointer ${
-              viewMode === 'focus'
-                ? 'bg-white text-[#B84E34] shadow-2xs font-black'
-                : 'text-stone-600 hover:text-stone-900'
-            }`}
-          >
-            <Map className="w-3.5 h-3.5" />
-            <span>駅別解説</span>
+            <BookOpen className="w-3.5 h-3.5 text-amber-300" />
+            <span className="whitespace-nowrap">学習ガイド</span>
           </button>
         </div>
       </div>
 
       {/* ===================================================================== */}
-      {/* 🌟 モード①：Duolingo風 冒険クエストマップ（集中表示 or 全体一覧）     */}
+      {/* 🎯 選択中ステージのクエスト（今日やること Hero ＆ 3Dノードトレイル）    */}
       {/* ===================================================================== */}
-      {viewMode === 'quest' && (
-        <div className="space-y-3">
-          {/* 🌟 ステージ選択カルーセル ＆ 表示切り替え */}
-          <div className="flex items-center justify-between gap-2">
-            {/* カルーセル */}
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 max-w-full">
-              {ROADMAP_STEPS.map((s) => {
-                const isSelected = s.step === selectedStage;
-                const isUnlocked = gameState.freeExploreMode || s.step <= gameState.unlockedStage;
-                const bossScore = gameState.clearedBossExams[STEP_META[s.step]?.examId];
-                const isBossCleared = bossScore !== undefined && bossScore >= STAGE_QUEST_META[s.step]?.bossPassScore;
-                const PillIcon = STAGE_ICONS[s.step] || Sparkles;
-
-                return (
-                  <button
-                    key={s.step}
-                    type="button"
-                    onClick={() => {
-                      setSelectedStage(s.step);
-                      setIsDeepDiveOpen(false);
-                    }}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
-                      isSelected
-                        ? 'bg-[#B84E34] text-white shadow-2xs ring-2 ring-[#B84E34]/30'
-                        : isUnlocked
-                        ? 'bg-white border border-stone-200 text-stone-700 hover:bg-stone-50'
-                        : 'bg-stone-100/70 border border-stone-200/50 text-stone-400'
-                    }`}
-                  >
-                    <PillIcon className={`w-3.5 h-3.5 ${isSelected ? 'text-white' : 'text-[#B84E34]'}`} />
-                    <span className="whitespace-nowrap">Stage {s.step}</span>
-                    {isBossCleared ? (
-                      <Trophy className="w-3 h-3 text-amber-300" />
-                    ) : !isUnlocked ? (
-                      <Lock className="w-3 h-3 text-stone-400" />
-                    ) : null}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* 集中表示 / 全一覧 切り替え */}
-            <button
-              type="button"
-              onClick={() => setQuestDisplayMode((prev) => (prev === 'focused' ? 'all' : 'focused'))}
-              className="px-2.5 py-1.5 rounded-xl border border-stone-200 bg-white text-stone-600 hover:text-stone-900 text-xs font-bold shrink-0 shadow-2xs transition-all cursor-pointer whitespace-nowrap"
-              title="1ステージずつ集中して解くか、全8ステージをスクロールで一覧するか切り替えます"
-            >
-              {questDisplayMode === 'focused' ? '全8ステージ表示' : '集中表示'}
-            </button>
-          </div>
-
-          {/* クエストカード描画 */}
-          {questDisplayMode === 'focused' ? (
-            /* ① 集中表示モード（選択中の1ステージのみフォーカス） */
-            renderStageCard(ROADMAP_STEPS[selectedStage - 1], true)
-          ) : (
-            /* ② 全体一覧モード（全8ステージを縦スクロールで一望） */
-            <div className="space-y-6">
-              {ROADMAP_STEPS.map((s, sIdx) => (
-                <div key={s.step} className="space-y-4">
-                  {renderStageCard(s, false)}
-                  {sIdx < ROADMAP_STEPS.length - 1 && (
-                    <div className="flex flex-col items-center justify-center py-1 space-y-1">
-                      <div className="w-1 h-4 bg-gradient-to-b from-[#B84E34] to-amber-500 rounded-full" />
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+      {renderStageCard(ROADMAP_STEPS[selectedStage - 1], true)}
 
       {/* ===================================================================== */}
-      {/* 📊 モード②：1枚完結！全体俯瞰マトリクスシート（Master Matrix Sheet）   */}
+      {/* 📖 学習ガイド ＆ ロードマップ仕様書 モーダル（全情報を1つに集約）       */}
       {/* ===================================================================== */}
-      {viewMode === 'matrix' && (
-        <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-stone-200 shadow-2xs">
-            <div className="space-y-0.5">
-              <div className="text-xs font-black text-stone-800 flex items-center gap-1.5">
-                <Table className="w-4 h-4 text-[#B84E34]" />
-                <span>「フェーズ × 学習項目 × Done定義 × リスク対策」全体見渡しシート</span>
-              </div>
-              <p className="text-[11px] text-stone-500">
-                目標の曖昧さ・スコープの広がりすぎ・多忙による挫折を未然に防ぐための学習者専用シートです。
-              </p>
-            </div>
-
-            <div className="flex items-center gap-1 shrink-0 text-xs font-bold">
-              <button
-                type="button"
-                onClick={() => setMatrixFilter('all')}
-                className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
-                  matrixFilter === 'all'
-                    ? 'bg-[#B84E34] text-white shadow-xs'
-                    : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
-                }`}
-              >
-                すべて (Step 1〜8)
-              </button>
-              <button
-                type="button"
-                onClick={() => setMatrixFilter('beginner')}
-                className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
-                  matrixFilter === 'beginner'
-                    ? 'bg-[#B84E34] text-white shadow-xs'
-                    : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
-                }`}
-              >
-                初級 (Step 1〜4)
-              </button>
-              <button
-                type="button"
-                onClick={() => setMatrixFilter('advanced')}
-                className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
-                  matrixFilter === 'advanced'
-                    ? 'bg-[#B84E34] text-white shadow-xs'
-                    : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
-                }`}
-              >
-                中上級 (Step 5〜8)
-              </button>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            {filteredSteps.map((step) => {
-              const meta = STEP_META[step.step];
-
-              return (
-                <div
-                  key={step.step}
-                  className="bg-white border border-stone-200 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 shadow-xs hover:border-[#B84E34]/40 hover:shadow-md transition-all space-y-3.5"
-                >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-stone-100">
-                    <div className="flex items-center gap-2.5 flex-wrap">
-                      <span
-                        style={{ backgroundColor: step.stationColor }}
-                        className="w-7 h-7 rounded-xl text-white font-black text-xs flex items-center justify-center shadow-xs"
-                      >
-                        {step.step}
-                      </span>
-                      <span className="text-base sm:text-lg font-black text-[#1B2A38]">
-                        Step {step.step}: {step.stage}
-                      </span>
-                      <span className="text-xs font-bold text-stone-700 bg-stone-100 px-2.5 py-0.5 rounded-full border border-stone-200">
-                        {step.badge}
-                      </span>
-                      <span className="text-xs font-mono font-bold text-[#B84E34] bg-[#FAF0EC] px-2.5 py-0.5 rounded-full border border-[#F0D5CD]">
-                        ⏱️ {step.timeHours}（タイムボックス: {step.scopePriority.timeboxWeeks}）
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-2 shrink-0">
-                      {onNavigateToExam && (
-                        <button
-                          type="button"
-                          onClick={() => onNavigateToExam(meta.examId)}
-                          className="px-3 py-1.5 rounded-xl bg-[#B84E34] hover:bg-[#a2432c] text-white text-xs font-bold shadow-2xs transition-all flex items-center gap-1 cursor-pointer"
-                        >
-                          <Award className="w-3.5 h-3.5" />
-                          <span>模試に挑む ➔</span>
-                        </button>
-                      )}
-                      {onNavigateToContent && (
-                        <button
-                          type="button"
-                          onClick={() => onNavigateToContent(meta.firstLessonId, 'textbook')}
-                          className="px-3 py-1.5 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-stone-700 text-xs font-bold shadow-2xs transition-all flex items-center gap-1 cursor-pointer"
-                        >
-                          <BookOpen className="w-3.5 h-3.5 text-[#B84E34]" />
-                          <span>教科書</span>
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-3.5 text-xs">
-                    <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-[#E8E2D5] space-y-2">
-                      <div className="font-black text-[#B84E34] flex items-center gap-1.5">
-                        <Target className="w-4 h-4" />
-                        <span>① 目的 ＆ 順序の必然性</span>
-                      </div>
-                      <div className="space-y-2 text-stone-700 leading-relaxed">
-                        <div>
-                          <strong className="text-stone-900 font-bold block text-[11px] mb-0.5">【学ぶ目的】</strong>
-                          <p>{step.goalDefinition.purpose}</p>
-                        </div>
-                        <div className="pt-1.5 border-t border-[#E8E2D5]/60">
-                          <strong className="text-stone-900 font-bold block text-[11px] mb-0.5">【順序の必然性】</strong>
-                          <p className="text-stone-600">{step.learningExperience.whyThisOrder}</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-amber-50/50 p-4 rounded-2xl border border-amber-200/70 space-y-2">
-                      <div className="font-black text-amber-900 flex items-center justify-between gap-1">
-                        <span className="flex items-center gap-1.5">
-                          <ShieldCheck className="w-4 h-4 text-amber-600" />
-                          <span>② Must分解 ＆ 制約</span>
-                        </span>
-                        <span className="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.2 rounded-full font-bold">
-                          挫折防止
-                        </span>
-                      </div>
-                      <div className="space-y-2 text-stone-700 leading-relaxed">
-                        <div>
-                          <strong className="text-amber-950 font-bold block text-[11px] mb-1">【Must作業タスク（WBS）】</strong>
-                          <ul className="space-y-1 pl-1">
-                            {step.scopePriority.wbsBreakdown.map((item, idx) => (
-                              <li key={idx} className="flex items-start gap-1.5 text-[11px]">
-                                <span className="text-amber-700 font-bold shrink-0">✓</span>
-                                <span>{item}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                        <div className="pt-2 border-t border-amber-200/50">
-                          <strong className="text-rose-700 font-bold block text-[11px] mb-0.5">
-                            <ShieldAlert className="w-3.5 h-3.5 inline mr-1 text-rose-600" />
-                            広げすぎない制約:
-                          </strong>
-                          <p className="text-[11px] text-stone-600 bg-white/70 p-1.5 rounded-lg border border-amber-200/40">
-                            {step.scopePriority.scopeGuard}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-emerald-50/50 p-4 rounded-2xl border border-emerald-200/70 space-y-2">
-                      <div className="font-black text-emerald-900 flex items-center justify-between gap-1">
-                        <span className="flex items-center gap-1.5">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                          <span>③ Done定義 ＆ ストーリー</span>
-                        </span>
-                        <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.2 rounded-full font-bold">
-                          完了基準
-                        </span>
-                      </div>
-                      <div className="space-y-2 text-stone-700 leading-relaxed">
-                        <div>
-                          <strong className="text-emerald-950 font-bold block text-[11px] mb-0.5">【完了判定の基準】</strong>
-                          <p className="font-medium text-emerald-900 bg-white/80 p-2 rounded-xl border border-emerald-200/60 text-[11px]">
-                            {step.goalDefinition.doneDefinition}
-                          </p>
-                        </div>
-                        <div className="pt-1.5 border-t border-emerald-200/50">
-                          <strong className="text-stone-900 font-bold block text-[11px] mb-0.5">
-                            <Sparkles className="w-3.5 h-3.5 inline mr-1 text-[#B84E34]" />
-                            行動シナリオ例:
-                          </strong>
-                          <p className="text-stone-600 text-[11px]">{step.goalDefinition.userStory}</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-rose-50/40 p-4 rounded-2xl border border-rose-200/70 space-y-2">
-                      <div className="font-black text-rose-900 flex items-center justify-between gap-1">
-                        <span className="flex items-center gap-1.5">
-                          <AlertCircle className="w-4 h-4 text-rose-600" />
-                          <span>④ つまずき ＆ 5分回避策</span>
-                        </span>
-                        <span className="text-[10px] bg-rose-100 text-rose-800 px-2 py-0.2 rounded-full font-bold">
-                          習慣継続
-                        </span>
-                      </div>
-                      <div className="space-y-2 text-stone-700 leading-relaxed">
-                        <div>
-                          <strong className="text-rose-950 font-bold block text-[11px] mb-0.5">
-                            <AlertTriangle className="w-3.5 h-3.5 inline mr-1 text-amber-600" />
-                            事前に知っておく壁:
-                          </strong>
-                          <p className="text-[11px] text-stone-600">{step.learningExperience.commonStumblingBlock}</p>
-                        </div>
-                        <div className="pt-2 border-t border-rose-200/50">
-                          <strong className="text-[#B84E34] font-black block text-[11px] mb-1">
-                            <LifeBuoy className="w-3.5 h-3.5 inline mr-1 text-[#B84E34]" />
-                            忙しい日の5分縮小プロトコル:
-                          </strong>
-                          <p className="text-[11px] text-stone-700 bg-white/80 p-2 rounded-xl border border-rose-200/50 font-medium">
-                            {step.learningExperience.riskAndFallback.fallbackProtocol}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+      {showGuideModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 animate-in fade-in">
+          <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-stone-200 animate-in zoom-in-95">
+            {/* モーダル上部バー */}
+            <div className="p-3.5 sm:p-4 border-b border-stone-100 flex items-center justify-between gap-3 bg-[#FAF7F2]">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD] flex items-center justify-center">
+                  <BookOpen className="w-4 h-4 text-[#B84E34]" />
                 </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* ===================================================================== */}
-      {/* 🚇 モード③：駅別フォーカス（メトロレール ＆ 1駅深掘りマガジン）       */}
-      {/* ===================================================================== */}
-      {viewMode === 'focus' && (
-        <div className="space-y-6">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between text-xs font-bold text-stone-500 px-1">
-              <span className="flex items-center gap-1.5">
-                <Map className="w-3.5 h-3.5 text-[#B84E34]" />
-                <span>メトロ路線図（駅をタップして切り替え）</span>
-              </span>
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={handlePrevStep}
-                  disabled={activeStepIndex === 0}
-                  className="w-7 h-7 rounded-lg border border-stone-200 bg-white hover:bg-stone-50 disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center text-stone-700 shadow-2xs transition-all cursor-pointer"
-                  title="前の駅へ"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                <span className="text-[11px] font-mono px-1.5">
-                  {activeStepIndex + 1} / {ROADMAP_STEPS.length}
-                </span>
-                <button
-                  type="button"
-                  onClick={handleNextStep}
-                  disabled={activeStepIndex === ROADMAP_STEPS.length - 1}
-                  className="w-7 h-7 rounded-lg border border-stone-200 bg-white hover:bg-stone-50 disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center text-stone-700 shadow-2xs transition-all cursor-pointer"
-                  title="次の駅へ"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-
-            <div className="overflow-x-auto pb-3 pt-2 scrollbar-thin">
-              <div className="relative min-w-[760px] px-4 py-3 flex items-center justify-between">
-                <div className="absolute left-8 right-8 top-1/2 -translate-y-1/2 h-1.5 bg-stone-200 rounded-full z-0" />
-                <div
-                  className="absolute left-8 top-1/2 -translate-y-1/2 h-1.5 bg-gradient-to-r from-emerald-500 via-[#B84E34] to-amber-500 rounded-full transition-all duration-500 z-0"
-                  style={{
-                    width: `calc(${(activeStepIndex / (ROADMAP_STEPS.length - 1)) * 100}% - 32px)`,
-                  }}
-                />
-
-                {ROADMAP_STEPS.map((step, idx) => {
-                  const isCurrent = idx === activeStepIndex;
-                  const isPassed = idx < activeStepIndex;
-                  const stationColor = step.stationColor || '#B84E34';
-
-                  return (
-                    <div
-                      key={step.step}
-                      onClick={() => setActiveStepIndex(idx)}
-                      className="relative z-10 flex flex-col items-center cursor-pointer group select-none shrink-0"
-                      style={{ width: `${100 / ROADMAP_STEPS.length}%` }}
-                    >
-                      <div
-                        style={{
-                          backgroundColor: isCurrent ? stationColor : isPassed ? stationColor : '#FFFFFF',
-                          borderColor: stationColor,
-                          color: isCurrent || isPassed ? '#FFFFFF' : stationColor,
-                        }}
-                        className={`w-9 h-9 sm:w-10 sm:h-10 rounded-2xl flex items-center justify-center font-black text-xs sm:text-sm border-2 transition-all duration-300 shadow-xs ${
-                          isCurrent
-                            ? 'scale-125 ring-4 ring-offset-2 ring-stone-300 shadow-md animate-pulse'
-                            : 'group-hover:scale-110 opacity-90'
-                        }`}
-                      >
-                        {isPassed ? <Check className="w-4 h-4 stroke-[3]" /> : step.step}
-                      </div>
-
-                      <div className="mt-2 text-center space-y-0.5">
-                        <div
-                          className={`text-[11px] font-black transition-colors ${
-                            isCurrent ? 'text-[#B84E34]' : 'text-stone-700 group-hover:text-stone-900'
-                          }`}
-                        >
-                          {step.stage}
-                        </div>
-                        <div className="text-[9.5px] font-bold text-stone-500 line-clamp-1 max-w-[90px]">
-                          {step.badge.split('/')[0].trim()}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white border border-stone-200 rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 shadow-xs space-y-4 sm:space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-stone-100">
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span
-                    style={{ backgroundColor: activeStep.stationColor }}
-                    className="text-white text-xs font-black px-2.5 py-0.5 rounded-lg shadow-2xs"
-                  >
-                    Step {activeStep.step}
-                  </span>
-                  <span className="text-lg sm:text-2xl font-black text-[#1B2A38]">
-                    {activeStep.stage}
-                  </span>
-                  <span className="text-xs font-bold text-stone-600 bg-stone-100 px-2.5 py-0.5 rounded-full border border-stone-200">
-                    {activeStep.badge}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3 text-xs text-stone-500 font-mono">
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5 text-stone-400" />
-                    想定学習時間: <strong className="text-stone-800">{activeStep.timeHours}</strong>
-                  </span>
-                  <span>•</span>
-                  <span className="flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5 text-stone-400" />
-                    目安期間: <strong className="text-stone-800">{activeStep.scopePriority.timeboxWeeks}</strong>
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2 shrink-0">
-                {onNavigateToExam && (
-                  <button
-                    type="button"
-                    onClick={() => onNavigateToExam(meta.examId)}
-                    className="px-4 py-2 rounded-xl bg-[#B84E34] hover:bg-[#a2432c] text-white text-xs font-bold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Award className="w-3.5 h-3.5" />
-                    <span>この級の模擬試験に挑む ➔</span>
-                  </button>
-                )}
-                {onNavigateToContent && (
-                  <button
-                    type="button"
-                    onClick={() => onNavigateToContent(meta.firstLessonId, 'textbook')}
-                    className="px-3.5 py-2 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-stone-700 text-xs font-bold shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <BookOpen className="w-3.5 h-3.5 text-[#B84E34]" />
-                    <span>教科書へ</span>
-                  </button>
-                )}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 border-b border-stone-200 overflow-x-auto pb-1 scrollbar-none">
-              <button
-                type="button"
-                onClick={() => setStationTab('goal')}
-                className={`pb-2 px-3 text-xs font-black transition-all border-b-2 flex items-center gap-1.5 cursor-pointer shrink-0 ${
-                  stationTab === 'goal'
-                    ? 'border-[#B84E34] text-[#B84E34]'
-                    : 'border-transparent text-stone-500 hover:text-stone-800'
-                }`}
-              >
-                <Target className="w-3.5 h-3.5" />
-                <span>1. ゴール ＆ Done定義</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setStationTab('scope')}
-                className={`pb-2 px-3 text-xs font-black transition-all border-b-2 flex items-center gap-1.5 cursor-pointer shrink-0 ${
-                  stationTab === 'scope'
-                    ? 'border-[#B84E34] text-[#B84E34]'
-                    : 'border-transparent text-stone-500 hover:text-stone-800'
-                }`}
-              >
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span>2. スコープ制御 ＆ WBS</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setStationTab('experience')}
-                className={`pb-2 px-3 text-xs font-black transition-all border-b-2 flex items-center gap-1.5 cursor-pointer shrink-0 ${
-                  stationTab === 'experience'
-                    ? 'border-[#B84E34] text-[#B84E34]'
-                    : 'border-transparent text-stone-500 hover:text-stone-800'
-                }`}
-              >
-                <AlertCircle className="w-3.5 h-3.5" />
-                <span>3. 学習体験 ＆ 縮小プロトコル</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setStationTab('speech')}
-                className={`pb-2 px-3 text-xs font-black transition-all border-b-2 flex items-center gap-1.5 cursor-pointer shrink-0 ${
-                  stationTab === 'speech'
-                    ? 'border-[#B84E34] text-[#B84E34]'
-                    : 'border-transparent text-stone-500 hover:text-stone-800'
-                }`}
-              >
-                <MessageCircle className="w-3.5 h-3.5" />
-                <span>4. 象徴セリフ ＆ SLA分析</span>
-              </button>
-            </div>
-
-            {stationTab === 'goal' && (
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs">
-                  <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-[#E8E2D5] space-y-2">
-                    <span className="font-black text-[#B84E34] flex items-center gap-1.5">
-                      <Target className="w-4 h-4" /> 目的（なぜ学ぶのかの核）
-                    </span>
-                    <p className="text-stone-800 leading-relaxed font-medium">
-                      {activeStep.goalDefinition.purpose}
-                    </p>
-                    <div className="pt-2 border-t border-[#E8E2D5] text-[11px] text-stone-500">
-                      <strong>公的Can-Do基準: </strong>{activeStep.academicBasis.officialCanDo}
-                    </div>
-                  </div>
-
-                  <div className="bg-emerald-50/50 p-4 rounded-2xl border border-emerald-200/80 space-y-2">
-                    <span className="font-black text-emerald-900 flex items-center gap-1.5">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Done定義（完了基準）
-                    </span>
-                    <p className="text-emerald-950 leading-relaxed font-medium bg-white/80 p-2.5 rounded-xl border border-emerald-200/50">
-                      {activeStep.goalDefinition.doneDefinition}
-                    </p>
-                    <div className="text-[11px] text-emerald-800">
-                      <strong>手元に残る成果物: </strong>{activeStep.goalDefinition.deliverable}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white border border-stone-200 rounded-2xl p-4 space-y-1.5 shadow-2xs">
-                  <span className="text-xs font-black text-stone-800 flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4 text-[#B84E34]" />
-                    <span>説明できるストーリー例（学習完了後の具体的行動シナリオ）:</span>
-                  </span>
-                  <p className="text-xs text-stone-700 leading-relaxed bg-[#FAF7F2] p-3 rounded-xl border border-[#E8E2D5]">
-                    {activeStep.goalDefinition.userStory}
+                <div>
+                  <h3 className="text-sm sm:text-base font-black text-[#1B2A38]">
+                    学習ガイド ＆ ロードマップ仕様
+                  </h3>
+                  <p className="text-[11px] text-stone-500">
+                    目標Done定義・全体マトリクス・SLA母語干渉・設定
                   </p>
                 </div>
               </div>
-            )}
+              <button
+                type="button"
+                onClick={() => setShowGuideModal(false)}
+                className="w-8 h-8 rounded-full bg-stone-200/80 hover:bg-stone-300 text-stone-600 flex items-center justify-center cursor-pointer transition-all"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
 
-            {stationTab === 'scope' && (
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                  <div className="bg-rose-50/40 p-4 rounded-2xl border border-rose-200/70 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="font-black text-rose-900 flex items-center gap-1.5">
-                        <Flame className="w-4 h-4 text-rose-600" />
-                        Must（必須の骨格）
-                      </span>
-                      <span className="text-[10px] px-2 py-0.2 rounded-full bg-rose-100 text-rose-800 font-bold">最優先</span>
-                    </div>
-                    <ul className="space-y-1.5 pl-1">
-                      {activeStep.scopePriority.must.map((item, idx) => (
-                        <li key={idx} className="flex items-start gap-1.5 text-stone-800 leading-normal">
-                          <span className="text-rose-600 font-bold shrink-0">✓</span>
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+            {/* タブナビゲーション */}
+            <div className="flex items-center gap-1.5 p-2 sm:px-4 bg-stone-100/70 border-b border-stone-200 overflow-x-auto no-scrollbar text-xs font-bold">
+              <button
+                type="button"
+                onClick={() => setGuideModalTab('goal')}
+                className={`px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                  guideModalTab === 'goal'
+                    ? 'bg-white text-[#B84E34] shadow-2xs font-black'
+                    : 'text-stone-600 hover:text-stone-900'
+                }`}
+              >
+                <Target className="w-3.5 h-3.5" />
+                <span>① ゴール ＆ Done定義</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setGuideModalTab('matrix')}
+                className={`px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                  guideModalTab === 'matrix'
+                    ? 'bg-white text-[#B84E34] shadow-2xs font-black'
+                    : 'text-stone-600 hover:text-stone-900'
+                }`}
+              >
+                <Table className="w-3.5 h-3.5" />
+                <span>② 1枚完結シート</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setGuideModalTab('sla')}
+                className={`px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                  guideModalTab === 'sla'
+                    ? 'bg-white text-[#B84E34] shadow-2xs font-black'
+                    : 'text-stone-600 hover:text-stone-900'
+                }`}
+              >
+                <Map className="w-3.5 h-3.5" />
+                <span>③ 駅別SLA解説</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setGuideModalTab('settings')}
+                className={`px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                  guideModalTab === 'settings'
+                    ? 'bg-white text-[#B84E34] shadow-2xs font-black'
+                    : 'text-stone-600 hover:text-stone-900'
+                }`}
+              >
+                <Unlock className="w-3.5 h-3.5" />
+                <span>④ 設定 ＆ 進捗解放</span>
+              </button>
+            </div>
 
-                  <div className="bg-amber-50/40 p-4 rounded-2xl border border-amber-200/70 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="font-black text-amber-900 flex items-center gap-1.5">
-                        <Sparkles className="w-4 h-4 text-amber-500" />
-                        Should（日常の展開）
-                      </span>
-                      <span className="text-[10px] px-2 py-0.2 rounded-full bg-amber-100 text-amber-800 font-bold">推奨</span>
-                    </div>
-                    <ul className="space-y-1.5 pl-1">
-                      {activeStep.scopePriority.should.map((item, idx) => (
-                        <li key={idx} className="flex items-start gap-1.5 text-stone-700 leading-normal">
-                          <span className="text-amber-600 font-bold shrink-0">•</span>
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="bg-stone-50 p-4 rounded-2xl border border-stone-200 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="font-black text-stone-700">Could（後回しでOK）</span>
-                      <span className="text-[10px] px-2 py-0.2 rounded-full bg-stone-200 text-stone-600 font-bold">後回し</span>
-                    </div>
-                    <ul className="space-y-1.5 pl-1">
-                      {activeStep.scopePriority.could.map((item, idx) => (
-                        <li key={idx} className="flex items-start gap-1.5 text-stone-500 leading-normal">
-                          <span className="text-stone-400 font-bold shrink-0">-</span>
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-
-                <div className="bg-white border border-stone-200 rounded-2xl p-4 sm:p-5 space-y-3 shadow-2xs">
-                  <span className="text-xs font-black text-stone-800 flex items-center gap-1.5">
-                    <ShieldCheck className="w-4 h-4 text-[#B84E34]" />
-                    <span>Mustを達成するための作業分解タスク（WBS）:</span>
-                  </span>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                    {activeStep.scopePriority.wbsBreakdown.map((task, idx) => (
-                      <div key={idx} className="p-2.5 rounded-xl bg-[#FAF7F2] border border-[#E8E2D5] text-stone-800 font-medium flex items-center gap-2">
-                        <span className="w-5 h-5 rounded-md bg-[#FAF0EC] text-[#B84E34] text-[10px] font-black flex items-center justify-center shrink-0">
-                          {idx + 1}
-                        </span>
-                        <span>{task}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-xl text-xs flex items-start gap-2">
-                    <span className="text-amber-800 font-black shrink-0 flex items-center gap-1">
-                      <ShieldAlert className="w-4 h-4 text-amber-600" />
-                      スコープ拡大防止原則:
+            {/* モーダルコンテンツ（スクロール可能） */}
+            <div className="p-4 sm:p-6 overflow-y-auto space-y-5 flex-1">
+              {/* ① ゴール ＆ Done定義 */}
+              {guideModalTab === 'goal' && (
+                <div className="space-y-4">
+                  {/* ステージ切り替えセレクタ */}
+                  <div className="flex items-center justify-between gap-2 pb-2 border-b border-stone-100 flex-wrap">
+                    <span className="text-xs font-black text-stone-700 flex items-center gap-1">
+                      <Compass className="w-4 h-4 text-[#B84E34]" />
+                      <span>確認するStageを選択:</span>
                     </span>
-                    <span className="text-stone-700">{activeStep.scopePriority.scopeGuard}</span>
+                    <div className="flex items-center gap-1 overflow-x-auto py-1">
+                      {ROADMAP_STEPS.map((s) => (
+                        <button
+                          key={s.step}
+                          type="button"
+                          onClick={() => setActiveStepIndex(s.step - 1)}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                            activeStepIndex === s.step - 1
+                              ? 'bg-[#B84E34] text-white shadow-2xs'
+                              : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                          }`}
+                        >
+                          Step {s.step}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              </div>
-            )}
 
-            {stationTab === 'experience' && (
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs">
-                  <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-[#E8E2D5] space-y-3">
-                    <div className="space-y-1">
+                  {/* 目的 ＆ Done定義 */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs">
+                    <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-[#E8E2D5] space-y-2">
                       <span className="font-black text-[#B84E34] flex items-center gap-1.5">
-                        <Compass className="w-4 h-4" /> なぜこの順番で学ぶのか
+                        <Target className="w-4 h-4" /> 目的（なぜ学ぶのかの核）
                       </span>
-                      <p className="text-stone-700 leading-relaxed font-medium">
-                        {activeStep.learningExperience.whyThisOrder}
+                      <p className="text-stone-800 leading-relaxed font-medium">
+                        {activeStep.goalDefinition.purpose}
                       </p>
+                      <div className="pt-2 border-t border-[#E8E2D5] text-[11px] text-stone-500">
+                        <strong>公的Can-Do基準: </strong>{activeStep.academicBasis.officialCanDo}
+                      </div>
                     </div>
 
-                    <div className="pt-2 border-t border-[#E8E2D5] space-y-1.5">
-                      <strong className="text-stone-900 font-bold block text-[11px] flex items-center gap-1">
-                        <Trophy className="w-3.5 h-3.5 text-amber-500" />
-                        ミニ到達目標（マイルストーン）:
-                      </strong>
-                      <div className="space-y-1 pl-1">
-                        {activeStep.learningExperience.miniMilestones.map((m, idx) => (
-                          <div key={idx} className="flex items-center gap-2 text-[11px] text-stone-700">
-                            <span className="px-2 py-0.5 rounded-md bg-stone-200/70 font-mono font-bold text-stone-800 text-[10px] shrink-0">
-                              {m.milestone}
-                            </span>
-                            <span>{m.label}</span>
-                          </div>
-                        ))}
+                    <div className="bg-emerald-50/50 p-4 rounded-2xl border border-emerald-200/80 space-y-2">
+                      <span className="font-black text-emerald-900 flex items-center gap-1.5">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Done定義（完了基準）
+                      </span>
+                      <p className="text-emerald-950 leading-relaxed font-medium bg-white/80 p-2.5 rounded-xl border border-emerald-200/50">
+                        {activeStep.goalDefinition.doneDefinition}
+                      </p>
+                      <div className="text-[11px] text-emerald-800">
+                        <strong>手元に残る成果物: </strong>{activeStep.goalDefinition.deliverable}
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-rose-50/40 p-4 rounded-2xl border border-rose-200/80 space-y-3">
-                    <div className="space-y-1">
-                      <span className="font-black text-rose-900 flex items-center gap-1.5">
-                        <AlertCircle className="w-4 h-4 text-rose-600" /> よくあるつまずきポイント
+                  {/* ユーザー行動ストーリー */}
+                  <div className="bg-white border border-stone-200 rounded-2xl p-4 space-y-1.5 shadow-2xs">
+                    <span className="text-xs font-black text-stone-800 flex items-center gap-1.5">
+                      <Sparkles className="w-4 h-4 text-[#B84E34]" />
+                      <span>説明できるストーリー例（学習完了後の具体的行動シナリオ）:</span>
+                    </span>
+                    <p className="text-xs text-stone-700 leading-relaxed bg-[#FAF7F2] p-3 rounded-xl border border-[#E8E2D5]">
+                      {activeStep.goalDefinition.userStory}
+                    </p>
+                  </div>
+
+                  {/* スコープ防止 ＆ 5分縮小プロトコル */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs">
+                    <div className="bg-amber-50/60 p-4 rounded-2xl border border-amber-200/80 space-y-2">
+                      <span className="font-black text-amber-900 flex items-center gap-1.5">
+                        <ShieldAlert className="w-4 h-4 text-amber-600" />
+                        スコープ拡大防止原則（挫折防止）
                       </span>
-                      <p className="text-stone-700 leading-relaxed text-[11px]">
-                        {activeStep.learningExperience.commonStumblingBlock}
+                      <p className="text-stone-700 leading-relaxed">
+                        {activeStep.scopePriority.scopeGuard}
                       </p>
                     </div>
 
-                    <div className="pt-2 border-t border-rose-200/60 bg-white/80 p-3 rounded-xl border border-rose-200/50 space-y-1">
-                      <div className="font-black text-[#B84E34] flex items-center gap-1.5 text-xs">
-                        <LifeBuoy className="w-4 h-4" />
-                        <span>忙しい日の「5分縮小プロトコル」</span>
-                      </div>
-                      <p className="text-stone-800 text-[11px] font-medium leading-relaxed">
+                    <div className="bg-rose-50/60 p-4 rounded-2xl border border-rose-200/80 space-y-2">
+                      <span className="font-black text-rose-900 flex items-center gap-1.5">
+                        <LifeBuoy className="w-4 h-4 text-rose-600" />
+                        忙しい日の「5分縮小プロトコル」
+                      </span>
+                      <p className="text-stone-800 leading-relaxed font-medium">
                         {activeStep.learningExperience.riskAndFallback.fallbackProtocol}
                       </p>
                     </div>
                   </div>
-                </div>
 
-                {activeStep.learningExperience.jargonBuster && (
-                  <div className="bg-white border border-stone-200 rounded-2xl p-4 space-y-2 shadow-2xs text-xs">
-                    <span className="font-black text-stone-800 flex items-center gap-1.5">
-                      <HelpCircle className="w-4 h-4 text-[#B84E34]" />
-                      <span>初心者にもわかる用語の噛み砕き補足:</span>
-                    </span>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
-                      {activeStep.learningExperience.jargonBuster.map((j, idx) => (
-                        <div key={idx} className="p-3 rounded-xl bg-stone-50 border border-stone-100 space-y-1">
-                          <strong className="text-stone-900 font-bold block">{j.term}</strong>
-                          <p className="text-stone-600 text-[11px] leading-relaxed">{j.explanation}</p>
+                  {/* 象徴モデル会話 ＆ ネイティブ音声再生 */}
+                  <div className="bg-[#FAF0EC]/50 border border-[#F2DED7] rounded-2xl p-4 space-y-2.5">
+                    <div className="flex items-center justify-between text-xs font-bold text-[#B84E34]">
+                      <span className="flex items-center gap-1.5">
+                        <Volume2 className="w-4 h-4" />
+                        <span>代表モデル会話フレーズ（音声試聴）</span>
+                      </span>
+                      <span className="text-stone-400 font-normal text-[11px]">TOPIK / 話す基準</span>
+                    </div>
+                    <div className="flex items-start justify-between gap-3 bg-white p-3.5 rounded-xl border border-[#F0D5CC]">
+                      <div className="space-y-1">
+                        <p className="font-black text-[#1B2A38] text-base">
+                          {activeStep.representativeSpeech.ko}
+                        </p>
+                        {showPronunciation && activeStep.representativeSpeech.reading && (
+                          <p className="text-xs text-stone-400 font-mono">
+                            {activeStep.representativeSpeech.reading}
+                          </p>
+                        )}
+                        <p className="text-xs text-stone-700">
+                          {activeStep.representativeSpeech.ja}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => playSpeech(activeStep.representativeSpeech.ko, activeStep.step)}
+                        className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all cursor-pointer shrink-0 shadow-2xs ${
+                          playingStep === activeStep.step
+                            ? 'bg-[#B84E34] text-white animate-pulse'
+                            : 'bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CC] hover:bg-[#F2DED7]'
+                        }`}
+                      >
+                        <Volume2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ② 1枚完結シート */}
+              {guideModalTab === 'matrix' && (
+                <div className="space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#FAF7F2] p-3.5 rounded-2xl border border-[#E8E2D5]">
+                    <div className="space-y-0.5">
+                      <div className="text-xs font-black text-stone-800 flex items-center gap-1.5">
+                        <Table className="w-4 h-4 text-[#B84E34]" />
+                        <span>「フェーズ × 学習項目 × Done定義 × リスク対策」マトリクス</span>
+                      </div>
+                      <p className="text-[11px] text-stone-500">
+                        目標のブレ・教材の浮気・多忙による挫折を未然に防ぐ全体見渡しシート
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-1 shrink-0 text-xs font-bold">
+                      <button
+                        type="button"
+                        onClick={() => setMatrixFilter('all')}
+                        className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                          matrixFilter === 'all'
+                            ? 'bg-[#B84E34] text-white shadow-2xs'
+                            : 'bg-white text-stone-600 border border-stone-200'
+                        }`}
+                      >
+                        すべて (1〜8)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setMatrixFilter('beginner')}
+                        className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                          matrixFilter === 'beginner'
+                            ? 'bg-[#B84E34] text-white shadow-2xs'
+                            : 'bg-white text-stone-600 border border-stone-200'
+                        }`}
+                      >
+                        初級 (1〜4)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setMatrixFilter('advanced')}
+                        className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                          matrixFilter === 'advanced'
+                            ? 'bg-[#B84E34] text-white shadow-2xs'
+                            : 'bg-white text-stone-600 border border-stone-200'
+                        }`}
+                      >
+                        中上級 (5〜8)
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    {filteredSteps.map((step) => {
+                      const meta = STEP_META[step.step];
+                      return (
+                        <div
+                          key={step.step}
+                          className="bg-white border border-stone-200 rounded-2xl p-4 shadow-2xs space-y-3"
+                        >
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-stone-100">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span
+                                style={{ backgroundColor: step.stationColor }}
+                                className="w-6 h-6 rounded-lg text-white font-black text-xs flex items-center justify-center shadow-2xs"
+                              >
+                                {step.step}
+                              </span>
+                              <span className="text-sm sm:text-base font-black text-[#1B2A38]">
+                                Step {step.step}: {step.stage}
+                              </span>
+                              <span className="text-xs font-bold text-stone-700 bg-stone-100 px-2 py-0.5 rounded-full border border-stone-200">
+                                {step.badge}
+                              </span>
+                              <span className="text-xs font-mono font-bold text-[#B84E34] bg-[#FAF0EC] px-2 py-0.5 rounded-full border border-[#F0D5CD]">
+                                ⏱️ {step.timeHours}（{step.scopePriority.timeboxWeeks}）
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-2 shrink-0">
+                              {onNavigateToExam && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setShowGuideModal(false);
+                                    onNavigateToExam(meta.examId);
+                                  }}
+                                  className="px-2.5 py-1 rounded-lg bg-[#B84E34] text-white text-xs font-bold hover:bg-[#a2432c] flex items-center gap-1 cursor-pointer"
+                                >
+                                  <Award className="w-3.5 h-3.5" />
+                                  <span>模試へ</span>
+                                </button>
+                              )}
+                              {onNavigateToContent && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setShowGuideModal(false);
+                                    onNavigateToContent(meta.firstLessonId, 'textbook');
+                                  }}
+                                  className="px-2.5 py-1 rounded-lg border border-stone-200 text-stone-700 text-xs font-bold hover:bg-stone-50 flex items-center gap-1 cursor-pointer"
+                                >
+                                  <BookOpen className="w-3.5 h-3.5 text-[#B84E34]" />
+                                  <span>教科書</span>
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
+                            <div className="bg-[#FAF7F2] p-3 rounded-xl border border-[#E8E2D5] space-y-1.5">
+                              <span className="font-black text-[#B84E34] block">① 目的 ＆ 順序の必然性</span>
+                              <p className="text-stone-700 leading-relaxed">{step.goalDefinition.purpose}</p>
+                              <p className="text-[11px] text-stone-500 pt-1 border-t border-[#E8E2D5]">
+                                {step.learningExperience.whyThisOrder}
+                              </p>
+                            </div>
+
+                            <div className="bg-amber-50/50 p-3 rounded-xl border border-amber-200/70 space-y-1.5">
+                              <span className="font-black text-amber-900 block">② Must作業タスク</span>
+                              <ul className="space-y-0.5 text-stone-700">
+                                {step.scopePriority.wbsBreakdown.map((item, idx) => (
+                                  <li key={idx} className="flex items-start gap-1">
+                                    <span className="text-amber-700 font-bold">✓</span>
+                                    <span>{item}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+
+                            <div className="bg-emerald-50/50 p-3 rounded-xl border border-emerald-200/70 space-y-1.5">
+                              <span className="font-black text-emerald-900 block">③ Done完了判定</span>
+                              <p className="text-emerald-950 font-medium bg-white/80 p-2 rounded-lg border border-emerald-200/50">
+                                {step.goalDefinition.doneDefinition}
+                              </p>
+                              <p className="text-[11px] text-stone-600">{step.goalDefinition.userStory}</p>
+                            </div>
+
+                            <div className="bg-rose-50/50 p-3 rounded-xl border border-rose-200/70 space-y-1.5">
+                              <span className="font-black text-rose-900 block">④ 5分縮小プロトコル</span>
+                              <p className="text-stone-700 text-[11px] bg-white/80 p-2 rounded-lg border border-rose-200/50">
+                                {step.learningExperience.riskAndFallback.fallbackProtocol}
+                              </p>
+                            </div>
+                          </div>
                         </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* ③ 駅別SLA解説 */}
+              {guideModalTab === 'sla' && (
+                <div className="space-y-4">
+                  {/* メトロ路線図駅セレクタ */}
+                  <div className="flex items-center justify-between text-xs font-bold text-stone-500 pb-1">
+                    <span className="flex items-center gap-1.5">
+                      <Map className="w-3.5 h-3.5 text-[#B84E34]" />
+                      <span>メトロ路線図（タップで駅切り替え）</span>
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={handlePrevStep}
+                        disabled={activeStepIndex === 0}
+                        className="w-7 h-7 rounded-lg border border-stone-200 bg-white hover:bg-stone-50 disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center text-stone-700 cursor-pointer"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </button>
+                      <span className="text-[11px] font-mono px-1">
+                        {activeStepIndex + 1} / {ROADMAP_STEPS.length}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleNextStep}
+                        disabled={activeStepIndex === ROADMAP_STEPS.length - 1}
+                        className="w-7 h-7 rounded-lg border border-stone-200 bg-white hover:bg-stone-50 disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center text-stone-700 cursor-pointer"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="overflow-x-auto pb-2 scrollbar-thin">
+                    <div className="flex items-center gap-2 min-w-[600px] py-2">
+                      {ROADMAP_STEPS.map((s, idx) => (
+                        <button
+                          key={s.step}
+                          type="button"
+                          onClick={() => setActiveStepIndex(idx)}
+                          className={`flex-1 p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+                            idx === activeStepIndex
+                              ? 'bg-[#B84E34] text-white border-[#B84E34] shadow-xs'
+                              : 'bg-stone-50 border-stone-200 text-stone-700 hover:bg-stone-100'
+                          }`}
+                        >
+                          <div className="text-[10px] font-mono opacity-80">Step {s.step}</div>
+                          <div className="text-xs font-black truncate">{s.stage}</div>
+                        </button>
                       ))}
                     </div>
                   </div>
-                )}
-              </div>
-            )}
 
-            {stationTab === 'speech' && (
-              <div className="space-y-4">
-                <div className="bg-[#FAF0EC]/40 border border-[#F2DED7] rounded-2xl p-4 sm:p-5 space-y-3">
-                  <div className="flex items-center justify-between gap-2 text-xs font-bold text-[#B84E34]">
-                    <span className="flex items-center gap-1.5">
-                      <MessageCircle className="w-4 h-4" />
-                      <span>該当級の象徴的モデルセリフ（発音・シャドーイング）</span>
-                    </span>
-                    <span className="text-stone-400 font-normal text-[11px]">
-                      TOPIK 말하기 / 面接基準
-                    </span>
+                  {/* SLA母語干渉 ＆ 打開策 */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                    <div className="bg-rose-50/70 border border-rose-200/80 rounded-2xl p-4 space-y-1.5">
+                      <div className="font-bold text-rose-900 flex items-center gap-1.5 text-xs">
+                        <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
+                        <span>日本語話者の頻出誤用の罠 (SLA母語干渉):</span>
+                      </div>
+                      <p className="text-stone-700 leading-relaxed">
+                        {activeStep.slaTips.frequentError}
+                      </p>
+                    </div>
+
+                    <div className="bg-emerald-50/70 border border-emerald-200/80 rounded-2xl p-4 space-y-1.5">
+                      <div className="font-bold text-emerald-900 flex items-center gap-1.5 text-xs">
+                        <Lightbulb className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>認知言語学的ブレイクスルー (打開策):</span>
+                      </div>
+                      <p className="text-stone-700 leading-relaxed">
+                        {activeStep.slaTips.breakthrough}
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="flex items-start justify-between gap-3 bg-white p-4 rounded-xl border border-[#F0D5CC] shadow-2xs">
-                    <div className="space-y-1 min-w-0 flex-1">
-                      <p className="font-black text-[#1B2A38] text-base sm:text-lg leading-snug">
-                        {activeStep.representativeSpeech.ko}
-                      </p>
-                      {showPronunciation && activeStep.representativeSpeech.reading && (
-                        <p className="text-xs text-stone-400 font-mono">
-                          {activeStep.representativeSpeech.reading}
+                  {/* 用語の噛み砕き解説 */}
+                  {activeStep.learningExperience.jargonBuster && (
+                    <div className="bg-white border border-stone-200 rounded-2xl p-4 space-y-2 shadow-2xs text-xs">
+                      <span className="font-black text-stone-800 flex items-center gap-1.5">
+                        <HelpCircle className="w-4 h-4 text-[#B84E34]" />
+                        <span>初心者向け用語の噛み砕き補足:</span>
+                      </span>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+                        {activeStep.learningExperience.jargonBuster.map((j, idx) => (
+                          <div key={idx} className="p-3 rounded-xl bg-stone-50 border border-stone-100 space-y-1">
+                            <strong className="text-stone-900 font-bold block">{j.term}</strong>
+                            <p className="text-stone-600 text-[11px] leading-relaxed">{j.explanation}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ④ 設定 ＆ 進捗解放 */}
+              {guideModalTab === 'settings' && (
+                <div className="space-y-4">
+                  <div className="bg-white border border-stone-200 rounded-2xl p-4 sm:p-5 space-y-3 shadow-2xs">
+                    <h4 className="text-sm font-black text-stone-900 flex items-center gap-2">
+                      <Award className="w-4 h-4 text-[#B84E34]" />
+                      <span>現在の学習レベル ＆ 獲得経験値</span>
+                    </h4>
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#B84E34] to-[#8f3a24] text-white flex items-center justify-center font-black text-xl shadow-xs shrink-0">
+                        {levelInfo.currentTier.badge}
+                      </div>
+                      <div className="space-y-1 flex-1">
+                        <div className="flex items-center justify-between text-xs font-bold">
+                          <span className="text-[#1B2A38] text-sm">{levelInfo.currentTier.title}</span>
+                          <span className="text-stone-500 font-mono">{gameState.xp} XP</span>
+                        </div>
+                        <div className="w-full bg-stone-200 rounded-full h-2 overflow-hidden">
+                          <div
+                            className="bg-[#B84E34] h-full rounded-full transition-all duration-500"
+                            style={{ width: `${levelInfo.progressPercent}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 自由探索モード切り替え */}
+                  <div className="bg-[#FAF7F2] border border-[#E8E2D5] rounded-2xl p-4 sm:p-5 space-y-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="space-y-0.5">
+                        <h4 className="text-sm font-black text-stone-900 flex items-center gap-1.5">
+                          {gameState.freeExploreMode ? (
+                            <Unlock className="w-4 h-4 text-indigo-600" />
+                          ) : (
+                            <Lock className="w-4 h-4 text-stone-600" />
+                          )}
+                          <span>自由解放モード（全ステージ閲覧・挑戦）</span>
+                        </h4>
+                        <p className="text-xs text-stone-600 leading-relaxed">
+                          通常は各ステージのボス検定に合格すると次ステージが解禁されます。復習や先取り学習のために全ステージを即座に解放できます。
                         </p>
-                      )}
-                      <p className="text-xs sm:text-sm text-stone-700 font-medium pt-0.5">
-                        {activeStep.representativeSpeech.ja}
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => playSpeech(activeStep.representativeSpeech.ko, activeStep.step)}
-                      className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer shrink-0 shadow-xs ${
-                        playingStep === activeStep.step
-                          ? 'bg-[#B84E34] text-white animate-pulse'
-                          : 'bg-[#FAF0EC] hover:bg-[#F2DED7] text-[#B84E34] border border-[#F0D5CC]'
-                      }`}
-                      title="ネイティブ音声を聴く"
-                    >
-                      <Volume2 className="w-4 h-4" />
-                    </button>
-                  </div>
+                      </div>
 
-                  <div className="text-xs text-stone-600 leading-relaxed bg-white/60 p-3 rounded-xl border border-[#F0D5CC]/60">
-                    <strong className="text-[#B84E34] flex items-center gap-1 mb-0.5">
-                      <Lightbulb className="w-3.5 h-3.5 text-[#B84E34]" />
-                      言語学的評価点:
-                    </strong>
-                    <span>{activeStep.representativeSpeech.linguisticPoint}</span>
+                      <button
+                        type="button"
+                        onClick={toggleFreeExplore}
+                        className={`px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer shrink-0 shadow-xs ${
+                          gameState.freeExploreMode
+                            ? 'bg-indigo-600 text-white hover:bg-indigo-700'
+                            : 'bg-white border border-stone-300 text-stone-700 hover:bg-stone-50'
+                        }`}
+                      >
+                        {gameState.freeExploreMode ? '自由解放中（ON）' : '順次アンロック（OFF）'}
+                      </button>
+                    </div>
                   </div>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                  <div className="bg-rose-50/70 border border-rose-200/80 rounded-2xl p-4 space-y-1.5">
-                    <div className="font-bold text-rose-900 flex items-center gap-1.5 text-xs">
-                      <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
-                      <span>日本語話者の頻出誤用の罠 (SLA):</span>
-                    </div>
-                    <p className="text-stone-700 leading-relaxed">
-                      {activeStep.slaTips.frequentError}
-                    </p>
-                  </div>
-
-                  <div className="bg-emerald-50/70 border border-emerald-200/80 rounded-2xl p-4 space-y-1.5">
-                    <div className="font-bold text-emerald-900 flex items-center gap-1.5 text-xs">
-                      <Lightbulb className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>認知言語学的ブレイクスルー (打開策):</span>
-                    </div>
-                    <p className="text-stone-700 leading-relaxed">
-                      {activeStep.slaTips.breakthrough}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       )}

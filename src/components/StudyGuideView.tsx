@@ -56,7 +56,6 @@ import {
   VOCAB_CATEGORIES,
 } from '../data/koreanVocabularyData';
 import { KoreanNumbersGuideView } from './KoreanNumbersGuideView';
-import { VisualRoadmapView } from './roadmap/VisualRoadmapView';
 import { TestLesson, WordItem } from '../types';
 import { findMyLessonExamplesForGuide } from '../utils/guideMatcher';
 import { speechService } from '../utils/speech';
@@ -274,25 +273,37 @@ const LEGACY_GUIDE_PROGRESS_STORAGE_KEY = 'study_guide_progress_v1';
 interface StudyGuideViewProps {
   onBackToNote: () => void;
   initialAnchor?: string;
+  defaultTab?: GuideTab;
   allLessons?: TestLesson[];
   onJumpToNote?: (lessonId: string, wordId?: string) => void;
   onAddWordToVocab?: (newWord: WordItem) => void;
   existingWords?: WordItem[];
   onOpenShadowing?: () => void;
   onNavigateToExam?: (examId?: string) => void;
+  hideBottomNav?: boolean;
+  hideBackButton?: boolean;
 }
 
 export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
   onBackToNote,
   initialAnchor,
+  defaultTab,
   allLessons,
   onJumpToNote,
   onAddWordToVocab,
   existingWords,
   onOpenShadowing,
   onNavigateToExam,
+  hideBottomNav = false,
+  hideBackButton = false,
 }) => {
-  const [activeTab, setActiveTab] = useState<GuideTab>('textbook');
+  const [activeTab, setActiveTab] = useState<GuideTab>(defaultTab || 'textbook');
+
+  useEffect(() => {
+    if (defaultTab && defaultTab !== activeTab) {
+      setActiveTab(defaultTab);
+    }
+  }, [defaultTab]);
   const [searchQuery, setSearchQuery] = useState('');
 
   // 🧭 生徒・講師の現在地・ステータス（⚪未開拓 / 🟡練習中 / 🟢習得）・次回ミッションの永続化管理
@@ -1876,17 +1887,19 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
         }}
       >
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-1.5 sm:gap-2">
-          {/* ホームに戻るボタン（スマホではコンパクト表示、PCではフルテキスト） */}
-          <button
-            type="button"
-            onClick={onBackToNote}
-            title="ホームへ戻る"
-            className="flex items-center gap-1 sm:gap-1.5 px-2.5 py-1 rounded-xl border border-[#E2DDD2] bg-white hover:bg-[#FAF7F2] text-xs font-bold text-[#1B2A38] transition-all shadow-2xs cursor-pointer shrink-0 active:scale-95 h-8"
-          >
-            <ArrowLeft className="w-3.5 h-3.5 text-[#B84E34]" />
-            <span className="hidden sm:inline">ホームへ戻る</span>
-            <span className="sm:hidden text-xs">ホーム</span>
-          </button>
+          {/* ホームに戻るボタン（hideBackButton時は非表示） */}
+          {!hideBackButton && (
+            <button
+              type="button"
+              onClick={onBackToNote}
+              title="ホームへ戻る"
+              className="flex items-center gap-1 sm:gap-1.5 px-2.5 py-1 rounded-xl border border-[#E2DDD2] bg-white hover:bg-[#FAF7F2] text-xs font-bold text-[#1B2A38] transition-all shadow-2xs cursor-pointer shrink-0 active:scale-95 h-8"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 text-[#B84E34]" />
+              <span className="hidden sm:inline">ホームへ戻る</span>
+              <span className="sm:hidden text-xs">ホーム</span>
+            </button>
+          )}
 
           {/* リアルタイムインデックス検索バー（十分な横幅を確保） */}
           <div className="relative flex-1 min-w-[120px] max-w-sm sm:max-w-md">
@@ -1984,38 +1997,38 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
               <button
                 type="button"
                 onClick={() => changeLevelMode('beginner')}
-                className={`px-2 py-0.5 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
+                className={`px-2.5 py-0.5 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
                   levelMode === 'beginner'
                     ? 'bg-white text-emerald-800 shadow-2xs font-extrabold'
                     : 'text-[#6B635B] hover:text-[#1B2A38]'
                 }`}
                 title="初級モード：第1〜30課・基本文法80選・日常会話（中級以上を隠す）"
               >
-                🔰 初級
+                初級
               </button>
               <button
                 type="button"
                 onClick={() => changeLevelMode('intermediate')}
-                className={`px-2 py-0.5 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
+                className={`px-2.5 py-0.5 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
                   levelMode === 'intermediate'
                     ? 'bg-[#1E3A5F] text-white shadow-2xs font-extrabold'
                     : 'text-[#6B635B] hover:text-[#1B2A38]'
                 }`}
                 title="中級モード：第4章・中級文法100選・身体慣用句40選・スラング60選"
               >
-                🌿 中級
+                中級
               </button>
               <button
                 type="button"
                 onClick={() => changeLevelMode('advanced')}
-                className={`px-2 py-0.5 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
+                className={`px-2.5 py-0.5 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
                   levelMode === 'advanced'
                     ? 'bg-gradient-to-r from-amber-600 to-amber-700 text-white shadow-2xs font-extrabold'
                     : 'text-[#6B635B] hover:text-[#1B2A38]'
                 }`}
                 title="上級モード：四字熟語40選・時事論述20選・TOPIK 5-6級高級文法"
               >
-                👑 上級
+                上級
               </button>
             </div>
           </div>
@@ -2055,7 +2068,7 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                         : 'text-[#6B635B] hover:text-[#1B2A38]'
                     }`}
                   >
-                    🔰 初級
+                    初級
                   </button>
                   <button
                     type="button"
@@ -2066,7 +2079,7 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                         : 'text-[#6B635B] hover:text-[#1B2A38]'
                     }`}
                   >
-                    🌿 中級
+                    中級
                   </button>
                   <button
                     type="button"
@@ -2077,7 +2090,7 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                         : 'text-[#6B635B] hover:text-[#1B2A38]'
                     }`}
                   >
-                    👑 上級
+                    上級
                   </button>
                 </div>
               </div>
@@ -2580,15 +2593,6 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                     </div>
                   </div>
                 )}
-
-                {/* 🗺️ 完全制覇ロードマップ（動的メトロ路線図 ＆ インタラクティブハブ） */}
-                <section id="sec-roadmap" className="scroll-mt-24 mt-6">
-                  <VisualRoadmapView
-                    onNavigateToExam={onNavigateToExam}
-                    onNavigateToContent={(id, tab) => scrollTo(id, tab)}
-                    showPronunciation={showPronunciation}
-                  />
-                </section>
               </div>
             )}
           </div>
@@ -5053,11 +5057,12 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
       </main>
 
       {/* トップへ戻るフローティングボタン（ボトムバーの上部に配置、スクロール連動） */}
+      {/* トップへ戻るボタン */}
       <button
         type="button"
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         className={`fixed right-4 sm:right-6 z-30 p-2.5 rounded-full bg-white/95 backdrop-blur-md border border-[#E8E2D5] text-[#756D63] hover:text-[#B84E34] hover:border-[#B84E34] shadow-md transition-all duration-300 cursor-pointer active:scale-90 ${
-          showBars ? 'bottom-16 sm:bottom-20' : 'bottom-4'
+          hideBottomNav ? 'bottom-20' : showBars ? 'bottom-16 sm:bottom-20' : 'bottom-4'
         }`}
         style={{
           transform: 'translateZ(0)',
@@ -5069,86 +5074,88 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
         <ArrowUp className="w-4 h-4" />
       </button>
 
-      {/* ===================== 画面下部固定ボトムナビゲーション（スクロール連動自動収納 ＆ iOS Safari固定バグ完全対策） ===================== */}
-      <nav
-        className={`fixed bottom-0 left-0 right-0 z-40 bg-[#FAF7F2]/95 backdrop-blur-md border-t border-[#E8E2D5] shadow-lg transition-all duration-300 transform-gpu pb-[env(safe-area-inset-bottom)] ${
-          showBars ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'
-        }`}
-        style={{
-          transform: showBars ? 'translate3d(0, 0, 0)' : 'translate3d(0, 100%, 0)',
-          WebkitTransform: showBars ? 'translate3d(0, 0, 0)' : 'translate3d(0, 100%, 0)',
-          willChange: 'transform',
-          WebkitBackfaceVisibility: 'hidden',
-          backfaceVisibility: 'hidden',
-        }}
-      >
-        <div className="max-w-md mx-auto flex items-center justify-around px-2 py-1.5">
-          <button
-            type="button"
-            onClick={() => setActiveTab('textbook')}
-            className={`flex flex-col items-center justify-center py-1 px-1 sm:px-2 rounded-xl transition-all cursor-pointer ${
-              activeTab === 'textbook'
-                ? 'text-[#B84E34] font-bold'
-                : 'text-[#756D63] hover:text-[#1B2A38]'
-            }`}
-          >
-            <BookOpen className={`w-4 h-4 sm:w-5 sm:h-5 ${activeTab === 'textbook' ? 'stroke-[2.5]' : 'stroke-2'}`} />
-            <span className="text-[10px] sm:text-xs mt-0.5 whitespace-nowrap">教科書</span>
-          </button>
+      {/* ===================== 画面下部固定ボトムナビゲーション（hideBottomNav時は非表示） ===================== */}
+      {!hideBottomNav && (
+        <nav
+          className={`fixed bottom-0 left-0 right-0 z-40 bg-[#FAF7F2]/95 backdrop-blur-md border-t border-[#E8E2D5] shadow-lg transition-all duration-300 transform-gpu pb-[env(safe-area-inset-bottom)] ${
+            showBars ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'
+          }`}
+          style={{
+            transform: showBars ? 'translate3d(0, 0, 0)' : 'translate3d(0, 100%, 0)',
+            WebkitTransform: showBars ? 'translate3d(0, 0, 0)' : 'translate3d(0, 100%, 0)',
+            willChange: 'transform',
+            WebkitBackfaceVisibility: 'hidden',
+            backfaceVisibility: 'hidden',
+          }}
+        >
+          <div className="max-w-md mx-auto flex items-center justify-around px-2 py-1.5">
+            <button
+              type="button"
+              onClick={() => setActiveTab('textbook')}
+              className={`flex flex-col items-center justify-center py-1 px-1 sm:px-2 rounded-xl transition-all cursor-pointer ${
+                activeTab === 'textbook'
+                  ? 'text-[#B84E34] font-bold'
+                  : 'text-[#756D63] hover:text-[#1B2A38]'
+              }`}
+            >
+              <BookOpen className={`w-4 h-4 sm:w-5 sm:h-5 ${activeTab === 'textbook' ? 'stroke-[2.5]' : 'stroke-2'}`} />
+              <span className="text-[10px] sm:text-xs mt-0.5 whitespace-nowrap">教科書</span>
+            </button>
 
-          <button
-            type="button"
-            onClick={() => setActiveTab('reference')}
-            className={`flex flex-col items-center justify-center py-1 px-1 sm:px-2 rounded-xl transition-all cursor-pointer ${
-              activeTab === 'reference'
-                ? 'text-[#B84E34] font-bold'
-                : 'text-[#756D63] hover:text-[#1B2A38]'
-            }`}
-          >
-            <HelpCircle className={`w-4 h-4 sm:w-5 sm:h-5 ${activeTab === 'reference' ? 'stroke-[2.5]' : 'stroke-2'}`} />
-            <span className="text-[10px] sm:text-xs mt-0.5 whitespace-nowrap">参考書</span>
-          </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('reference')}
+              className={`flex flex-col items-center justify-center py-1 px-1 sm:px-2 rounded-xl transition-all cursor-pointer ${
+                activeTab === 'reference'
+                  ? 'text-[#B84E34] font-bold'
+                  : 'text-[#756D63] hover:text-[#1B2A38]'
+              }`}
+            >
+              <HelpCircle className={`w-4 h-4 sm:w-5 sm:h-5 ${activeTab === 'reference' ? 'stroke-[2.5]' : 'stroke-2'}`} />
+              <span className="text-[10px] sm:text-xs mt-0.5 whitespace-nowrap">参考書</span>
+            </button>
 
-          <button
-            type="button"
-            onClick={() => setActiveTab('dictionary')}
-            className={`flex flex-col items-center justify-center py-1 px-1 sm:px-2 rounded-xl transition-all cursor-pointer ${
-              activeTab === 'dictionary'
-                ? 'text-[#B84E34] font-bold'
-                : 'text-[#756D63] hover:text-[#1B2A38]'
-            }`}
-          >
-            <Bookmark className={`w-4 h-4 sm:w-5 sm:h-5 ${activeTab === 'dictionary' ? 'stroke-[2.5]' : 'stroke-2'}`} />
-            <span className="text-[10px] sm:text-xs mt-0.5 whitespace-nowrap">辞書</span>
-          </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('dictionary')}
+              className={`flex flex-col items-center justify-center py-1 px-1 sm:px-2 rounded-xl transition-all cursor-pointer ${
+                activeTab === 'dictionary'
+                  ? 'text-[#B84E34] font-bold'
+                  : 'text-[#756D63] hover:text-[#1B2A38]'
+              }`}
+            >
+              <Bookmark className={`w-4 h-4 sm:w-5 sm:h-5 ${activeTab === 'dictionary' ? 'stroke-[2.5]' : 'stroke-2'}`} />
+              <span className="text-[10px] sm:text-xs mt-0.5 whitespace-nowrap">辞書</span>
+            </button>
 
-          <button
-            type="button"
-            onClick={() => setActiveTab('chunks')}
-            className={`flex flex-col items-center justify-center py-1 px-1 sm:px-2 rounded-xl transition-all cursor-pointer ${
-              activeTab === 'chunks'
-                ? 'text-[#B84E34] font-bold'
-                : 'text-[#756D63] hover:text-[#1B2A38]'
-            }`}
-          >
-            <MessageCircle className={`w-4 h-4 sm:w-5 sm:h-5 ${activeTab === 'chunks' ? 'stroke-[2.5]' : 'stroke-2'}`} />
-            <span className="text-[10px] sm:text-xs mt-0.5 whitespace-nowrap">会話</span>
-          </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('chunks')}
+              className={`flex flex-col items-center justify-center py-1 px-1 sm:px-2 rounded-xl transition-all cursor-pointer ${
+                activeTab === 'chunks'
+                  ? 'text-[#B84E34] font-bold'
+                  : 'text-[#756D63] hover:text-[#1B2A38]'
+              }`}
+            >
+              <MessageCircle className={`w-4 h-4 sm:w-5 sm:h-5 ${activeTab === 'chunks' ? 'stroke-[2.5]' : 'stroke-2'}`} />
+              <span className="text-[10px] sm:text-xs mt-0.5 whitespace-nowrap">会話</span>
+            </button>
 
-          <button
-            type="button"
-            onClick={() => setActiveTab('collocations')}
-            className={`flex flex-col items-center justify-center py-1 px-1 sm:px-2 rounded-xl transition-all cursor-pointer ${
-              activeTab === 'collocations'
-                ? 'text-[#B84E34] font-bold'
-                : 'text-[#756D63] hover:text-[#1B2A38]'
-            }`}
-          >
-            <Link2 className={`w-4 h-4 sm:w-5 sm:h-5 ${activeTab === 'collocations' ? 'stroke-[2.5]' : 'stroke-2'}`} />
-            <span className="text-[10px] sm:text-xs mt-0.5 whitespace-nowrap">助詞</span>
-          </button>
-        </div>
-      </nav>
+            <button
+              type="button"
+              onClick={() => setActiveTab('collocations')}
+              className={`flex flex-col items-center justify-center py-1 px-1 sm:px-2 rounded-xl transition-all cursor-pointer ${
+                activeTab === 'collocations'
+                  ? 'text-[#B84E34] font-bold'
+                  : 'text-[#756D63] hover:text-[#1B2A38]'
+              }`}
+            >
+              <Link2 className={`w-4 h-4 sm:w-5 sm:h-5 ${activeTab === 'collocations' ? 'stroke-[2.5]' : 'stroke-2'}`} />
+              <span className="text-[10px] sm:text-xs mt-0.5 whitespace-nowrap">助詞</span>
+            </button>
+          </div>
+        </nav>
+      )}
 
       {/* ===================== ボトムシート詳細モーダル（辞書・会話・助詞） ===================== */}
       {currentBottomSheetData && (

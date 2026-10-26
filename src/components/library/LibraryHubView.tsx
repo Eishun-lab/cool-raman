@@ -1,14 +1,24 @@
-import React, { useState } from 'react';
-import { BookOpen, Hash, Search, ArrowLeft } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import {
+  BookOpen,
+  Hash,
+  Bookmark,
+  HelpCircle,
+  MessageCircle,
+  Search,
+} from 'lucide-react';
 import { StudyGuideView } from '../StudyGuideView';
 import { KoreanNumbersGuideView } from '../KoreanNumbersGuideView';
+import { GuideTab } from '../../types/guide';
 
 interface LibraryHubViewProps {
   initialAnchor?: string;
-  initialSubTab?: 'textbook' | 'numbers';
+  initialSubTab?: 'textbook' | 'dictionary' | 'reference' | 'chunks' | 'numbers';
   onNavigateToExam?: (examId?: string) => void;
   onBackToDashboard?: () => void;
 }
+
+type LibrarySubTab = 'textbook' | 'dictionary' | 'reference' | 'chunks' | 'numbers';
 
 export const LibraryHubView: React.FC<LibraryHubViewProps> = ({
   initialAnchor,
@@ -16,74 +26,64 @@ export const LibraryHubView: React.FC<LibraryHubViewProps> = ({
   onNavigateToExam,
   onBackToDashboard,
 }) => {
-  const [activeSubTab, setActiveSubTab] = useState<'textbook' | 'numbers'>(initialSubTab);
+  const [activeSubTab, setActiveSubTab] = useState<LibrarySubTab>(initialSubTab);
+
+  useEffect(() => {
+    if (initialSubTab) {
+      setActiveSubTab(initialSubTab);
+    }
+  }, [initialSubTab]);
 
   return (
-    <div className="w-full space-y-4">
-      {/* 📚 ライブラリ トップヘッダー ＆ サブナビゲーション */}
-      <div className="bg-white border border-stone-200/90 rounded-2xl p-3 sm:p-4 shadow-2xs space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD] flex items-center justify-center shrink-0">
-              <BookOpen className="w-4 h-4 stroke-[2.5]" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-base sm:text-lg font-black text-[#1B2A38] tracking-tight">
-                  逆引きライブラリ
-                </h2>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-stone-100 text-stone-600 border border-stone-200">
-                  全網羅リファレンス
-                </span>
-              </div>
-              <p className="text-xs text-stone-500">
-                40課の体系文法・250大辞典・数字攻略をいつでも一発検索
-              </p>
-            </div>
-          </div>
-
-          {/* サブタブ切り替え */}
-          <div className="flex items-center gap-1 bg-stone-100 p-1 rounded-xl self-start sm:self-auto shrink-0 text-xs font-bold">
-            <button
-              type="button"
-              onClick={() => setActiveSubTab('textbook')}
-              className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${
-                activeSubTab === 'textbook'
-                  ? 'bg-white text-[#B84E34] shadow-2xs font-black'
-                  : 'text-stone-600 hover:text-stone-900'
-              }`}
-            >
-              <BookOpen className="w-3.5 h-3.5" />
-              <span>教科書・文法大辞典</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveSubTab('numbers')}
-              className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${
-                activeSubTab === 'numbers'
-                  ? 'bg-white text-[#B84E34] shadow-2xs font-black'
-                  : 'text-stone-600 hover:text-stone-900'
-              }`}
-            >
-              <Hash className="w-3.5 h-3.5" />
-              <span>数字完全攻略</span>
-            </button>
-          </div>
+    <div className="w-full space-y-3 sm:space-y-4">
+      {/* 📚 ライブラリ 統合トップカテゴリーバー（スリム・単一階層） */}
+      <div className="bg-white border border-stone-200/90 rounded-2xl p-2.5 sm:p-3 shadow-2xs">
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+          {[
+            { id: 'textbook' as const, label: '教科書40課', icon: BookOpen },
+            { id: 'dictionary' as const, label: '文法辞典250', icon: Bookmark },
+            { id: 'reference' as const, label: '使い分け・Q&A', icon: HelpCircle },
+            { id: 'chunks' as const, label: '会話・助詞', icon: MessageCircle },
+            { id: 'numbers' as const, label: '数字攻略', icon: Hash },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeSubTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveSubTab(tab.id)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+                  isActive
+                    ? 'bg-[#B84E34] text-white shadow-2xs font-black'
+                    : 'bg-stone-100/70 text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5 stroke-[2.2]" />
+                <span className="whitespace-nowrap">{tab.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* コンテンツ表示エリア */}
-      {activeSubTab === 'textbook' ? (
+      {activeSubTab === 'numbers' ? (
+        <div className="space-y-4 animate-in fade-in duration-150">
+          <KoreanNumbersGuideView showPronunciation={true} isLargeFont={false} />
+        </div>
+      ) : (
         <StudyGuideView
           onBackToNote={onBackToDashboard || (() => {})}
           initialAnchor={initialAnchor}
+          defaultTab={activeSubTab as GuideTab}
           onNavigateToExam={onNavigateToExam}
+          hideBottomNav={true}
+          hideBackButton={true}
         />
-      ) : (
-        <div className="space-y-4">
-          <KoreanNumbersGuideView showPronunciation={true} isLargeFont={false} />
-        </div>
       )}
     </div>
   );
 };
+
+export default LibraryHubView;
