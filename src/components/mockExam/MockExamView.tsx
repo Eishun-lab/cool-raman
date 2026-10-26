@@ -18,10 +18,19 @@ import {
   Check,
   Compass,
   Layers,
-  Filter
+  Filter,
+  Zap,
+  Lock,
+  Unlock,
+  Trophy,
+  Flame,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { speechService } from '../../utils/speech';
+import {
+  getInitialGamificationState,
+  saveGamificationState,
+} from '../../utils/gamification';
 import {
   MockExam,
   MockQuestion,
@@ -41,6 +50,7 @@ interface MockExamViewProps {
   onNavigateToTextbookLesson?: (lessonId: string) => void;
   onNavigateToDictionary?: (dictId: string) => void;
   onBackToDashboard?: () => void;
+  onNavigateToRoadmap?: () => void;
 }
 
 export const MockExamView: React.FC<MockExamViewProps> = ({
@@ -48,11 +58,18 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
   onNavigateToTextbookLesson,
   onNavigateToDictionary,
   onBackToDashboard,
+  onNavigateToRoadmap,
 }) => {
   // 画面状態: 'list' (選択画面) | 'exam' (試験中) | 'result' (結果発表)
   const [viewState, setViewState] = useState<'list' | 'exam' | 'result'>('list');
   const [selectedExamId, setSelectedExamId] = useState<ExamType>(initialExamId || 'hanken_5');
   const [categoryFilter, setCategoryFilter] = useState<'all' | 'hanken' | 'topik'>('all');
+  const [rewardInfo, setRewardInfo] = useState<{
+    xpGained: number;
+    stageUnlocked: boolean;
+    newStageNum?: number;
+    passed: boolean;
+  } | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<Record<string, number>>({});
   const [timeLeftSeconds, setTimeLeftSeconds] = useState(1200);
@@ -100,6 +117,7 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
     setUserAnswers({});
     setCurrentQuestionIndex(0);
     setTimeLeftSeconds(exam.timeLimitSeconds);
+    setRewardInfo(null);
     setViewState('exam');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -119,20 +137,6 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
     speechService.speak(text, {
       onEnd: () => setIsAudioPlaying(false),
       onError: () => setIsAudioPlaying(false),
-    });
-  };
-
-  // 試験終了・採点
-  const finishExam = () => {
-    setShowFinishConfirm(false);
-    setViewState('result');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-
-    // 紙吹雪エフェクト
-    confetti({
-      particleCount: 80,
-      spread: 70,
-      origin: { y: 0.6 },
     });
   };
 
@@ -303,6 +307,73 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
       diagnosticReport,
     };
   }, [activeExam, userAnswers]);
+
+  // 試験終了・採点
+  const finishExam = () => {
+    setShowFinishConfirm(false);
+    setViewState('result');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // 🎮 ゲーミフィケーション報酬の付与・ボス撃破＆アンロック判定
+    try {
+      const state = getInitialGamificationState();
+      const passed = evaluation.passed;
+      const earnedScore = evaluation.score;
+
+      // 最高スコアの更新
+      const prevScore = state.clearedBossExams[activeExam.id] || 0;
+      state.clearedBossExams[activeExam.id] = Math.max(prevScore, earnedScore);
+
+      let xpGained = 60; // 完答参加XP
+      let stageUnlocked = false;
+      let newStageNum = 0;
+
+      if (passed) {
+        xpGained = 200; // ボス撃破で+200 XP！
+
+        // ステージアンロックマッピング
+        // Stage 1 & 2 boss: hanken_5 -> unlocks Stage 3
+        // Stage 3 boss: hanken_4 -> unlocks Stage 4
+        // Stage 4 boss: topik1 -> unlocks Stage 5
+        // Stage 5 boss: hanken_3 -> unlocks Stage 6
+        // Stage 6 boss: hanken_pre2 -> unlocks Stage 7
+        // Stage 7 boss: topik2 -> unlocks Stage 8
+        let targetStage = state.unlockedStage;
+        if (activeExam.id === 'hanken_5') {
+          targetStage = Math.max(state.unlockedStage, 3);
+        } else if (activeExam.id === 'hanken_4') {
+          targetStage = Math.max(state.unlockedStage, 4);
+        } else if (activeExam.id === 'topik1') {
+          targetStage = Math.max(state.unlockedStage, 5);
+        } else if (activeExam.id === 'hanken_3') {
+          targetStage = Math.max(state.unlockedStage, 6);
+        } else if (activeExam.id === 'hanken_pre2') {
+          targetStage = Math.max(state.unlockedStage, 7);
+        } else if (activeExam.id === 'topik2') {
+          targetStage = Math.max(state.unlockedStage, 8);
+        }
+
+        if (targetStage > state.unlockedStage) {
+          state.unlockedStage = targetStage;
+          stageUnlocked = true;
+          newStageNum = targetStage;
+        }
+      }
+
+      state.xp += xpGained;
+      saveGamificationState(state);
+      setRewardInfo({ xpGained, stageUnlocked, newStageNum, passed });
+    } catch (e) {
+      console.error('Failed to update exam gamification state', e);
+    }
+
+    // 紙吹雪エフェクト
+    confetti({
+      particleCount: evaluation.passed ? 120 : 60,
+      spread: 80,
+      origin: { y: 0.6 },
+    });
+  };
 
   // 残り時間のフォーマット (分:秒)
   const formatTime = (seconds: number) => {
@@ -863,6 +934,46 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
           </div>
         )}
 
+        {/* 🎮 ゲーミフィケーション報酬・アンロックカード */}
+        {rewardInfo && (
+          <div className="bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-red-500/10 border-2 border-amber-300 rounded-2xl p-4 sm:p-5 text-left flex flex-col sm:flex-row items-center justify-between gap-4 max-w-2xl mx-auto shadow-2xs">
+            <div className="space-y-1 text-center sm:text-left">
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                <span className="px-2.5 py-0.5 rounded-full bg-amber-500 text-white font-black text-xs flex items-center gap-1 shadow-2xs">
+                  <Zap className="w-3.5 h-3.5 fill-white" /> +{rewardInfo.xpGained} XP 獲得！
+                </span>
+                {rewardInfo.passed && (
+                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white font-black text-xs flex items-center gap-1 shadow-2xs">
+                    <Trophy className="w-3.5 h-3.5" /> ボス検定クリア！
+                  </span>
+                )}
+              </div>
+              <p className="text-xs sm:text-sm font-bold text-stone-800">
+                {rewardInfo.stageUnlocked ? (
+                  <span className="text-emerald-700 flex items-center gap-1.5 justify-center sm:justify-start">
+                    <Unlock className="w-4 h-4 text-emerald-600 shrink-0" />
+                    おめでとうございます！ロードマップの【Stage {rewardInfo.newStageNum}】が新たにアンロックされました！
+                  </span>
+                ) : rewardInfo.passed ? (
+                  '合格基準を達成しました！蓄積した経験値でレベルアップが近づいています。'
+                ) : (
+                  '模試完了ボーナスを獲得しました！失点原因を復習して再挑戦しましょう。'
+                )}
+              </p>
+            </div>
+            {onNavigateToRoadmap && (
+              <button
+                type="button"
+                onClick={onNavigateToRoadmap}
+                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#B84E34] to-orange-600 text-white font-bold text-xs hover:opacity-90 shadow-sm transition-all flex items-center gap-1.5 shrink-0 cursor-pointer active:scale-95"
+              >
+                <span>🗺️ ロードマップを進める</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+        )}
+
         {/* アクションボタン */}
         <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
           <button
@@ -873,6 +984,15 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
             <RotateCcw className="w-3.5 h-3.5" />
             <span>もう一度解く</span>
           </button>
+          {onNavigateToRoadmap && (
+            <button
+              type="button"
+              onClick={onNavigateToRoadmap}
+              className="px-5 py-2.5 rounded-xl border border-[#B84E34] bg-orange-50 text-xs font-bold text-[#B84E34] hover:bg-orange-100 transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              🗺️ ロードマップへ戻る
+            </button>
+          )}
           <button
             type="button"
             onClick={() => setViewState('list')}

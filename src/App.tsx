@@ -269,6 +269,7 @@ export const App: React.FC = () => {
                 setActiveTab('textbook');
               }}
               onBackToDashboard={() => setActiveTab('dashboard')}
+              onNavigateToRoadmap={() => setActiveTab('roadmap')}
             />
           </div>
         ) : activeTab === 'quiz' ? (
