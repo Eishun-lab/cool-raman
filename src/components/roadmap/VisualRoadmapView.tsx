@@ -51,6 +51,7 @@ import {
 import confetti from 'canvas-confetti';
 import { HorangiMascot } from '../mascot/HorangiMascot';
 import { DuolingoDrillSession } from './DuolingoDrillSession';
+import { TrailPathCanvas } from './TrailPathCanvas';
 import {
   SeoulSubwaySign,
   SeoulLandmarkDeco,
@@ -592,194 +593,22 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
           </div>
         ) : (
           <>
-            {/* ★ Duolingo式 ソウル探訪アドベンチャートレイル（余計な重複カードを廃止し、トレイルそのものが主役！） */}
-            <div
-              className={`${district.canvasBg} border-2 border-stone-200/90 rounded-3xl px-3 sm:px-6 py-6 sm:py-8 shadow-xs relative overflow-hidden`}
-            >
-              {/* 上部ラベル */}
-              <div className="text-center mb-5 relative z-10">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/95 border border-stone-200 text-[10.5px] font-black text-stone-600 uppercase tracking-widest shadow-2xs">
-                  <Compass className="w-3.5 h-3.5 text-[#B84E34]" />
-                  <span>SEOUL ADVENTURE TRAIL : {district.koName}</span>
-                </span>
-              </div>
-
-              {/* 街並みランドマーク装飾（左右端に配置し、中央ノードと絶対に重ならない設計） */}
-              <div className="absolute top-16 left-1 sm:left-6 z-10 pointer-events-auto">
-                <SeoulLandmarkDeco
-                  step={step.step}
-                  position="topLeft"
-                  labelKo={district.landmarks.topLeft.labelKo}
-                  labelJa={district.landmarks.topLeft.labelJa}
-                  accentColor={district.lineColor}
-                />
-              </div>
-
-              <div className="absolute top-1/2 -translate-y-8 right-1 sm:right-6 z-10 pointer-events-auto">
-                <SeoulLandmarkDeco
-                  step={step.step}
-                  position="midRight"
-                  labelKo={district.landmarks.midRight.labelKo}
-                  labelJa={district.landmarks.midRight.labelJa}
-                  accentColor={district.lineColor}
-                />
-              </div>
-
-              <div className="absolute bottom-28 left-1 sm:left-6 z-10 pointer-events-auto">
-                <SeoulLandmarkDeco
-                  step={step.step}
-                  position="bottomLeft"
-                  labelKo={district.landmarks.bottomLeft.labelKo}
-                  labelJa={district.landmarks.bottomLeft.labelJa}
-                  accentColor={district.lineColor}
-                />
-              </div>
-
-              <div className="relative py-2 flex flex-col items-center gap-8">
-                {/* 背景の縦方向道路ライン */}
-                <div className="absolute top-4 bottom-20 left-1/2 w-2.5 -translate-x-1/2 bg-white/80 border-x border-stone-200/80 rounded-full" />
-
-                {step.scopePriority.wbsBreakdown.map((task, tIdx) => {
-                  const questKey = `s${step.step}_t${tIdx}`;
-                  const isDone = !!gameState.completedQuests[questKey];
-                  const isCurrent = tIdx === firstIncompleteIdx;
-                  const isLocked = !isDone && !isCurrent && !gameState.freeExploreMode;
-                  const drill = STAGE_DRILLS[questKey];
-                  const displayTitle = drill?.title || task.replace(/^[①-⑤\d\.\s]+/, '');
-
-                  // モバイルで左右に寄りすぎて端やランドマークと被らないよう、適度な揺れに抑制
-                  const offsets = [
-                    'translate-x-0',
-                    'translate-x-4 sm:translate-x-7',
-                    'translate-x-6 sm:translate-x-10',
-                    '-translate-x-3 sm:-translate-x-6',
-                    'translate-x-0',
-                  ];
-                  const offsetClass = offsets[tIdx % offsets.length];
-
-                  return (
-                    <React.Fragment key={tIdx}>
-                      <div
-                        className={`relative flex flex-col items-center z-20 transition-transform ${offsetClass}`}
-                      >
-                        {/* 現在地の場合の浮遊吹き出しバッジ ＆ ソナー発光リング ＆ マスコット */}
-                        {isCurrent && (
-                          <>
-                            <div className="absolute -top-7 px-2.5 py-0.5 rounded-full bg-[#B84E34] text-white text-[10.5px] font-black shadow-md animate-bounce whitespace-nowrap z-30 flex items-center gap-1 ring-2 ring-white">
-                              <Zap className="w-3 h-3 fill-amber-300 text-amber-300" />
-                              <span>ここから！</span>
-                            </div>
-
-                            {/* ソナーのように広がる発光パルスリング */}
-                            <div className="absolute top-0 w-16 h-16 sm:w-18 sm:h-18 rounded-3xl border-2 border-[#B84E34] animate-sonar-ping pointer-events-none" />
-
-                            {/* ミニマスコットがノードの隣から手を振る */}
-                            <div className="absolute -left-11 sm:-left-14 -top-2 z-30">
-                              <HorangiMascot size="sm" mood="cheering" showMessage={false} interactive={true} />
-                            </div>
-                          </>
-                        )}
-
-                        {/* 3D立体ノードボタン（タッチターゲット64px以上・ロック時もタップ案内が反応！） */}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (isLocked) {
-                              sound.playTap();
-                              setLockedHint(`前のクエスト（第${tIdx}問）をクリアすると解放されます！`);
-                              setTimeout(() => setLockedHint(null), 3000);
-                            } else {
-                              startQuestDrill(step.step, tIdx);
-                            }
-                          }}
-                          className={`w-16 h-16 sm:w-18 sm:h-18 rounded-3xl flex items-center justify-center font-black transition-all cursor-pointer relative z-20 active:scale-95 ${
-                            isDone
-                              ? 'bg-emerald-500 text-white shadow-[0_5px_0_#047857] hover:bg-emerald-600 active:translate-y-1 active:shadow-[0_1px_0_#047857]'
-                              : isCurrent
-                              ? 'bg-[#B84E34] text-white shadow-[0_5px_0_#853420] ring-4 ring-[#B84E34]/30 hover:bg-[#a2432c] active:translate-y-1 active:shadow-[0_1px_0_#853420]'
-                              : 'bg-stone-200 text-stone-500 shadow-[0_4px_0_#a8a29e] hover:bg-stone-300/80 active:translate-y-0.5'
-                          }`}
-                          title={displayTitle}
-                        >
-                          {isDone ? (
-                            <div className="relative flex items-center justify-center">
-                              <Check className="w-7 h-7 stroke-[3]" />
-                              <Sparkles className="w-3.5 h-3.5 fill-amber-300 text-amber-300 absolute -top-1 -right-1 animate-star-spin" />
-                            </div>
-                          ) : isCurrent ? (
-                            <Zap className="w-7 h-7 fill-amber-300 text-amber-300 animate-pulse" />
-                          ) : (
-                            <Lock className="w-6 h-6 text-stone-400" />
-                          )}
-                        </button>
-
-                        {/* ノード下部のミニタイトル（改行事故を防止・単一行でスマート表示） */}
-                        <span className="text-[11.5px] font-bold text-stone-800 bg-white/95 backdrop-blur-xs px-3 py-1 rounded-xl border border-stone-200/90 mt-2 text-center leading-tight shadow-2xs whitespace-nowrap break-keep select-none pointer-events-none">
-                          {displayTitle}
-                        </span>
-                      </div>
-
-                      {/* 🎁 第3問の直後にDuolingo風「K-カルチャー宝箱ノード」を配置！ */}
-                      {tIdx === 2 && (
-                        <TreasureChestNode
-                          treasure={district.treasure}
-                          isOpened={!!gameState.completedQuests[`chest_s${step.step}`]}
-                          onOpen={() => handleOpenTreasureChest(step.step)}
-                        />
-                      )}
-                    </React.Fragment>
-                  );
-                })}
-
-                {/* 🏰 ボス検定（模試）ノード：トレイル終点の凱旋ポイント */}
-                <div className="relative flex flex-col items-center z-20 mt-4 mb-2">
-                  {isBossCleared ? (
-                    <div className="absolute -top-7 px-3 py-0.5 rounded-full bg-emerald-600 text-white text-[10.5px] font-black shadow-md flex items-center gap-1 ring-2 ring-white whitespace-nowrap z-30">
-                      <CheckCircle2 className="w-3 h-3" />
-                      <span>エリア制覇！</span>
-                    </div>
-                  ) : isStageCleared ? (
-                    <div className="absolute -top-7 px-3 py-0.5 rounded-full bg-amber-500 text-white text-[10.5px] font-black shadow-md animate-bounce flex items-center gap-1 ring-2 ring-white whitespace-nowrap z-30">
-                      <Trophy className="w-3 h-3 text-amber-200" />
-                      <span>ボス検定に挑戦！</span>
-                    </div>
-                  ) : null}
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      sound.playTap();
-                      if (onNavigateToExam) {
-                        onNavigateToExam(stepMeta.examId);
-                      }
-                    }}
-                    className={`w-18 h-18 sm:w-20 sm:h-20 rounded-3xl flex items-center justify-center font-black transition-all cursor-pointer relative z-20 active:scale-95 ${
-                      isBossCleared
-                        ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-[0_6px_0_#065f46] ring-4 ring-emerald-300'
-                        : isStageCleared
-                        ? 'bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 text-white shadow-[0_6px_0_#b45309] ring-4 ring-amber-300 animate-pulse'
-                        : 'bg-gradient-to-br from-[#1B2A38] to-[#2E4256] text-white shadow-[0_6px_0_#0f172a]'
-                    }`}
-                    title={qMeta.bossLabel}
-                  >
-                    <Trophy className="w-8 h-8 text-amber-300" />
-                  </button>
-
-                  <div className="text-center mt-2.5 space-y-0.5 bg-white/95 px-3.5 py-1.5 rounded-xl border border-stone-200/90 shadow-2xs max-w-[220px]">
-                    <span className="text-xs font-black text-[#1B2A38] block leading-tight break-keep">
-                      {qMeta.bossLabel}
-                    </span>
-                    <span className="text-[10px] text-stone-500 font-bold block">
-                      {isBossCleared
-                        ? `合格達成 (${bossScore}点)`
-                        : isStageCleared
-                        ? `合格ライン: ${qMeta.bossPassScore}点 (挑戦可能！)`
-                        : `全5問クリアで解放 (合格ライン: ${qMeta.bossPassScore}点)`}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* ★ Duolingo Feather風 有機的ベジエ曲線トレイル ＆ 触覚3Dキャンディノード */}
+            <TrailPathCanvas
+              step={step}
+              district={district}
+              qMeta={qMeta}
+              stepMeta={stepMeta}
+              firstIncompleteIdx={firstIncompleteIdx}
+              completedQuests={gameState.completedQuests}
+              freeExploreMode={gameState.freeExploreMode}
+              bossScore={bossScore}
+              isBossCleared={isBossCleared}
+              isStageCleared={isStageCleared}
+              onStartDrill={startQuestDrill}
+              onOpenTreasure={handleOpenTreasureChest}
+              onNavigateToExam={onNavigateToExam}
+            />
 
             {/* 次のエリアへの誘導・前後切替フッター */}
             <div className="space-y-2 pt-1 pb-4">
@@ -851,7 +680,7 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
       {/* ===================================================================== */}
       {/* 🌟 メインヘッダー：ソウル地下鉄路線風エリアカルーセル ＆ 学習ガイド       */}
       {/* ===================================================================== */}
-      <div className="bg-white border border-stone-200/90 rounded-2xl p-2 sm:p-2.5 shadow-2xs flex items-center justify-between gap-2">
+      <div className="bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl p-2 sm:p-2.5 shadow-xs flex items-center justify-between gap-2">
         {/* ステージ切り替えカルーセル */}
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 min-w-0 flex-1">
           {ROADMAP_STEPS.map((s) => {
@@ -860,7 +689,7 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
             const bossScore = gameState.clearedBossExams[STEP_META[s.step]?.examId];
             const isBossCleared = bossScore !== undefined && bossScore >= STAGE_QUEST_META[s.step]?.bossPassScore;
             const d = SEOUL_WORLD_DISTRICTS[s.step] || SEOUL_WORLD_DISTRICTS[1];
-            const shortJa = d.jaName.split('・')[0];
+            const shortJa = d.shortTitle || d.jaName.split('・')[0];
 
             return (
               <button
@@ -870,12 +699,12 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                   sound.playTap();
                   setSelectedStage(s.step);
                 }}
-                className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+                className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-black transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
                   isSelected
-                    ? 'text-white shadow-2xs ring-2 ring-stone-900/15'
+                    ? 'text-white shadow-xs ring-2 ring-slate-900/10'
                     : isUnlocked
-                    ? 'bg-stone-50 border border-stone-200 text-stone-700 hover:bg-stone-100'
-                    : 'bg-stone-100/60 border border-stone-200/50 text-stone-400'
+                    ? 'bg-slate-50 border border-slate-200 text-slate-700 hover:bg-slate-100'
+                    : 'bg-slate-100/70 border border-slate-200/60 text-slate-400'
                 }`}
                 style={isSelected ? { backgroundColor: d.lineColor } : undefined}
               >
@@ -883,7 +712,7 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                   className={`px-1.5 py-0.5 rounded-full text-[10px] font-black tracking-tight ${
                     isSelected ? 'bg-white/25 text-white' : 'text-white'
                   }`}
-                  style={!isSelected ? { backgroundColor: isUnlocked ? d.lineColor : '#A8A29E' } : undefined}
+                  style={!isSelected ? { backgroundColor: isUnlocked ? d.lineColor : '#94A3B8' } : undefined}
                 >
                   {d.stationCode}
                 </span>
@@ -891,7 +720,7 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                 {isBossCleared ? (
                   <Trophy className={`w-3 h-3 ${isSelected ? 'text-amber-200' : 'text-amber-500'}`} />
                 ) : !isUnlocked ? (
-                  <Lock className="w-3 h-3 text-stone-400" />
+                  <Lock className="w-3 h-3 text-slate-400" />
                 ) : null}
               </button>
             );
@@ -900,13 +729,13 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
 
         {/* 右側：ストリーク ＆ XP ＆ 学習ガイド */}
         <div className="flex items-center gap-1.5 shrink-0">
-          <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 font-bold text-xs shadow-2xs">
+          <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-orange-50 border border-orange-200/90 text-orange-950 font-black text-xs shadow-2xs">
             <Flame className="w-3.5 h-3.5 text-orange-500 animate-pulse" />
             <span>{gameState.streakDays}日</span>
           </div>
 
-          <div className="hidden xs:flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-900 font-bold text-xs shadow-2xs">
-            <Zap className="w-3.5 h-3.5 text-indigo-600 fill-indigo-600" />
+          <div className="hidden xs:flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-50 border border-amber-200/90 text-amber-950 font-black text-xs shadow-2xs">
+            <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
             <span>{gameState.xp} XP</span>
           </div>
 
@@ -916,7 +745,7 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
               sound.playTap();
               setShowGuideModal(true);
             }}
-            className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+            className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-black shadow-xs transition-all flex items-center gap-1 cursor-pointer"
             title="学習目標・WBS・1枚シート・SLA母語干渉分析を一括確認"
           >
             <BookOpen className="w-3.5 h-3.5 text-amber-300" />

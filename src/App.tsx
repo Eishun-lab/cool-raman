@@ -23,16 +23,16 @@ export const App: React.FC = () => {
   const [targetExamId, setTargetExamId] = useState<ExamType | undefined>(undefined);
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] text-[#1B2A38] font-sans flex flex-col">
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 font-sans flex flex-col">
       {/* トップヘッダー */}
-      <header className="sticky top-0 z-40 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#E8E2D5] px-3 sm:px-6 h-13 sm:h-15 flex items-center">
+      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-3 sm:px-6 h-13 sm:h-15 flex items-center shadow-2xs">
         <div className="max-w-7xl mx-auto w-full flex items-center justify-between gap-2">
           {/* ロゴ */}
           <div
             onClick={() => setActiveTab('roadmap')}
             className="flex items-center gap-2 sm:gap-2.5 cursor-pointer group shrink-0 select-none"
           >
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl overflow-hidden border border-[#E8E2D5] shadow-2xs group-hover:scale-105 transition-all shrink-0 bg-[#FAF7F2]">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl overflow-hidden border border-slate-200 shadow-2xs group-hover:scale-105 transition-all shrink-0 bg-white">
               <img
                 src={hanmoaLogo}
                 alt="HanMoa Logo"
@@ -41,7 +41,7 @@ export const App: React.FC = () => {
             </div>
             <div className="shrink-0">
               <div className="flex items-center gap-1.5">
-                <span className="font-black text-base sm:text-lg tracking-tight text-[#1B2A38] whitespace-nowrap">
+                <span className="font-black text-base sm:text-lg tracking-tight text-slate-900 whitespace-nowrap">
                   HanMoa
                 </span>
                 <span className="text-[10px] font-black tracking-wider px-2 py-0.5 rounded-full bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD] whitespace-nowrap">
@@ -68,9 +68,9 @@ export const App: React.FC = () => {
                   type="button"
                   title="模擬試験一覧"
                   onClick={() => setActiveTab('exam')}
-                  className="h-8 px-2.5 sm:px-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-stone-600 hover:text-stone-900 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                  className="h-8 px-2.5 sm:px-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
                 >
-                  <GraduationCap className="w-3.5 h-3.5 text-stone-500" />
+                  <GraduationCap className="w-3.5 h-3.5 text-slate-500" />
                   <span className="hidden xs:inline">模擬試験</span>
                 </button>
                 <button
@@ -80,9 +80,9 @@ export const App: React.FC = () => {
                     setLibrarySubTab('textbook');
                     setActiveTab('library');
                   }}
-                  className="h-8 px-2.5 sm:px-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-stone-600 hover:text-stone-900 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                  className="h-8 px-2.5 sm:px-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
                 >
-                  <BookOpen className="w-3.5 h-3.5 text-stone-500" />
+                  <BookOpen className="w-3.5 h-3.5 text-slate-500" />
                   <span className="hidden xs:inline">ライブラリ</span>
                 </button>
               </div>
