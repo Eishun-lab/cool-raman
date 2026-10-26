@@ -51,6 +51,13 @@ import {
 import confetti from 'canvas-confetti';
 import { HorangiMascot } from '../mascot/HorangiMascot';
 import { DuolingoDrillSession } from './DuolingoDrillSession';
+import {
+  SeoulSubwaySign,
+  SeoulLandmarkDeco,
+  TreasureChestNode,
+  TreasureChestModal,
+} from './SeoulSceneryArtwork';
+import { SEOUL_WORLD_DISTRICTS, CultureTreasureCard } from '../../data/seoulWorldMap';
 import { sound } from '../../utils/audioSynth';
 import { RoadmapStep, GuideTab } from '../../types/guide';
 import { ROADMAP_STEPS } from '../../data/roadmap';
@@ -258,6 +265,12 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
   const [drillStepNum, setDrillStepNum] = useState<number>(1);
   const [drillTaskIdx, setDrillTaskIdx] = useState<number>(0);
 
+  // K-カルチャー宝箱モーダル状態
+  const [activeTreasureModal, setActiveTreasureModal] = useState<{
+    treasure: CultureTreasureCard;
+    districtName: string;
+  } | null>(null);
+
   // レベル情報
   const levelInfo = useMemo(() => calculateLevelInfo(gameState.xp), [gameState.xp]);
 
@@ -344,6 +357,37 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
     setDrillTaskIdx(taskIdx);
   };
 
+  // K-カルチャー宝箱を開く
+  const handleOpenTreasureChest = (stepNum: number) => {
+    const district = SEOUL_WORLD_DISTRICTS[stepNum];
+    if (!district) return;
+
+    const chestKey = `chest_s${stepNum}`;
+    const alreadyOpened = !!gameState.completedQuests[chestKey];
+
+    sound.playVictory();
+    if (!alreadyOpened) {
+      confetti({
+        particleCount: 70,
+        spread: 65,
+        origin: { y: 0.6 },
+      });
+      setGameState((prev) => ({
+        ...prev,
+        xp: prev.xp + district.treasure.xpReward,
+        completedQuests: {
+          ...prev.completedQuests,
+          [chestKey]: true,
+        },
+      }));
+    }
+
+    setActiveTreasureModal({
+      treasure: district.treasure,
+      districtName: district.jaName,
+    });
+  };
+
   // 自由探索モード（全解放）の切り替え
   const toggleFreeExplore = () => {
     setGameState((prev) => ({
@@ -377,10 +421,11 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
     return ROADMAP_STEPS;
   }, [matrixFilter]);
 
-  // 1つのステージカードをレンダリングする関数（集中モード or 一覧モードで共用）
+  // 1つのステージカードをレンダリングする関数（ソウル＆韓国 8大探訪エリア世界観）
   const renderStageCard = (step: RoadmapStep, isSingleView: boolean) => {
     const qMeta = STAGE_QUEST_META[step.step];
     const stepMeta = STEP_META[step.step];
+    const district = SEOUL_WORLD_DISTRICTS[step.step] || SEOUL_WORLD_DISTRICTS[1];
     const StageIcon = STAGE_ICONS[step.step] || Sparkles;
     const ScenarioIcon = SCENARIO_ICONS[step.step] || Coffee;
     const totalQuests = step.scopePriority.wbsBreakdown.length;
@@ -404,47 +449,68 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
 
     return (
       <div key={step.step} className="w-full space-y-4">
-        {/* ステージヘッダーカード */}
-        <div className="bg-white border border-stone-200/90 rounded-3xl p-3.5 sm:p-5 shadow-2xs space-y-3">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-              <div
-                className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br ${qMeta.themeGradient} text-white flex items-center justify-center shadow-xs shrink-0`}
-              >
-                <StageIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+        {/* 🌟 Duolingo風 フルカラー・エリア看板（Thematic Unit Banner） */}
+        <div
+          className={`bg-gradient-to-r ${district.bannerGradient} text-white rounded-3xl p-4 sm:p-6 shadow-md border-b-4 ${district.bannerBorder} relative overflow-hidden`}
+        >
+          {/* 背景の光彩装飾 */}
+          <div className="absolute -right-8 -bottom-10 w-44 h-44 bg-white/10 rounded-full blur-xl pointer-events-none" />
+
+          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-2 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                {/* ソウル地下鉄 駅名標プレート */}
+                <SeoulSubwaySign
+                  stationCode={district.stationCode}
+                  lineName={district.lineName}
+                  lineColor={district.lineColor}
+                  koName={district.koName}
+                />
+                <span className="text-[10.5px] font-black bg-black/25 backdrop-blur-xs px-2.5 py-1 rounded-full border border-white/20">
+                  {step.badge}
+                </span>
+                {isStageCleared && (
+                  <span className="text-[10.5px] font-black bg-emerald-400 text-emerald-950 px-2.5 py-1 rounded-full flex items-center gap-1 shadow-2xs">
+                    <CheckCircle2 className="w-3 h-3" /> エリア制覇
+                  </span>
+                )}
               </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="text-[10px] sm:text-[11px] font-black px-2 py-0.5 rounded-md bg-stone-100 text-stone-700">
-                    Stage {step.step} / 8
-                  </span>
-                  <span className="text-[10px] sm:text-[11px] font-black text-[#B84E34] bg-[#FAF0EC] px-2 py-0.5 rounded-full border border-[#F0D5CD]">
-                    {step.badge}
-                  </span>
-                  {isStageCleared && (
-                    <span className="text-[10px] sm:text-[11px] font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" /> 制覇
-                    </span>
-                  )}
-                </div>
-                <h3 className="text-base sm:text-lg font-black text-[#1B2A38] tracking-tight truncate mt-0.5">
-                  {qMeta.stageName}
+
+              <div>
+                <h3 className="text-lg sm:text-2xl font-black tracking-tight leading-snug">
+                  Area {step.step}: {district.jaName}
                 </h3>
+                <p className="text-xs sm:text-sm text-white/90 font-medium mt-0.5 leading-relaxed">
+                  {district.subTitle}
+                </p>
               </div>
             </div>
 
-            {/* 進捗プログレス */}
-            <div className="text-right shrink-0">
-              <span className={`text-xs sm:text-sm font-black ${isStageCleared ? 'text-emerald-700' : 'text-[#B84E34]'}`}>
-                {doneCount} / {totalQuests}
-              </span>
-              <div className="w-16 sm:w-20 bg-stone-200 rounded-full h-1.5 overflow-hidden mt-1">
-                <div
-                  className={`h-full rounded-full transition-all duration-500 ${
-                    isStageCleared ? 'bg-emerald-500' : 'bg-[#B84E34]'
-                  }`}
-                  style={{ width: `${progressPercent}%` }}
-                />
+            {/* 右側：ガイドブックボタン ＆ エリア進捗 */}
+            <div className="flex sm:flex-col items-center sm:items-end justify-between gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  sound.playTap();
+                  setActiveStepIndex(step.step - 1);
+                  setShowGuideModal(true);
+                }}
+                className="px-3.5 py-2 rounded-2xl bg-white/20 hover:bg-white/30 backdrop-blur-xs border-2 border-white/40 text-white text-xs font-black flex items-center gap-1.5 shadow-xs transition-all cursor-pointer active:translate-y-0.5"
+              >
+                <BookOpen className="w-3.5 h-3.5" />
+                <span>エリアガイド</span>
+              </button>
+
+              <div className="text-right">
+                <span className="text-[11px] font-black text-white/90 block">
+                  探訪進捗: {doneCount} / {totalQuests}
+                </span>
+                <div className="w-24 bg-black/25 rounded-full h-2 overflow-hidden mt-1 p-0.5">
+                  <div
+                    className="bg-amber-300 h-full rounded-full transition-all duration-500"
+                    style={{ width: `${progressPercent}%` }}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -571,17 +637,52 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
               </div>
             </div>
 
-            {/* ★ Duolingo風 冒険ステップトレイル（縦に並ぶ触覚ノード） */}
-            <div className="bg-white border border-stone-200/90 rounded-3xl p-5 sm:p-6 shadow-2xs">
-              <div className="text-center mb-2">
-                <span className="text-xs font-black text-stone-400 uppercase tracking-widest">
-                  QUEST PATH
+            {/* ★ Duolingo × LingoDeer風 ソウル探訪アドベンチャートレイル */}
+            <div
+              className={`${district.canvasBg} border-2 border-stone-200/90 rounded-3xl p-5 sm:p-7 shadow-xs relative overflow-hidden`}
+            >
+              {/* 上部ラベル */}
+              <div className="text-center mb-3 relative z-10">
+                <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-white/90 border border-stone-200 text-[10.5px] font-black text-stone-600 uppercase tracking-widest shadow-2xs">
+                  <Compass className="w-3 h-3 text-[#B84E34]" />
+                  <span>SEOUL ADVENTURE TRAIL : {district.koName}</span>
                 </span>
               </div>
 
+              {/* 街並みランドマーク装飾（タップすると韓国語ネイティブ発音！） */}
+              <div className="absolute top-14 left-2.5 sm:left-8 z-10">
+                <SeoulLandmarkDeco
+                  step={step.step}
+                  position="topLeft"
+                  labelKo={district.landmarks.topLeft.labelKo}
+                  labelJa={district.landmarks.topLeft.labelJa}
+                  accentColor={district.lineColor}
+                />
+              </div>
+
+              <div className="absolute top-1/2 -translate-y-8 right-2.5 sm:right-8 z-10">
+                <SeoulLandmarkDeco
+                  step={step.step}
+                  position="midRight"
+                  labelKo={district.landmarks.midRight.labelKo}
+                  labelJa={district.landmarks.midRight.labelJa}
+                  accentColor={district.lineColor}
+                />
+              </div>
+
+              <div className="absolute bottom-24 left-2.5 sm:left-8 z-10">
+                <SeoulLandmarkDeco
+                  step={step.step}
+                  position="bottomLeft"
+                  labelKo={district.landmarks.bottomLeft.labelKo}
+                  labelJa={district.landmarks.bottomLeft.labelJa}
+                  accentColor={district.lineColor}
+                />
+              </div>
+
               <div className="relative py-4 flex flex-col items-center gap-7">
-                {/* 背景の縦方向コネクター線 */}
-                <div className="absolute top-6 bottom-14 left-1/2 w-1.5 -translate-x-1/2 bg-stone-100 rounded-full" />
+                {/* 背景の縦方向道路ライン */}
+                <div className="absolute top-6 bottom-14 left-1/2 w-2.5 -translate-x-1/2 bg-white/80 border-x border-stone-200/80 rounded-full" />
 
                 {step.scopePriority.wbsBreakdown.map((task, tIdx) => {
                   const isDone = !!gameState.completedQuests[`s${step.step}_t${tIdx}`];
@@ -590,69 +691,79 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                   // S字交互配置
                   const offsets = [
                     'translate-x-0',
-                    'translate-x-6 sm:translate-x-8',
-                    'translate-x-10 sm:translate-x-12',
-                    'translate-x-4 sm:translate-x-6',
-                    '-translate-x-6 sm:-translate-x-8',
+                    'translate-x-5 sm:translate-x-8',
+                    'translate-x-8 sm:translate-x-12',
+                    'translate-x-3 sm:translate-x-6',
+                    '-translate-x-5 sm:-translate-x-8',
                   ];
                   const offsetClass = offsets[tIdx % offsets.length];
 
                   return (
-                    <div
-                      key={tIdx}
-                      className={`relative flex flex-col items-center z-10 transition-transform ${offsetClass}`}
-                    >
-                      {/* 現在地の場合の浮遊吹き出しバッジ ＆ ソナー発光リング ＆ ミニホランイ */}
-                      {isCurrent && (
-                        <>
-                          <div className="absolute -top-7 px-2.5 py-0.5 rounded-full bg-[#B84E34] text-white text-[10.5px] font-black shadow-md animate-bounce whitespace-nowrap z-20 flex items-center gap-1 ring-2 ring-white">
-                            <Zap className="w-3 h-3 fill-amber-300 text-amber-300" />
-                            <span>ここから！</span>
-                          </div>
-
-                          {/* ソナーのように広がる発光パルスリング */}
-                          <div className="absolute top-0 w-14 h-14 sm:w-16 sm:h-16 rounded-3xl border-2 border-[#B84E34] animate-sonar-ping pointer-events-none" />
-
-                          {/* ミニマスコットがノードの隣から手を振る */}
-                          <div className="absolute -left-12 sm:-left-14 -top-2 z-20 hidden xs:block">
-                            <HorangiMascot size="sm" mood="cheering" showMessage={false} interactive={true} />
-                          </div>
-                        </>
-                      )}
-
-                      {/* 3D立体ノードボタン */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (!isLocked) startQuestDrill(step.step, tIdx);
-                        }}
-                        disabled={isLocked}
-                        className={`w-14 h-14 sm:w-16 sm:h-16 rounded-3xl flex items-center justify-center font-black transition-all cursor-pointer relative ${
-                          isDone
-                            ? 'bg-emerald-500 text-white shadow-[0_5px_0_#047857] hover:bg-emerald-600 active:translate-y-1 active:shadow-[0_1px_0_#047857]'
-                            : isCurrent
-                            ? 'bg-[#B84E34] text-white shadow-[0_5px_0_#853420] ring-4 ring-[#B84E34]/30 hover:bg-[#a2432c] active:translate-y-1 active:shadow-[0_1px_0_#853420]'
-                            : 'bg-stone-200 text-stone-400 shadow-[0_4px_0_#a8a29e] cursor-not-allowed opacity-80'
-                        }`}
-                        title={task}
+                    <React.Fragment key={tIdx}>
+                      <div
+                        className={`relative flex flex-col items-center z-10 transition-transform ${offsetClass}`}
                       >
-                        {isDone ? (
-                          <div className="relative flex items-center justify-center">
-                            <Check className="w-6 h-6 stroke-[3]" />
-                            <Sparkles className="w-3.5 h-3.5 fill-amber-300 text-amber-300 absolute -top-1 -right-1 animate-star-spin" />
-                          </div>
-                        ) : isCurrent ? (
-                          <Zap className="w-6 h-6 fill-amber-300 text-amber-300" />
-                        ) : (
-                          <Lock className="w-5 h-5 text-stone-400" />
-                        )}
-                      </button>
+                        {/* 現在地の場合の浮遊吹き出しバッジ ＆ ソナー発光リング ＆ ミニホランイ */}
+                        {isCurrent && (
+                          <>
+                            <div className="absolute -top-7 px-2.5 py-0.5 rounded-full bg-[#B84E34] text-white text-[10.5px] font-black shadow-md animate-bounce whitespace-nowrap z-20 flex items-center gap-1 ring-2 ring-white">
+                              <Zap className="w-3 h-3 fill-amber-300 text-amber-300" />
+                              <span>ここから！</span>
+                            </div>
 
-                      {/* ノード下部のミニタイトル */}
-                      <span className="text-[11px] font-bold text-stone-700 mt-2 max-w-[140px] text-center leading-tight">
-                        {task.replace(/^[①-⑤\d\.\s]+/, '')}
-                      </span>
-                    </div>
+                            {/* ソナーのように広がる発光パルスリング */}
+                            <div className="absolute top-0 w-14 h-14 sm:w-16 sm:h-16 rounded-3xl border-2 border-[#B84E34] animate-sonar-ping pointer-events-none" />
+
+                            {/* ミニマスコットがノードの隣から手を振る */}
+                            <div className="absolute -left-12 sm:-left-14 -top-2 z-20 hidden xs:block">
+                              <HorangiMascot size="sm" mood="cheering" showMessage={false} interactive={true} />
+                            </div>
+                          </>
+                        )}
+
+                        {/* 3D立体ノードボタン */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!isLocked) startQuestDrill(step.step, tIdx);
+                          }}
+                          disabled={isLocked}
+                          className={`w-14 h-14 sm:w-16 sm:h-16 rounded-3xl flex items-center justify-center font-black transition-all cursor-pointer relative ${
+                            isDone
+                              ? 'bg-emerald-500 text-white shadow-[0_5px_0_#047857] hover:bg-emerald-600 active:translate-y-1 active:shadow-[0_1px_0_#047857]'
+                              : isCurrent
+                              ? 'bg-[#B84E34] text-white shadow-[0_5px_0_#853420] ring-4 ring-[#B84E34]/30 hover:bg-[#a2432c] active:translate-y-1 active:shadow-[0_1px_0_#853420]'
+                              : 'bg-stone-200 text-stone-400 shadow-[0_4px_0_#a8a29e] cursor-not-allowed opacity-80'
+                          }`}
+                          title={task}
+                        >
+                          {isDone ? (
+                            <div className="relative flex items-center justify-center">
+                              <Check className="w-6 h-6 stroke-[3]" />
+                              <Sparkles className="w-3.5 h-3.5 fill-amber-300 text-amber-300 absolute -top-1 -right-1 animate-star-spin" />
+                            </div>
+                          ) : isCurrent ? (
+                            <Zap className="w-6 h-6 fill-amber-300 text-amber-300" />
+                          ) : (
+                            <Lock className="w-5 h-5 text-stone-400" />
+                          )}
+                        </button>
+
+                        {/* ノード下部のミニタイトル */}
+                        <span className="text-[11px] font-bold text-stone-800 bg-white/85 backdrop-blur-2xs px-2.5 py-0.5 rounded-lg border border-stone-200/60 mt-2 max-w-[155px] text-center leading-tight shadow-2xs">
+                          {task.replace(/^[①-⑤\d\.\s]+/, '')}
+                        </span>
+                      </div>
+
+                      {/* 🎁 第3問の直後にDuolingo風「K-カルチャー宝箱ノード」を配置！ */}
+                      {tIdx === 2 && (
+                        <TreasureChestNode
+                          treasure={district.treasure}
+                          isOpened={!!gameState.completedQuests[`chest_s${step.step}`]}
+                          onOpen={() => handleOpenTreasureChest(step.step)}
+                        />
+                      )}
+                    </React.Fragment>
                   );
                 })}
 
@@ -670,7 +781,7 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                   >
                     <Trophy className="w-7 h-7 text-amber-300" />
                   </button>
-                  <div className="text-center mt-2 space-y-0.5">
+                  <div className="text-center mt-2 space-y-0.5 bg-white/90 px-3 py-1 rounded-xl border border-stone-200/80 shadow-2xs">
                     <span className="text-xs font-black text-[#1B2A38] block">{qMeta.bossLabel}</span>
                     <span className="text-[10px] text-stone-500 font-bold block">
                       {isBossCleared ? `撃破済 (${bossScore}点)` : `合格ライン: ${qMeta.bossPassScore}点`}
@@ -680,12 +791,13 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
               </div>
             </div>
 
-            {/* 前後Stage切り替えフッター */}
+            {/* 前後エリア切り替えフッター */}
             <div className="flex items-center justify-between pt-1">
               <button
                 type="button"
                 disabled={selectedStage <= 1}
                 onClick={() => {
+                  sound.playTap();
                   setSelectedStage((prev) => Math.max(1, prev - 1));
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
@@ -696,17 +808,18 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                 }`}
               >
                 <ChevronLeft className="w-3.5 h-3.5" />
-                <span>前のStage</span>
+                <span>前のエリア</span>
               </button>
 
               <span className="text-xs font-black text-stone-400">
-                Stage {selectedStage} / 8
+                {district.stationCode} {district.jaName} ({selectedStage}/8)
               </span>
 
               <button
                 type="button"
                 disabled={selectedStage >= 8}
                 onClick={() => {
+                  sound.playTap();
                   setSelectedStage((prev) => Math.min(8, prev + 1));
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
@@ -716,7 +829,7 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                     : 'text-stone-700 border border-stone-200 bg-white hover:bg-stone-50'
                 }`}
               >
-                <span>次のStage</span>
+                <span>次のエリア</span>
                 <ChevronRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -729,7 +842,7 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
   return (
     <div className="w-full space-y-3 sm:space-y-4">
       {/* ===================================================================== */}
-      {/* 🌟 メインヘッダー：ステージカルーセル ＆ 1ボタン学習ガイド              */}
+      {/* 🌟 メインヘッダー：ソウル地下鉄路線風エリアカルーセル ＆ 学習ガイド       */}
       {/* ===================================================================== */}
       <div className="bg-white border border-stone-200/90 rounded-2xl p-2 sm:p-2.5 shadow-2xs flex items-center justify-between gap-2">
         {/* ステージ切り替えカルーセル */}
@@ -739,7 +852,8 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
             const isUnlocked = gameState.freeExploreMode || s.step <= gameState.unlockedStage;
             const bossScore = gameState.clearedBossExams[STEP_META[s.step]?.examId];
             const isBossCleared = bossScore !== undefined && bossScore >= STAGE_QUEST_META[s.step]?.bossPassScore;
-            const PillIcon = STAGE_ICONS[s.step] || Sparkles;
+            const d = SEOUL_WORLD_DISTRICTS[s.step] || SEOUL_WORLD_DISTRICTS[1];
+            const shortJa = d.jaName.split('・')[0];
 
             return (
               <button
@@ -751,16 +865,24 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                 }}
                 className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
                   isSelected
-                    ? 'bg-[#B84E34] text-white shadow-2xs ring-2 ring-[#B84E34]/30'
+                    ? 'text-white shadow-2xs ring-2 ring-stone-900/15'
                     : isUnlocked
                     ? 'bg-stone-50 border border-stone-200 text-stone-700 hover:bg-stone-100'
                     : 'bg-stone-100/60 border border-stone-200/50 text-stone-400'
                 }`}
+                style={isSelected ? { backgroundColor: d.lineColor } : undefined}
               >
-                <PillIcon className={`w-3.5 h-3.5 ${isSelected ? 'text-white' : 'text-[#B84E34]'}`} />
-                <span className="whitespace-nowrap">Stage {s.step}</span>
+                <span
+                  className={`px-1.5 py-0.5 rounded-full text-[10px] font-black tracking-tight ${
+                    isSelected ? 'bg-white/25 text-white' : 'text-white'
+                  }`}
+                  style={!isSelected ? { backgroundColor: isUnlocked ? d.lineColor : '#A8A29E' } : undefined}
+                >
+                  {d.stationCode}
+                </span>
+                <span className="whitespace-nowrap">{shortJa}</span>
                 {isBossCleared ? (
-                  <Trophy className="w-3 h-3 text-amber-300" />
+                  <Trophy className={`w-3 h-3 ${isSelected ? 'text-amber-200' : 'text-amber-500'}`} />
                 ) : !isUnlocked ? (
                   <Lock className="w-3 h-3 text-stone-400" />
                 ) : null}
@@ -1332,6 +1454,17 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
             const totalTasks = ROADMAP_STEPS[drillStepNum - 1].scopePriority.wbsBreakdown.length;
             handleToggleQuest(drillStepNum, drillTaskIdx, totalTasks);
           }}
+        />
+      )}
+
+      {/* ===================================================================== */}
+      {/* 🎁 韓国リアル文化＆流行語 宝箱コレクションモーダル                       */}
+      {/* ===================================================================== */}
+      {activeTreasureModal && (
+        <TreasureChestModal
+          treasure={activeTreasureModal.treasure}
+          districtName={activeTreasureModal.districtName}
+          onClose={() => setActiveTreasureModal(null)}
         />
       )}
     </div>
