@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Map,
   Target,
@@ -25,7 +25,12 @@ import {
   HelpCircle,
   Table,
   CheckCircle2,
+  Trophy,
+  LifeBuoy,
+  Play,
+  RotateCcw,
 } from 'lucide-react';
+import confetti from 'canvas-confetti';
 import { RoadmapStep, GuideTab } from '../../types/guide';
 import { ROADMAP_STEPS } from '../../data/roadmap';
 import { speechService } from '../../utils/speech';
@@ -52,60 +57,138 @@ const STEP_META: Record<
     examLabel: 'ハングル検定 5級 模擬試験',
     stageLabel: '第1章（第1〜10課）入門・土台',
     firstLessonId: 'lesson-1',
-    accentGradient: 'from-emerald-600 to-teal-700',
+    accentGradient: 'from-emerald-500 to-teal-600',
   },
   2: {
     examId: 'hanken_5',
     examLabel: 'ハングル検定 5級 模擬試験',
     stageLabel: '第1章（第6〜10課）基本時制',
     firstLessonId: 'lesson-6',
-    accentGradient: 'from-sky-600 to-blue-700',
+    accentGradient: 'from-sky-500 to-blue-600',
   },
   3: {
     examId: 'hanken_4',
     examLabel: 'ハングル検定 4級 模擬試験',
     stageLabel: '第2章（第11〜20課）不規則活用',
     firstLessonId: 'lesson-11',
-    accentGradient: 'from-amber-600 to-orange-700',
+    accentGradient: 'from-amber-500 to-orange-600',
   },
   4: {
     examId: 'topik1',
     examLabel: 'TOPIK I 模擬試験（1・2級）',
     stageLabel: '第3章（第21〜30課）複文・連体形',
     firstLessonId: 'lesson-21',
-    accentGradient: 'from-rose-600 to-red-700',
+    accentGradient: 'from-rose-500 to-red-600',
   },
   5: {
     examId: 'hanken_3',
     examLabel: 'ハングル検定 3級 模擬試験',
     stageLabel: '第4章（第31〜35課）中級実戦',
     firstLessonId: 'lesson-31',
-    accentGradient: 'from-purple-600 to-indigo-700',
+    accentGradient: 'from-violet-500 to-purple-600',
   },
   6: {
     examId: 'hanken_pre2',
     examLabel: 'ハングル検定 準2級 模擬試験',
     stageLabel: '第5章（第36〜40課）中上級完成',
     firstLessonId: 'lesson-36',
-    accentGradient: 'from-pink-600 to-rose-700',
+    accentGradient: 'from-blue-600 to-indigo-700',
   },
   7: {
     examId: 'topik2',
     examLabel: 'TOPIK II 模擬試験（3・4級）',
     stageLabel: '文法大辞典（No.181〜225）高級論理',
     firstLessonId: 'dict-181',
-    accentGradient: 'from-cyan-600 to-sky-700',
+    accentGradient: 'from-teal-600 to-cyan-700',
   },
   8: {
     examId: 'topik2',
     examLabel: 'TOPIK II 模擬試験（5・6級）',
     stageLabel: '文法大辞典（No.226〜250）格調論述',
     firstLessonId: 'dict-226',
-    accentGradient: 'from-amber-500 to-yellow-600',
+    accentGradient: 'from-rose-600 via-pink-600 to-amber-500',
   },
 };
 
-type RoadmapViewMode = 'matrix' | 'focus' | 'list';
+// 冒険クエストマップ用ビジュアルメタデータ（直感的シンボル・アイコン）
+const STAGE_QUEST_META: Record<
+  number,
+  {
+    icon: string;
+    stageName: string;
+    scenarioIcon: string;
+    scenarioTitle: string;
+    themeGradient: string;
+    bossLabel: string;
+  }
+> = {
+  1: {
+    icon: '🔤',
+    stageName: 'ハングル解読アイランド',
+    scenarioIcon: '☕',
+    scenarioTitle: '明洞のカフェで、メニューを指差さずに「아메리카노 하나 주세요」と注文してレシートを受け取れる！',
+    themeGradient: 'from-emerald-500 to-teal-600',
+    bossLabel: 'ハングル検定 5級（合格ライン: 60点）',
+  },
+  2: {
+    icon: '🦴',
+    stageName: '日常会話の骨格アイランド',
+    scenarioIcon: '🛍️',
+    scenarioTitle: '韓国人の友達に「週末は何をしたの？」と聞かれて、自分の予定や過去の行動をスラスラ即答できる！',
+    themeGradient: 'from-sky-500 to-blue-600',
+    bossLabel: 'ハングル検定 5級（合格ライン: 60点）',
+  },
+  3: {
+    icon: '🧗',
+    stageName: '不規則活用・感情表現アイランド',
+    scenarioIcon: '💌',
+    scenarioTitle: '服屋で「少し小さいので大きいサイズを見せてください」と要望を伝え、推しにファンレターを書ける！',
+    themeGradient: 'from-amber-500 to-orange-600',
+    bossLabel: 'ハングル検定 4級（合格ライン: 70点）',
+  },
+  4: {
+    icon: '🏰',
+    stageName: '初級完全制覇・自立アイランド',
+    scenarioIcon: '🏨',
+    scenarioTitle: 'ホテルのチェックインで「荷物を預かってもらえますか？朝食は何時ですか？」と全て韓国語で交渉できる！',
+    themeGradient: 'from-rose-500 to-red-600',
+    bossLabel: 'TOPIK I（初級2級取得ボーダー: 140点）',
+  },
+  5: {
+    icon: '🚀',
+    stageName: '社会・伝言・間接話法アイランド',
+    scenarioIcon: '🏢',
+    scenarioTitle: '職場で「キム課長から電話があり、会議は午後2時から始めるとのことでした」と正確に報告・伝言できる！',
+    themeGradient: 'from-violet-500 to-purple-600',
+    bossLabel: 'ハングル検定 3級（合格ライン: 70点）',
+  },
+  6: {
+    icon: '📊',
+    stageName: '論理ディスカッションアイランド',
+    scenarioIcon: '🗣️',
+    scenarioTitle: '若者の流行や就職事情について、賛成・反対の理由を添えて韓国人と20分間議論できる！',
+    themeGradient: 'from-blue-600 to-indigo-700',
+    bossLabel: 'ハングル検定 準2級（合格ライン: 70点）',
+  },
+  7: {
+    icon: '🎓',
+    stageName: 'ビジネス商談・学術小論文アイランド',
+    scenarioIcon: '💼',
+    scenarioTitle: 'ビジネス会議で新商品をプレゼンし、相手の反論に対して論理的根拠を示して納得させられる！',
+    themeGradient: 'from-teal-600 to-cyan-700',
+    bossLabel: 'TOPIK II（中上級5級水準: 190点）',
+  },
+  8: {
+    icon: '👑',
+    stageName: 'ネイティブ・文化的共生アイランド',
+    scenarioIcon: '🌟',
+    scenarioTitle: 'テレビの時事討論番組を字幕なしで100%理解し、ジョークも含めて現地の人と対等に笑い合える！',
+    themeGradient: 'from-rose-600 via-pink-600 to-amber-500',
+    bossLabel: 'TOPIK II（最上級6級水準: 230点）',
+  },
+};
+
+type RoadmapViewMode = 'quest' | 'matrix' | 'focus';
 type StationDetailTab = 'goal' | 'scope' | 'experience' | 'speech';
 
 export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
@@ -113,13 +196,50 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
   onNavigateToContent,
   showPronunciation = true,
 }) => {
-  // 表示モード: 'matrix' (1枚完結マトリクス表) | 'focus' (路線図＋1駅フォーカス) | 'list' (全駅スクロール)
-  const [viewMode, setViewMode] = useState<RoadmapViewMode>('matrix');
+  // 表示モード: 'quest' (Duolingo風 冒険クエストマップ) | 'matrix' (1枚全体マトリクス) | 'focus' (路線図＋1駅フォーカス)
+  const [viewMode, setViewMode] = useState<RoadmapViewMode>('quest');
   const [activeStepIndex, setActiveStepIndex] = useState(0);
   const [playingStep, setPlayingStep] = useState<number | null>(null);
   const [stationTab, setStationTab] = useState<StationDetailTab>('goal');
   const [matrixFilter, setMatrixFilter] = useState<'all' | 'beginner' | 'advanced'>('all');
-  const [expandedScopeInMatrix, setExpandedScopeInMatrix] = useState<Record<number, boolean>>({});
+
+  // クエスト完了状態のLocalStorage永続化（ゲーム感覚でチェック）
+  const [completedQuests, setCompletedQuests] = useState<Record<string, boolean>>(() => {
+    try {
+      const saved = localStorage.getItem('hanmoa_roadmap_quests');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const toggleQuest = (stepNum: number, taskIdx: number, totalTasks: number) => {
+    const key = `s${stepNum}_t${taskIdx}`;
+    const nextState = !completedQuests[key];
+    const updated = { ...completedQuests, [key]: nextState };
+    setCompletedQuests(updated);
+    try {
+      localStorage.setItem('hanmoa_roadmap_quests', JSON.stringify(updated));
+    } catch {}
+
+    // そのステージの全クエストが完了したら紙吹雪エフェクト！
+    if (nextState) {
+      let stageAllClear = true;
+      for (let i = 0; i < totalTasks; i++) {
+        if (!updated[`s${stepNum}_t${i}`]) {
+          stageAllClear = false;
+          break;
+        }
+      }
+      if (stageAllClear) {
+        confetti({
+          particleCount: 70,
+          spread: 60,
+          origin: { y: 0.6 },
+        });
+      }
+    }
+  };
 
   const activeStep = ROADMAP_STEPS[activeStepIndex];
   const meta = STEP_META[activeStep.step];
@@ -162,88 +282,365 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
   }, [matrixFilter]);
 
   return (
-    <div className="bg-[#FAF7F2] border border-[#E8E2D5] rounded-3xl p-3 sm:p-6 shadow-xs space-y-6">
+    <div className="bg-[#FAF7F2] border border-[#E8E2D5] rounded-3xl p-3 sm:p-7 shadow-xs space-y-6">
       {/* 🧭 ロードマップ ヘッダーバー */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-[#EDE7DC]">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-[#B84E34] text-white flex items-center justify-center font-black shadow-xs shrink-0">
-            <Compass className="w-5 h-5" />
+          <div className="w-11 h-11 rounded-2xl bg-[#B84E34] text-white flex items-center justify-center font-black shadow-xs shrink-0 text-xl">
+            🗺️
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-base sm:text-xl font-black text-[#1B2A38] tracking-tight">
+              <h2 className="text-lg sm:text-2xl font-black text-[#1B2A38] tracking-tight">
                 韓国語 完全制覇ロードマップ
               </h2>
-              <span className="text-[10px] font-black text-[#B84E34] bg-[#FAF0EC] px-2.5 py-0.5 rounded-full border border-[#F0D5CD]">
-                ブレない軸 ＆ 挫折防止設計
+              <span className="text-xs font-black text-[#B84E34] bg-[#FAF0EC] px-2.5 py-0.5 rounded-full border border-[#F0D5CD]">
+                Duolingo風 冒険クエスト
               </span>
             </div>
-            <p className="text-xs text-stone-500">
-              ゴール・Done定義・WBS作業分解・つまずき予見・忙しい日の5分縮小プロトコル完備
+            <p className="text-xs sm:text-sm text-stone-600 mt-0.5">
+              大きな文字・直感的ストーリー・チェック式クエスト・忙しい日の5分縮小プロトコル
             </p>
           </div>
         </div>
 
-        {/* 3大表示モード切り替えタブ */}
-        <div className="flex items-center gap-1 self-start md:self-auto bg-stone-200/60 p-1 rounded-2xl text-xs font-bold shrink-0">
+        {/* 表示モード切り替えタブ */}
+        <div className="flex items-center gap-1 self-start md:self-auto bg-stone-200/70 p-1.5 rounded-2xl text-xs font-bold shrink-0">
+          <button
+            type="button"
+            onClick={() => setViewMode('quest')}
+            className={`px-3.5 py-2 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
+              viewMode === 'quest'
+                ? 'bg-white text-[#B84E34] shadow-xs font-black'
+                : 'text-stone-600 hover:text-stone-900'
+            }`}
+          >
+            <Sparkles className="w-4 h-4 text-amber-500" />
+            <span>冒険クエストマップ</span>
+          </button>
           <button
             type="button"
             onClick={() => setViewMode('matrix')}
-            className={`px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
+            className={`px-3 py-2 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
               viewMode === 'matrix'
                 ? 'bg-white text-[#B84E34] shadow-xs font-black'
                 : 'text-stone-600 hover:text-stone-900'
             }`}
           >
-            <Table className="w-3.5 h-3.5" />
-            <span>📊 全体俯瞰マトリクス</span>
+            <Table className="w-4 h-4" />
+            <span>1枚俯瞰シート</span>
           </button>
           <button
             type="button"
             onClick={() => setViewMode('focus')}
-            className={`px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
+            className={`px-3 py-2 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
               viewMode === 'focus'
                 ? 'bg-white text-[#B84E34] shadow-xs font-black'
                 : 'text-stone-600 hover:text-stone-900'
             }`}
           >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>🚇 駅別フォーカス</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setViewMode('list')}
-            className={`px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
-              viewMode === 'list'
-                ? 'bg-white text-[#B84E34] shadow-xs font-black'
-                : 'text-stone-600 hover:text-stone-900'
-            }`}
-          >
-            <Layers className="w-3.5 h-3.5" />
-            <span>📜 全駅リスト</span>
+            <Map className="w-4 h-4" />
+            <span>駅別フォーカス</span>
           </button>
         </div>
       </div>
 
       {/* ===================================================================== */}
-      {/* 📊 モード①：1枚完結！全体俯瞰マトリクスシート（Master Matrix Sheet）   */}
-      {/* 「フェーズ（期間）× 学習項目（Must分解）× Done定義 × リスク対策」を横断 */}
+      {/* 🌟 モード①：Duolingo風 冒険クエストマップ（わかりやすい・字が大きい） */}
+      {/* ===================================================================== */}
+      {viewMode === 'quest' && (
+        <div className="space-y-8 max-w-4xl mx-auto py-2">
+          {/* マップイントロバナー */}
+          <div className="bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 border border-amber-200/80 rounded-3xl p-5 sm:p-6 text-center space-y-2 shadow-xs">
+            <span className="text-xs font-black tracking-wider uppercase text-amber-900 bg-amber-200/60 px-3 py-1 rounded-full">
+              🏝️ ハングルマスターへの冒険ルート（全8ステージ）
+            </span>
+            <h3 className="text-lg sm:text-2xl font-black text-[#1B2A38]">
+              クエストをクリアして、次のステージへ進もう！
+            </h3>
+            <p className="text-xs sm:text-sm text-stone-600 max-w-xl mx-auto leading-relaxed">
+              「何をすれば完了か」のチェック項目を1つずつクリアしていくだけ。<br className="hidden sm:inline" />
+              忙しい日は「5分縮小プロトコル」でOK！各ステージの最後にはボス検定（模擬試験）が待っています。
+            </p>
+          </div>
+
+          {/* 8大ステージカード（一本の冒険ロード） */}
+          <div className="space-y-10 relative">
+            {ROADMAP_STEPS.map((step, sIdx) => {
+              const qMeta = STAGE_QUEST_META[step.step];
+              const stepMeta = STEP_META[step.step];
+              const totalQuests = step.scopePriority.wbsBreakdown.length;
+              
+              // このステージの完了クエスト数をカウント
+              let doneCount = 0;
+              for (let i = 0; i < totalQuests; i++) {
+                if (completedQuests[`s${step.step}_t${i}`]) {
+                  doneCount++;
+                }
+              }
+              const isStageCleared = doneCount === totalQuests && totalQuests > 0;
+              const progressPercent = Math.round((doneCount / totalQuests) * 100);
+
+              return (
+                <div key={step.step} className="space-y-4">
+                  {/* ステージメインカード */}
+                  <div
+                    className={`bg-white border-2 rounded-3xl p-5 sm:p-8 shadow-md hover:shadow-xl transition-all space-y-6 ${
+                      isStageCleared
+                        ? 'border-emerald-400 ring-2 ring-emerald-200/60'
+                        : 'border-stone-200'
+                    }`}
+                  >
+                    {/* ステージヘッダー */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-stone-100">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br ${qMeta.themeGradient} text-white flex items-center justify-center text-2xl shadow-sm shrink-0`}
+                        >
+                          {qMeta.icon}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xs font-black px-2.5 py-0.5 rounded-lg bg-stone-100 text-stone-700">
+                              ステージ {step.step} / 8
+                            </span>
+                            <span className="text-xs font-black text-[#B84E34] bg-[#FAF0EC] px-2.5 py-0.5 rounded-full border border-[#F0D5CD]">
+                              {step.badge}
+                            </span>
+                            {isStageCleared && (
+                              <span className="text-xs font-black text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full border border-emerald-300 flex items-center gap-1">
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                <span>ステージ制覇！</span>
+                              </span>
+                            )}
+                          </div>
+                          <h4 className="text-lg sm:text-2xl font-black text-[#1B2A38] mt-1">
+                            {qMeta.stageName}
+                          </h4>
+                          <span className="text-xs font-mono text-stone-500">
+                            ⏱️ 想定時間: {step.timeHours}（タイムボックス: {step.scopePriority.timeboxWeeks}）
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* クエスト進捗プログレス */}
+                      <div className="bg-stone-50 p-3 rounded-2xl border border-stone-200 sm:w-48 shrink-0 space-y-1.5">
+                        <div className="flex items-center justify-between text-xs font-black">
+                          <span className="text-stone-700">進捗状況</span>
+                          <span className={isStageCleared ? 'text-emerald-700' : 'text-[#B84E34]'}>
+                            {doneCount} / {totalQuests} 達成 ({progressPercent}%)
+                          </span>
+                        </div>
+                        <div className="w-full bg-stone-200 rounded-full h-2.5 overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all duration-500 ${
+                              isStageCleared
+                                ? 'bg-emerald-500'
+                                : 'bg-[#B84E34]'
+                            }`}
+                            style={{ width: `${progressPercent}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* ☕ リアルな達成シナリオ（一目でわかるユーザー体験ゴール） */}
+                    <div className="bg-gradient-to-r from-amber-50/80 to-orange-50/80 border border-amber-200 rounded-2xl p-4 sm:p-5 flex items-start gap-3.5">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-white shadow-2xs border border-amber-200 flex items-center justify-center text-2xl shrink-0">
+                        {qMeta.scenarioIcon}
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-[11px] font-black uppercase text-amber-900 tracking-wider">
+                          🎯 このステージをクリアしたあなたの姿
+                        </span>
+                        <p className="text-sm sm:text-base font-black text-[#1B2A38] leading-snug">
+                          {qMeta.scenarioTitle}
+                        </p>
+                        <p className="text-xs text-stone-600 pt-0.5">
+                          {step.goalDefinition.purpose}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* ⭐️ チェック式クエスト（タップでクリアできる！） */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs sm:text-sm font-black text-[#1B2A38] flex items-center gap-1.5">
+                          <Sparkles className="w-4 h-4 text-amber-500" />
+                          <span>必須クエスト（タップしてクリア！）</span>
+                        </span>
+                        <span className="text-xs text-stone-400">タップでチェック</span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        {step.scopePriority.wbsBreakdown.map((task, tIdx) => {
+                          const isDone = !!completedQuests[`s${step.step}_t${tIdx}`];
+
+                          return (
+                            <div
+                              key={tIdx}
+                              onClick={() => toggleQuest(step.step, tIdx, totalQuests)}
+                              className={`p-3.5 rounded-2xl border-2 transition-all flex items-center gap-3 cursor-pointer select-none group active:scale-[0.99] ${
+                                isDone
+                                  ? 'bg-emerald-50/80 border-emerald-300 text-emerald-950 shadow-2xs'
+                                  : 'bg-[#FAF7F2] border-stone-200 hover:border-stone-300 hover:bg-white text-stone-800'
+                              }`}
+                            >
+                              <div
+                                className={`w-7 h-7 rounded-xl flex items-center justify-center font-black text-sm shrink-0 transition-all ${
+                                  isDone
+                                    ? 'bg-emerald-600 text-white shadow-xs'
+                                    : 'bg-white border-2 border-stone-300 text-transparent group-hover:border-[#B84E34]'
+                                }`}
+                              >
+                                ✓
+                              </div>
+                              <span
+                                className={`text-xs sm:text-sm font-bold leading-snug ${
+                                  isDone ? 'line-through text-emerald-800/80' : 'text-stone-800'
+                                }`}
+                              >
+                                {task}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* スコープ拡大防止原則（手を出さない制約） */}
+                      <div className="p-3 rounded-xl bg-stone-50 border border-stone-200 text-xs text-stone-600 flex items-start gap-2">
+                        <span className="text-rose-600 font-black shrink-0">🛑 挫折を防ぐ制約:</span>
+                        <span>{step.scopePriority.scopeGuard}</span>
+                      </div>
+                    </div>
+
+                    {/* 🗣️ Duolingo風 モデルセリフ（大きな文字 ＆ ネイティブ音声） */}
+                    <div className="bg-[#FAF0EC]/50 border border-[#F2DED7] rounded-2xl p-4 sm:p-5 space-y-3">
+                      <div className="flex items-center justify-between text-xs font-black text-[#B84E34]">
+                        <span className="flex items-center gap-1.5">
+                          <MessageCircle className="w-4 h-4" />
+                          <span>ステージ代表フレーズ（音声を真似して声に出そう！）</span>
+                        </span>
+                        <span className="text-stone-400 font-normal text-[11px]">ネイティブ発音</span>
+                      </div>
+
+                      <div className="bg-white p-4 rounded-2xl border border-[#F0D5CC] shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="space-y-1">
+                          <p className="text-lg sm:text-xl font-black text-[#1B2A38] leading-snug">
+                            {step.representativeSpeech.ko}
+                          </p>
+                          {showPronunciation && step.representativeSpeech.reading && (
+                            <p className="text-xs sm:text-sm text-stone-400 font-mono">
+                              {step.representativeSpeech.reading}
+                            </p>
+                          )}
+                          <p className="text-xs sm:text-sm text-stone-700 font-bold pt-0.5">
+                            {step.representativeSpeech.ja}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => playSpeech(step.representativeSpeech.ko, step.step)}
+                          className={`px-4 py-2.5 rounded-xl border flex items-center justify-center gap-2 text-xs font-black transition-all cursor-pointer shrink-0 shadow-xs ${
+                            playingStep === step.step
+                              ? 'bg-[#B84E34] text-white animate-pulse'
+                              : 'bg-[#FAF0EC] text-[#B84E34] border-[#F0D5CD] hover:bg-[#F2DED7]'
+                          }`}
+                        >
+                          <Volume2 className="w-4 h-4" />
+                          <span>{playingStep === step.step ? '再生中...' : '音声を聴く'}</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* 🛟 忙しい日の「5分縮小プロトコル」 */}
+                    <div className="bg-rose-50/50 border border-rose-200/80 rounded-2xl p-4 flex items-start gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-white text-[#B84E34] border border-rose-200 flex items-center justify-center text-lg shrink-0 shadow-2xs">
+                        🛟
+                      </div>
+                      <div className="space-y-0.5">
+                        <strong className="text-xs sm:text-sm font-black text-rose-900 block">
+                          忙しくて倒れそうな日はこれだけ！「5分縮小プロトコル」
+                        </strong>
+                        <p className="text-xs sm:text-sm text-stone-700 leading-relaxed font-medium">
+                          {step.learningExperience.riskAndFallback.fallbackProtocol}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* 🏆 ボス検定（模擬試験）＆ 教科書ボタン */}
+                    <div className="bg-[#FAF7F2] border border-[#E8E2D5] rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-1.5 text-xs font-black text-[#B84E34]">
+                          <Trophy className="w-4 h-4 text-amber-500" />
+                          <span>このステージのボス検定</span>
+                        </div>
+                        <h5 className="text-sm sm:text-base font-black text-[#1B2A38]">
+                          {qMeta.bossLabel}
+                        </h5>
+                        <p className="text-xs text-stone-500">
+                          合格すると、あなたのCan-Do到達度カルテが即時発行されます。
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        {onNavigateToExam && (
+                          <button
+                            type="button"
+                            onClick={() => onNavigateToExam(stepMeta.examId)}
+                            className="px-4 py-2.5 rounded-xl bg-[#B84E34] hover:bg-[#a2432c] text-white text-xs sm:text-sm font-bold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+                          >
+                            <Award className="w-4 h-4" />
+                            <span>ボス戦（模試）に挑む ➔</span>
+                          </button>
+                        )}
+                        {onNavigateToContent && (
+                          <button
+                            type="button"
+                            onClick={() => onNavigateToContent(stepMeta.firstLessonId, 'textbook')}
+                            className="px-3.5 py-2.5 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-stone-700 text-xs sm:text-sm font-bold shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+                          >
+                            <BookOpen className="w-4 h-4 text-[#B84E34]" />
+                            <span>教科書を開く</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ステージ間の道（Winding Road Connector） */}
+                  {sIdx < ROADMAP_STEPS.length - 1 && (
+                    <div className="flex flex-col items-center justify-center py-2 space-y-1">
+                      <div className="w-1 h-6 bg-gradient-to-b from-[#B84E34] to-amber-500 rounded-full" />
+                      <div className="px-3 py-1 rounded-full bg-white border border-stone-200 shadow-2xs text-[11px] font-bold text-stone-500 flex items-center gap-1">
+                        <span>↓ 次のステージへ進む（ステージ {sIdx + 2}）</span>
+                      </div>
+                      <div className="w-1 h-6 bg-gradient-to-b from-amber-500 to-[#B84E34] rounded-full" />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ===================================================================== */}
+      {/* 📊 モード②：1枚完結！全体俯瞰マトリクスシート（Master Matrix Sheet）   */}
       {/* ===================================================================== */}
       {viewMode === 'matrix' && (
         <div className="space-y-4">
-          {/* マトリクス説明 ＆ フィルター */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-stone-200 shadow-2xs">
             <div className="space-y-0.5">
               <div className="text-xs font-black text-stone-800 flex items-center gap-1.5">
                 <Table className="w-4 h-4 text-[#B84E34]" />
-                <span>1枚で見渡せる「フェーズ × 学習項目 × Done定義 × リスク対策」マトリクス</span>
+                <span>「フェーズ × 学習項目 × Done定義 × リスク対策」全体見渡しシート</span>
               </div>
               <p className="text-[11px] text-stone-500">
                 目標の曖昧さ・スコープの広がりすぎ・多忙による挫折を未然に防ぐための学習者専用シートです。
               </p>
             </div>
 
-            {/* 段階フィルター */}
             <div className="flex items-center gap-1 shrink-0 text-xs font-bold">
               <button
                 type="button"
@@ -281,18 +678,15 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
             </div>
           </div>
 
-          {/* 大判マトリクスカード群（PC: 4列グリッド、スマホ: 縦積みカード） */}
           <div className="space-y-4">
             {filteredSteps.map((step) => {
               const meta = STEP_META[step.step];
-              const isScopeOpen = !!expandedScopeInMatrix[step.step];
 
               return (
                 <div
                   key={step.step}
                   className="bg-white border border-stone-200 rounded-3xl p-5 shadow-xs hover:border-[#B84E34]/40 hover:shadow-md transition-all space-y-4"
                 >
-                  {/* フェーズヘッダー */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-stone-100">
                     <div className="flex items-center gap-2.5 flex-wrap">
                       <span
@@ -312,7 +706,6 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                       </span>
                     </div>
 
-                    {/* クイックアクション */}
                     <div className="flex items-center gap-2 shrink-0">
                       {onNavigateToExam && (
                         <button
@@ -337,13 +730,11 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                     </div>
                   </div>
 
-                  {/* 4大マトリクスブロック（横並びグリッド） */}
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-3.5 text-xs">
-                    {/* ① 【目的 ＆ 順序の必然性】 */}
                     <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-[#E8E2D5] space-y-2">
                       <div className="font-black text-[#B84E34] flex items-center gap-1.5">
                         <Target className="w-4 h-4" />
-                        <span>① 目的 ＆ なぜこの順序か</span>
+                        <span>① 目的 ＆ 順序の必然性</span>
                       </div>
                       <div className="space-y-2 text-stone-700 leading-relaxed">
                         <div>
@@ -357,7 +748,6 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                       </div>
                     </div>
 
-                    {/* ② 【学習項目（Must分解WBS ＆ スコープ制約）】 */}
                     <div className="bg-amber-50/50 p-4 rounded-2xl border border-amber-200/70 space-y-2">
                       <div className="font-black text-amber-900 flex items-center justify-between gap-1">
                         <span className="flex items-center gap-1.5">
@@ -389,7 +779,6 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                       </div>
                     </div>
 
-                    {/* ③ 【Done定義 ＆ 具体的行動ストーリー】 */}
                     <div className="bg-emerald-50/50 p-4 rounded-2xl border border-emerald-200/70 space-y-2">
                       <div className="font-black text-emerald-900 flex items-center justify-between gap-1">
                         <span className="flex items-center gap-1.5">
@@ -411,13 +800,9 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                           <strong className="text-stone-900 font-bold block text-[11px] mb-0.5">🎬 行動シナリオ例:</strong>
                           <p className="text-stone-600 text-[11px]">{step.goalDefinition.userStory}</p>
                         </div>
-                        <div className="pt-1 text-[11px] text-stone-500">
-                          <strong>📦 成果物: </strong>{step.goalDefinition.deliverable}
-                        </div>
                       </div>
                     </div>
 
-                    {/* ④ 【つまずき予見 ＆ 5分縮小プロトコル】 */}
                     <div className="bg-rose-50/40 p-4 rounded-2xl border border-rose-200/70 space-y-2">
                       <div className="font-black text-rose-900 flex items-center justify-between gap-1">
                         <span className="flex items-center gap-1.5">
@@ -444,33 +829,6 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                       </div>
                     </div>
                   </div>
-
-                  {/* 象徴モデルセリフ行（音声再生ボタンつき） */}
-                  <div className="bg-[#FAF0EC]/30 border border-[#F2DED7] rounded-2xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                    <div className="space-y-0.5 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-bold text-[#B84E34] bg-[#FAF0EC] px-2 py-0.5 rounded-md border border-[#F0D5CD]">
-                          🗣️ この駅の象徴セリフ
-                        </span>
-                        <span className="font-black text-[#1B2A38] text-xs sm:text-sm truncate">
-                          {step.representativeSpeech.ko}
-                        </span>
-                      </div>
-                      <p className="text-xs text-stone-500 pl-1">{step.representativeSpeech.ja}</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => playSpeech(step.representativeSpeech.ko, step.step)}
-                      className={`px-3 py-1.5 rounded-xl border flex items-center justify-center gap-1.5 text-xs font-bold transition-all cursor-pointer shrink-0 ${
-                        playingStep === step.step
-                          ? 'bg-[#B84E34] text-white animate-pulse'
-                          : 'bg-white text-[#B84E34] border-[#F0D5CC] hover:bg-[#FAF0EC]'
-                      }`}
-                    >
-                      <Volume2 className="w-3.5 h-3.5" />
-                      <span>{playingStep === step.step ? '再生中...' : 'ネイティブ音声を聴く'}</span>
-                    </button>
-                  </div>
                 </div>
               );
             })}
@@ -479,11 +837,10 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
       )}
 
       {/* ===================================================================== */}
-      {/* 🚆 モード②：駅別フォーカス（メトロ路線図 ＆ 1駅深掘りマガジン）      */}
+      {/* 🚇 モード③：駅別フォーカス（メトロレール ＆ 1駅深掘りマガジン）       */}
       {/* ===================================================================== */}
       {viewMode === 'focus' && (
         <div className="space-y-6">
-          {/* レールナビゲーター */}
           <div className="space-y-3">
             <div className="flex items-center justify-between text-xs font-bold text-stone-500 px-1">
               <span className="flex items-center gap-1.5">
@@ -515,7 +872,6 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
               </div>
             </div>
 
-            {/* 路線図レール横スクロールコンテナ */}
             <div className="overflow-x-auto pb-3 pt-2 scrollbar-thin">
               <div className="relative min-w-[760px] px-4 py-3 flex items-center justify-between">
                 <div className="absolute left-8 right-8 top-1/2 -translate-y-1/2 h-1.5 bg-stone-200 rounded-full z-0" />
@@ -570,35 +926,9 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                 })}
               </div>
             </div>
-
-            {/* 4大ステージ ショートカットピル */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-xs">
-              {[
-                { label: '🟢 入門・土台', stepIdx: 0, desc: 'Step 1〜2（5級準備）' },
-                { label: '🟡 初級突破', stepIdx: 2, desc: 'Step 3〜4（4級/TOPIK I）' },
-                { label: '🟣 中級飛躍', stepIdx: 4, desc: 'Step 5〜6（3級/準2級）' },
-                { label: '🟠 上級完成', stepIdx: 6, desc: 'Step 7〜8（2級/1級/6級）' },
-              ].map((cat, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => setActiveStepIndex(cat.stepIdx)}
-                  className={`p-2 rounded-xl border text-left transition-all cursor-pointer ${
-                    activeStepIndex >= cat.stepIdx && activeStepIndex < cat.stepIdx + 2
-                      ? 'bg-white border-[#B84E34] text-[#B84E34] shadow-xs ring-1 ring-[#B84E34]/20'
-                      : 'bg-white/60 border-stone-200/80 text-stone-600 hover:bg-white hover:text-stone-900'
-                  }`}
-                >
-                  <div className="font-bold text-[11px]">{cat.label}</div>
-                  <div className="text-[10px] text-stone-400 mt-0.5">{cat.desc}</div>
-                </button>
-              ))}
-            </div>
           </div>
 
-          {/* 選択中の駅のフォーカスマガジンカード */}
-          <div className="bg-white border border-stone-200 rounded-3xl p-5 sm:p-7 shadow-sm space-y-6 animate-in fade-in duration-300">
-            {/* ヘッダー行 */}
+          <div className="bg-white border border-stone-200 rounded-3xl p-5 sm:p-7 shadow-sm space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-stone-100">
               <div className="space-y-1.5">
                 <div className="flex items-center gap-2 flex-wrap">
@@ -622,7 +952,6 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                 </div>
               </div>
 
-              {/* クイックアクション */}
               <div className="flex flex-wrap items-center gap-2 shrink-0">
                 {onNavigateToExam && (
                   <button
@@ -647,7 +976,6 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
               </div>
             </div>
 
-            {/* 駅カード内タブナビゲーション */}
             <div className="flex items-center gap-2 border-b border-stone-200 overflow-x-auto pb-1 scrollbar-none">
               <button
                 type="button"
@@ -699,7 +1027,6 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
               </button>
             </div>
 
-            {/* タブ①: ゴール ＆ Done定義 */}
             {stationTab === 'goal' && (
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs">
@@ -728,7 +1055,6 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                   </div>
                 </div>
 
-                {/* 具体的行動ストーリー例 */}
                 <div className="bg-white border border-stone-200 rounded-2xl p-4 space-y-1.5 shadow-2xs">
                   <span className="text-xs font-black text-stone-800 flex items-center gap-1.5">
                     <span>🎬 説明できるストーリー例（学習完了後の具体的行動シナリオ）:</span>
@@ -740,11 +1066,9 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
               </div>
             )}
 
-            {/* タブ②: スコープ制御 ＆ WBS */}
             {stationTab === 'scope' && (
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                  {/* Must */}
                   <div className="bg-rose-50/40 p-4 rounded-2xl border border-rose-200/70 space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="font-black text-rose-900">🔥 Must（必須の骨格）</span>
@@ -760,7 +1084,6 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                     </ul>
                   </div>
 
-                  {/* Should */}
                   <div className="bg-amber-50/40 p-4 rounded-2xl border border-amber-200/70 space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="font-black text-amber-900">⭐ Should（日常の展開）</span>
@@ -776,7 +1099,6 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                     </ul>
                   </div>
 
-                  {/* Could */}
                   <div className="bg-stone-50 p-4 rounded-2xl border border-stone-200 space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="font-black text-stone-700">💤 Could（今は捨てる）</span>
@@ -793,7 +1115,6 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                   </div>
                 </div>
 
-                {/* Must作業分解 WBS ＆ スコープ制約 */}
                 <div className="bg-white border border-stone-200 rounded-2xl p-4 sm:p-5 space-y-3 shadow-2xs">
                   <span className="text-xs font-black text-stone-800 flex items-center gap-1.5">
                     <ShieldCheck className="w-4 h-4 text-[#B84E34]" />
@@ -818,11 +1139,9 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
               </div>
             )}
 
-            {/* タブ③: 学習体験 ＆ 縮小プロトコル */}
             {stationTab === 'experience' && (
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs">
-                  {/* なぜこの順番か ＆ ミニマイルストーン */}
                   <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-[#E8E2D5] space-y-3">
                     <div className="space-y-1">
                       <span className="font-black text-[#B84E34] flex items-center gap-1.5">
@@ -850,11 +1169,10 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                     </div>
                   </div>
 
-                  {/* つまずき予見 ＆ 5分縮小プロトコル */}
                   <div className="bg-rose-50/40 p-4 rounded-2xl border border-rose-200/80 space-y-3">
                     <div className="space-y-1">
                       <span className="font-black text-rose-900 flex items-center gap-1.5">
-                        <AlertCircle className="w-4 h-4 text-rose-600" /> よくあるつまずきポイント（事前に壁を予見）
+                        <AlertCircle className="w-4 h-4 text-rose-600" /> よくあるつまずきポイント
                       </span>
                       <p className="text-stone-700 leading-relaxed text-[11px]">
                         {activeStep.learningExperience.commonStumblingBlock}
@@ -863,7 +1181,7 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
 
                     <div className="pt-2 border-t border-rose-200/60 bg-white/80 p-3 rounded-xl border border-rose-200/50 space-y-1">
                       <div className="font-black text-[#B84E34] flex items-center gap-1.5 text-xs">
-                        <ShieldCheck className="w-4 h-4" />
+                        <LifeBuoy className="w-4 h-4" />
                         <span>忙しい日の「5分縮小プロトコル」</span>
                       </div>
                       <p className="text-stone-800 text-[11px] font-medium leading-relaxed">
@@ -873,7 +1191,6 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                   </div>
                 </div>
 
-                {/* 初心者向け用語補足 */}
                 {activeStep.learningExperience.jargonBuster && (
                   <div className="bg-white border border-stone-200 rounded-2xl p-4 space-y-2 shadow-2xs text-xs">
                     <span className="font-black text-stone-800 flex items-center gap-1.5">
@@ -893,10 +1210,8 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
               </div>
             )}
 
-            {/* タブ④: 象徴モデルセリフ ＆ SLA分析 */}
             {stationTab === 'speech' && (
               <div className="space-y-4">
-                {/* モデルセリフカード */}
                 <div className="bg-[#FAF0EC]/40 border border-[#F2DED7] rounded-2xl p-4 sm:p-5 space-y-3">
                   <div className="flex items-center justify-between gap-2 text-xs font-bold text-[#B84E34]">
                     <span className="flex items-center gap-1.5">
@@ -942,7 +1257,6 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                   </div>
                 </div>
 
-                {/* SLA分析 誤用の罠と打開策 */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                   <div className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-4 space-y-1.5">
                     <div className="font-bold text-amber-900 flex items-center gap-1.5 text-xs">
@@ -964,106 +1278,7 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                 </div>
               </div>
             )}
-
-            {/* 🔗 直結教材リンク行 */}
-            {activeStep.links && activeStep.links.length > 0 && (
-              <div className="pt-2 border-t border-stone-100 space-y-2">
-                <span className="text-xs font-bold text-stone-500">
-                  📖 この駅を攻略するための直結教材:
-                </span>
-                <div className="flex flex-wrap items-center gap-2">
-                  {activeStep.links.map((link) => (
-                    <button
-                      key={link.id}
-                      type="button"
-                      onClick={() => onNavigateToContent && onNavigateToContent(link.id, link.tab)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-[#FAF0EC] border border-stone-200 hover:border-[#B84E34] text-xs font-bold text-[#B84E34] shadow-2xs transition-all cursor-pointer"
-                    >
-                      <BookOpen className="w-3.5 h-3.5" />
-                      <span>{link.label}</span>
-                      <ArrowRight className="w-3 h-3 opacity-60" />
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
-        </div>
-      )}
-
-      {/* ===================================================================== */}
-      {/* 📜 モード③：全駅スクロールリスト（従来のリニア閲覧ビュー）             */}
-      {/* ===================================================================== */}
-      {viewMode === 'list' && (
-        <div className="relative pl-6 sm:pl-8 space-y-5 before:absolute before:left-3 sm:before:left-4 before:top-4 before:bottom-4 before:w-0.5 before:bg-gradient-to-b before:from-emerald-500 via-[#B84E34] to-amber-500 before:rounded-full">
-          {ROADMAP_STEPS.map((step) => {
-            const stationColor = step.stationColor || '#B84E34';
-            const stepMeta = STEP_META[step.step];
-
-            return (
-              <div key={step.step} className="relative group">
-                <div
-                  style={{ backgroundColor: stationColor }}
-                  className="absolute -left-[27px] sm:-left-[31px] top-3.5 w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-white font-bold text-xs ring-4 ring-white shadow-xs shrink-0 select-none z-10"
-                >
-                  {step.step}
-                </div>
-
-                <div className="bg-white rounded-2xl border border-stone-200 shadow-2xs hover:border-stone-300 transition-all p-4 space-y-3">
-                  <div className="flex items-center justify-between gap-2 flex-wrap pb-2 border-b border-stone-100">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span
-                        style={{ color: stationColor, backgroundColor: `${stationColor}15` }}
-                        className="text-xs font-black px-2.5 py-0.5 rounded-md"
-                      >
-                        Step {step.step}: {step.stage}
-                      </span>
-                      <span className="text-xs font-bold text-stone-700 bg-stone-100 px-2.5 py-0.5 rounded-full border border-stone-200">
-                        {step.badge}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono text-stone-500">⏱️ {step.timeHours}</span>
-                      {onNavigateToExam && (
-                        <button
-                          type="button"
-                          onClick={() => onNavigateToExam(stepMeta.examId)}
-                          className="px-2.5 py-1 rounded-lg bg-[#B84E34] text-white text-[11px] font-bold hover:bg-[#a2432c] transition-all cursor-pointer"
-                        >
-                          模試 ➔
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                    <div className="p-2.5 bg-[#FAF7F2] rounded-xl border border-[#E8E2D5]">
-                      <strong className="text-stone-800 block text-[11px] mb-0.5">🎯 Done定義:</strong>
-                      <p className="text-stone-700">{step.goalDefinition.doneDefinition}</p>
-                    </div>
-                    <div className="p-2.5 bg-rose-50/50 rounded-xl border border-rose-200/60">
-                      <strong className="text-rose-900 block text-[11px] mb-0.5">🛡️ 5分縮小プロトコル:</strong>
-                      <p className="text-stone-700">{step.learningExperience.riskAndFallback.fallbackProtocol}</p>
-                    </div>
-                  </div>
-
-                  <div className="p-3 bg-[#FAF0EC]/40 border border-[#F2DED7] rounded-xl flex items-start justify-between gap-2">
-                    <div className="space-y-0.5">
-                      <p className="font-bold text-sm text-[#1B2A38]">{step.representativeSpeech.ko}</p>
-                      <p className="text-xs text-stone-500">{step.representativeSpeech.ja}</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => playSpeech(step.representativeSpeech.ko, step.step)}
-                      className="w-7 h-7 rounded-lg bg-white border border-[#F0D5CC] text-[#B84E34] flex items-center justify-center cursor-pointer shrink-0"
-                    >
-                      <Volume2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
         </div>
       )}
     </div>
