@@ -50,6 +50,8 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { HorangiMascot } from '../mascot/HorangiMascot';
+import { DuolingoDrillSession } from './DuolingoDrillSession';
+import { sound } from '../../utils/audioSynth';
 import { RoadmapStep, GuideTab } from '../../types/guide';
 import { ROADMAP_STEPS } from '../../data/roadmap';
 import { STAGE_DRILLS, QuestDrillData } from '../../data/stageMicroDrills';
@@ -251,15 +253,10 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
   const [showGuideModal, setShowGuideModal] = useState(false);
   const [guideModalTab, setGuideModalTab] = useState<'goal' | 'matrix' | 'sla' | 'settings'>('goal');
 
-  // クイック特訓ドリルモーダル状態
+  // クイック特訓ドリル状態
   const [activeDrill, setActiveDrill] = useState<QuestDrillData | null>(null);
   const [drillStepNum, setDrillStepNum] = useState<number>(1);
   const [drillTaskIdx, setDrillTaskIdx] = useState<number>(0);
-  const [drillQuestionIndex, setDrillQuestionIndex] = useState(0);
-  const [drillSelectedOption, setDrillSelectedOption] = useState<number | null>(null);
-  const [drillIsAnswered, setDrillIsAnswered] = useState(false);
-  const [drillScore, setDrillScore] = useState(0);
-  const [drillFinished, setDrillFinished] = useState(false);
 
   // レベル情報
   const levelInfo = useMemo(() => calculateLevelInfo(gameState.xp), [gameState.xp]);
@@ -332,8 +329,9 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
     }
   };
 
-  // ドリルの開始
+  // ドリルの開始（Duolingo式 フルスクリーン特訓セッション）
   const startQuestDrill = (stepNum: number, taskIdx: number) => {
+    sound.playTap();
     const key = `s${stepNum}_t${taskIdx}`;
     const drill = STAGE_DRILLS[key];
     if (!drill) {
@@ -344,49 +342,6 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
     setActiveDrill(drill);
     setDrillStepNum(stepNum);
     setDrillTaskIdx(taskIdx);
-    setDrillQuestionIndex(0);
-    setDrillSelectedOption(null);
-    setDrillIsAnswered(false);
-    setDrillScore(0);
-    setDrillFinished(false);
-  };
-
-  // ドリルの選択肢回答
-  const handleDrillAnswer = (optionIdx: number) => {
-    if (!activeDrill || drillIsAnswered) return;
-    setDrillSelectedOption(optionIdx);
-    setDrillIsAnswered(true);
-
-    const currentQ = activeDrill.questions[drillQuestionIndex];
-    const isCorrect = optionIdx === currentQ.correctIndex;
-    if (isCorrect) {
-      setDrillScore((prev) => prev + 1);
-      if (currentQ.audioText) {
-        playSpeech(currentQ.audioText);
-      }
-    }
-  };
-
-  // ドリルの次へ or 終了
-  const handleNextDrillQuestion = () => {
-    if (!activeDrill) return;
-    if (drillQuestionIndex < activeDrill.questions.length - 1) {
-      setDrillQuestionIndex((prev) => prev + 1);
-      setDrillSelectedOption(null);
-      setDrillIsAnswered(false);
-    } else {
-      setDrillFinished(true);
-      // ドリル完了報酬
-      awardXP(60, 'ドリルクリア');
-      // クエストを完了にする
-      const totalTasks = ROADMAP_STEPS[drillStepNum - 1].scopePriority.wbsBreakdown.length;
-      handleToggleQuest(drillStepNum, drillTaskIdx, totalTasks);
-      confetti({
-        particleCount: 80,
-        spread: 70,
-        origin: { y: 0.5 },
-      });
-    }
   };
 
   // 自由探索モード（全解放）の切り替え
@@ -790,7 +745,10 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
               <button
                 key={s.step}
                 type="button"
-                onClick={() => setSelectedStage(s.step)}
+                onClick={() => {
+                  sound.playTap();
+                  setSelectedStage(s.step);
+                }}
                 className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
                   isSelected
                     ? 'bg-[#B84E34] text-white shadow-2xs ring-2 ring-[#B84E34]/30'
@@ -820,7 +778,10 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
 
           <button
             type="button"
-            onClick={() => setShowGuideModal(true)}
+            onClick={() => {
+              sound.playTap();
+              setShowGuideModal(true);
+            }}
             className="px-3 py-1.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
             title="目標定義・WBS・1枚シート・SLA母語干渉分析・設定を一括確認"
           >
@@ -1357,185 +1318,21 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
       )}
 
       {/* ===================================================================== */}
-      {/* 30秒クイック特訓ドリル モーダル                                      */}
+      {/* 🌟 Duolingo式 フルスクリーン特訓セッション（音響・触覚・ボトムシート） */}
       {/* ===================================================================== */}
       {activeDrill && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-5 sm:p-7 shadow-2xl space-y-5 animate-in fade-in zoom-in-95">
-            {/* モーダルヘッダー */}
-            <div className="flex items-center justify-between pb-3 border-b border-stone-100">
-              <div className="flex items-center gap-2">
-                <span className="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-black text-sm">
-                  <Zap className="w-4 h-4 text-amber-600" />
-                </span>
-                <div>
-                  <h4 className="text-sm sm:text-base font-black text-[#1B2A38]">
-                    30秒クイック特訓: {activeDrill.title}
-                  </h4>
-                  <span className="text-[11px] text-stone-500 font-bold">
-                    {drillFinished ? '特訓完了！' : `第 ${drillQuestionIndex + 1} / ${activeDrill.questions.length} 問`}
-                  </span>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setActiveDrill(null)}
-                className="w-8 h-8 rounded-full bg-stone-100 text-stone-500 hover:bg-stone-200 flex items-center justify-center cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* 問題コンテンツ */}
-            {!drillFinished ? (
-              <div className="space-y-3.5">
-                {/* 🐯 Duolingo風 マスコット感情リアクション（回答前・正解・不正解で動的に変化） */}
-                <div className="flex justify-center -mb-1">
-                  <HorangiMascot
-                    size="md"
-                    mood={
-                      !drillIsAnswered
-                        ? 'studying'
-                        : drillSelectedOption === activeDrill.questions[drillQuestionIndex].correctIndex
-                        ? 'happy'
-                        : 'encouraging'
-                    }
-                    message={
-                      !drillIsAnswered
-                        ? '어느 쪽이 맞을까요?'
-                        : drillSelectedOption === activeDrill.questions[drillQuestionIndex].correctIndex
-                        ? '정답! 완벽해요! 🎉'
-                        : '괜찮아요! 해설을 확인해봐요!'
-                    }
-                    subMessage={
-                      !drillIsAnswered
-                        ? 'どれが正しいかな？'
-                        : drillSelectedOption === activeDrill.questions[drillQuestionIndex].correctIndex
-                        ? '素晴らしい！正解です！'
-                        : '大丈夫！解説をチェックしよう！'
-                    }
-                    showXpBadge={drillIsAnswered && drillSelectedOption === activeDrill.questions[drillQuestionIndex].correctIndex}
-                    xpAmount={60}
-                    interactive={true}
-                  />
-                </div>
-
-                <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-[#E8E2D5] space-y-2">
-                  <span className="text-[10px] font-black uppercase text-[#B84E34] tracking-wider">
-                    TARGET SKILL: {activeDrill.targetSkill}
-                  </span>
-                  <p className="text-sm sm:text-base font-black text-[#1B2A38] leading-snug">
-                    {activeDrill.questions[drillQuestionIndex].question}
-                  </p>
-                  {activeDrill.questions[drillQuestionIndex].audioText && (
-                    <button
-                      type="button"
-                      onClick={() => playSpeech(activeDrill.questions[drillQuestionIndex].audioText!)}
-                      className="px-3 py-1 rounded-lg bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold hover:bg-amber-100 flex items-center gap-1.5 cursor-pointer mt-1"
-                    >
-                      <Volume2 className="w-3.5 h-3.5 text-amber-600" />
-                      <span>音声を聴く</span>
-                    </button>
-                  )}
-                </div>
-
-                {/* 選択肢ボタン */}
-                <div className="space-y-2">
-                  {activeDrill.questions[drillQuestionIndex].options.map((opt, optIdx) => {
-                    const isSelected = drillSelectedOption === optIdx;
-                    const isCorrectOpt = optIdx === activeDrill.questions[drillQuestionIndex].correctIndex;
-
-                    let btnClass = 'bg-white border-stone-200 text-stone-800 hover:bg-stone-50 hover:border-stone-300';
-                    if (drillIsAnswered) {
-                      if (isCorrectOpt) {
-                        btnClass = 'bg-emerald-50 border-emerald-400 text-emerald-900 font-bold';
-                      } else if (isSelected && !isCorrectOpt) {
-                        btnClass = 'bg-rose-50 border-rose-400 text-rose-900 line-through';
-                      }
-                    }
-
-                    return (
-                      <button
-                        key={optIdx}
-                        type="button"
-                        disabled={drillIsAnswered}
-                        onClick={() => handleDrillAnswer(optIdx)}
-                        className={`w-full text-left p-3 rounded-xl border-2 transition-all flex items-center justify-between text-xs sm:text-sm font-bold cursor-pointer ${btnClass}`}
-                      >
-                        <span>{opt}</span>
-                        {drillIsAnswered && isCorrectOpt && (
-                          <span className="text-[11px] font-black text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-md flex items-center gap-1">
-                            <Check className="w-3 h-3 text-emerald-700" /> 正解
-                          </span>
-                        )}
-                        {drillIsAnswered && isSelected && !isCorrectOpt && (
-                          <span className="text-[11px] font-black text-rose-700 bg-rose-100 px-2 py-0.5 rounded-md flex items-center gap-1">
-                            <X className="w-3 h-3 text-rose-700" /> 不正解
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* 解説と次へボタン */}
-                {drillIsAnswered && (
-                  <div className="p-3.5 bg-amber-50/70 border border-amber-200/80 rounded-2xl text-xs space-y-2 animate-in fade-in">
-                    <p className="text-stone-700 leading-relaxed font-medium">
-                      <strong className="text-[#B84E34]">解説: </strong>{activeDrill.questions[drillQuestionIndex].explanation}
-                    </p>
-                    <div className="flex justify-end pt-1">
-                      <button
-                        type="button"
-                        onClick={handleNextDrillQuestion}
-                        className="px-4 py-2 rounded-xl bg-[#B84E34] text-white text-xs font-bold hover:bg-[#a2432c] transition-all cursor-pointer shadow-xs flex items-center gap-1.5"
-                      >
-                        <span>{drillQuestionIndex < activeDrill.questions.length - 1 ? '次の問題へ' : '結果を見る'}</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              /* ドリル終了結果画面（トロフィーマスコット） */
-              <div className="text-center py-4 space-y-4 animate-in zoom-in-95">
-                <div className="flex justify-center">
-                  <HorangiMascot
-                    size="lg"
-                    mood="trophy"
-                    message="특훈 클리어! 축하합니다! 🏆"
-                    subMessage="特訓クリア！クエスト達成！"
-                    showXpBadge={true}
-                    xpAmount={60}
-                    interactive={true}
-                  />
-                </div>
-                <div>
-                  <h4 className="text-lg sm:text-xl font-black text-[#1B2A38]">
-                    特訓クリア！クエスト達成！
-                  </h4>
-                  <p className="text-xs text-stone-500 mt-1">
-                    正解数: {drillScore} / {activeDrill.questions.length}問 ｜ 経験値 <strong>+60 XP</strong> 獲得！
-                  </p>
-                </div>
-
-                <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-2xl text-xs font-bold text-emerald-800 flex items-center justify-center gap-1.5">
-                  <Sparkles className="w-4 h-4 text-emerald-600" />
-                  <span>クエストが「クリア済み」に更新され、進捗バーが伸びました！</span>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setActiveDrill(null)}
-                  className="w-full py-3 rounded-2xl bg-[#B84E34] text-white text-xs sm:text-sm font-bold hover:bg-[#a2432c] shadow-md transition-all cursor-pointer"
-                >
-                  冒険マップに戻る
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
+        <DuolingoDrillSession
+          drill={activeDrill}
+          stepNum={drillStepNum}
+          taskIdx={drillTaskIdx}
+          streakDays={gameState.streakDays}
+          onClose={() => setActiveDrill(null)}
+          onComplete={(score, total) => {
+            awardXP(60, '特訓クリア');
+            const totalTasks = ROADMAP_STEPS[drillStepNum - 1].scopePriority.wbsBreakdown.length;
+            handleToggleQuest(drillStepNum, drillTaskIdx, totalTasks);
+          }}
+        />
       )}
     </div>
   );

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Sparkles, Trophy, Heart } from 'lucide-react';
 import { speechService } from '../../utils/speech';
+import { sound } from '../../utils/audioSynth';
 
 export type MascotMood =
   | 'idle'
@@ -54,6 +55,7 @@ export const HorangiMascot: React.FC<HorangiMascotProps> = ({
   const handleClick = () => {
     if (!interactive) return;
 
+    sound.playTap();
     setIsJumping(true);
     setShowHearts(true);
     setTimeout(() => setIsJumping(false), 750);
