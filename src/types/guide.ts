@@ -37,19 +37,48 @@ export interface RoadmapSlaTips {
   breakthrough: string;
 }
 
+// 1. ゴールと評価基準の定義（ブレない軸作り）
+export interface RoadmapGoalDefinition {
+  purpose: string;            // 「なぜ学ぶのか」の核（例：半年後の出張で現地スタッフと雑談/検定合格）
+  deliverable: string;        // 学習の証として手元に残るアウトプット（成果物）
+  doneDefinition: string;     // Done定義（どういう状態になったら完了か）
+  userStory: string;          // 説明できるストーリー例（学習完了後の具体的行動シナリオ）
+}
+
+// 2. スコープと優先順位の制御（挫折の防止）
+export interface RoadmapScopePriority {
+  must: string[];             // Must（骨格となる最優先項目）
+  should: string[];           // Should（日常的な展開項目）
+  could: string[];            // Could（今は捨てて良い・後回し項目）
+  wbsBreakdown: string[];     // Must達成のためのWBS作業分解タスク
+  scopeGuard: string;         // 途中でスコープを広げすぎない原則（手を出さない制約）
+  timeboxWeeks: string;       // 想定期間・タイムボックス（例: 2〜3週間）
+}
+
+// 3. 学習体験と動機づけの設計（運用の仕組み化）
+export interface RoadmapLearningExperience {
+  whyThisOrder: string;       // なぜその順番で学ぶのか（順序の必然性）
+  miniMilestones: { milestone: string; label: string }[]; // 各フェーズ途中のミニ到達目標（ドーパミンマイルストーン）
+  jargonBuster: { term: string; explanation: string }[];  // 初心者にも分かる用語補足（文法用語の噛み砕き）
+  commonStumblingBlock: string; // よくあるつまずきポイント（事前の壁予見）
+  riskAndFallback: { risk: string; fallbackProtocol: string }; // 主要リスクと回避策（忙しい日の5分縮小プロトコル）
+}
+
 export interface RoadmapStep {
   step: number;
   stage: string;
   badge: string;
   timeHours: string;
   stationColor: string;
+  goalDefinition: RoadmapGoalDefinition;
+  scopePriority: RoadmapScopePriority;
+  learningExperience: RoadmapLearningExperience;
   academicBasis: RoadmapAcademicBasis;
   representativeSpeech: RoadmapSpeech;
   actionRoutines: string[];
   slaTips: RoadmapSlaTips;
   links: { id: string; label: string; tab?: GuideTab }[];
 }
-
 
 export interface LessonExample {
   ko: string;
@@ -238,5 +267,3 @@ export interface AdvancedWritingItem {
   exampleJa: string;
   category: 'intro' | 'argument' | 'counter' | 'conclusion' | 'survey' | 'trend' | 'rank' | 'outlook'; // 序論・本論・反論・結論・調査・推移・順位・見通し
 }
-
-
