@@ -14,6 +14,7 @@ import { MockExamView } from './components/mockExam/MockExamView';
 import { VisualRoadmapView } from './components/roadmap/VisualRoadmapView';
 import { LibraryHubView } from './components/library/LibraryHubView';
 import { ComprehensiveQuizView } from './components/ComprehensiveQuizView';
+import { HorangiMascot } from './components/mascot/HorangiMascot';
 import { ExamType } from './types/mockExam';
 import hanmoaLogo from './assets/logo.jpg';
 
@@ -92,19 +93,37 @@ export const App: React.FC = () => {
       {/* メインコンテンツ */}
       <main className="flex-1 pb-20 md:pb-8">
         {activeTab === 'dashboard' ? (
-          <div className="max-w-6xl mx-auto px-3 sm:px-6 py-6 sm:py-12">
-            {/* ヒーローセクション */}
-            <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD] text-xs font-bold mb-4">
-                <Sparkles className="w-3.5 h-3.5" /> 韓国語を体系的に完全制覇
+          <div className="max-w-6xl mx-auto px-3 sm:px-6 py-4 sm:py-8">
+            {/* 🐯 Duolingo風 ウェルカムバナー */}
+            <div className="bg-white border border-[#E8E2D5] rounded-3xl p-4 sm:p-5 mb-6 sm:mb-8 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-3.5 text-center sm:text-left">
+                <HorangiMascot
+                  size="md"
+                  mood="cheering"
+                  showMessage={false}
+                  interactive={true}
+                />
+                <div className="space-y-1">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#FAF0EC] text-[#B84E34] text-[11px] font-black border border-[#F0D5CD]">
+                    <Sparkles className="w-3 h-3" />
+                    <span>오늘도 화이팅!（今日もファイト！）</span>
+                  </div>
+                  <h2 className="text-lg sm:text-xl font-black text-[#1B2A38]">
+                    韓国語の冒険へようこそ！
+                  </h2>
+                  <p className="text-xs text-stone-500">
+                    30秒の特訓と模擬試験で、楽しく着実に実力を伸ばしましょう。
+                  </p>
+                </div>
               </div>
-              <h1 className="text-3xl sm:text-5xl font-extrabold text-[#1B2A38] tracking-tight mb-4 leading-tight">
-                知識を網羅し、<br />テストで実力を証明する。
-              </h1>
-              <p className="text-sm sm:text-base text-stone-600 leading-relaxed">
-                全8ステージの冒険クエスト・公式模擬試験・逆引きライブラリを完全統合。<br className="hidden sm:inline" />
-                受動的な暗記を脱却し、Can-Do診断とマイクロ特訓で最短合格へ導きます。
-              </p>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab('roadmap')}
+                className="px-5 py-3 rounded-2xl bg-[#B84E34] hover:bg-[#a2432c] text-white text-xs sm:text-sm font-black shadow-[0_4px_0_#853420] active:translate-y-1 active:shadow-[0_1px_0_#853420] transition-all flex items-center gap-2 cursor-pointer shrink-0"
+              >
+                <span>今日のクエストを始める ➔</span>
+              </button>
             </div>
 
             {/* 3大コアピラー カード */}

@@ -49,6 +49,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { HorangiMascot } from '../mascot/HorangiMascot';
 import { RoadmapStep, GuideTab } from '../../types/guide';
 import { ROADMAP_STEPS } from '../../data/roadmap';
 import { STAGE_DRILLS, QuestDrillData } from '../../data/stageMicroDrills';
@@ -528,64 +529,91 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
         ) : (
           <>
             {/* ★ ユーザー要望：今日やることは決まっているわけだから、そこだけでいい（Hero Card） */}
-            <div className="bg-white border-2 border-amber-300/80 rounded-3xl p-4 sm:p-5 shadow-xs space-y-3 relative overflow-hidden">
-              <div className="flex items-center justify-between gap-2">
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10.5px] font-black uppercase tracking-wider">
-                  <Zap className="w-3 h-3 fill-amber-600 text-amber-600" />
-                  {firstIncompleteIdx !== -1
-                    ? `今日のNEXT STEP : 第 ${firstIncompleteIdx + 1} 問`
-                    : 'ステージ全特訓クリア！'}
-                </span>
-                <span className="text-[11px] font-bold text-stone-500 font-mono">
-                  {doneCount}/{totalQuests} 達成
-                </span>
-              </div>
-
-              {firstIncompleteIdx !== -1 ? (
-                <>
-                  <div className="space-y-1">
-                    <h3 className="text-base sm:text-lg font-black text-[#1B2A38] leading-snug">
-                      {step.scopePriority.wbsBreakdown[firstIncompleteIdx]}
-                    </h3>
-                    <p className="text-xs text-stone-600 flex items-center gap-1">
-                      <Sparkles className="w-3.5 h-3.5 text-[#B84E34] shrink-0" />
-                      <span className="truncate">{qMeta.scenarioTitle}</span>
-                    </p>
+            <div className="bg-white border-2 border-amber-300/80 rounded-3xl p-4 sm:p-5 shadow-xs relative overflow-hidden">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-4">
+                <div className="space-y-2.5 flex-1 min-w-0 w-full">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10.5px] font-black uppercase tracking-wider">
+                      <Zap className="w-3 h-3 fill-amber-600 text-amber-600" />
+                      {firstIncompleteIdx !== -1
+                        ? `今日のNEXT STEP : 第 ${firstIncompleteIdx + 1} 問`
+                        : 'ステージ全特訓クリア！'}
+                    </span>
+                    <span className="text-[11px] font-bold text-stone-500 font-mono">
+                      {doneCount}/{totalQuests} 達成
+                    </span>
                   </div>
 
-                  {/* Duolingo風 3D立体プッシュボタン */}
-                  <button
-                    type="button"
-                    onClick={() => startQuestDrill(step.step, firstIncompleteIdx)}
-                    className="w-full py-3.5 px-5 rounded-2xl bg-[#B84E34] hover:bg-[#a2432c] text-white font-black text-sm sm:text-base cursor-pointer transition-all duration-100 shadow-[0_5px_0_#853420] active:translate-y-1 active:shadow-[0_1px_0_#853420] flex items-center justify-center gap-2"
-                  >
-                    <Zap className="w-4 h-4 sm:w-5 sm:h-5 fill-amber-300 text-amber-300 animate-bounce" />
-                    <span>30秒特訓をスタート (+60 XP)</span>
-                  </button>
-                </>
-              ) : (
-                <>
-                  <div className="space-y-1">
-                    <h3 className="text-base sm:text-lg font-black text-emerald-900 leading-snug">
-                      全クエスト制覇！次はボス検定（模試）です！
-                    </h3>
-                    <p className="text-xs text-stone-600">
-                      【{qMeta.bossLabel}】（合格基準: {qMeta.bossPassScore}点以上）で次のステージが解放されます。
-                    </p>
-                  </div>
+                  {firstIncompleteIdx !== -1 ? (
+                    <>
+                      <div className="space-y-1">
+                        <h3 className="text-base sm:text-lg font-black text-[#1B2A38] leading-snug">
+                          {step.scopePriority.wbsBreakdown[firstIncompleteIdx]}
+                        </h3>
+                        <p className="text-xs text-stone-600 flex items-center gap-1">
+                          <Sparkles className="w-3.5 h-3.5 text-[#B84E34] shrink-0" />
+                          <span className="truncate">{qMeta.scenarioTitle}</span>
+                        </p>
+                      </div>
 
-                  {onNavigateToExam && (
-                    <button
-                      type="button"
-                      onClick={() => onNavigateToExam(stepMeta.examId)}
-                      className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-amber-500 to-[#B84E34] hover:opacity-95 text-white font-black text-sm sm:text-base cursor-pointer transition-all duration-100 shadow-[0_5px_0_#853420] active:translate-y-1 active:shadow-[0_1px_0_#853420] flex items-center justify-center gap-2"
-                    >
-                      <Trophy className="w-5 h-5 text-amber-200 animate-bounce" />
-                      <span>{isBossCleared ? 'ボス検定に再挑戦 ➔' : 'ボス検定（模試）に挑む ➔'}</span>
-                    </button>
+                      {/* Duolingo風 3D立体プッシュボタン */}
+                      <button
+                        type="button"
+                        onClick={() => startQuestDrill(step.step, firstIncompleteIdx)}
+                        className="w-full py-3.5 px-5 rounded-2xl bg-[#B84E34] hover:bg-[#a2432c] text-white font-black text-sm sm:text-base cursor-pointer transition-all duration-100 shadow-[0_5px_0_#853420] active:translate-y-1 active:shadow-[0_1px_0_#853420] flex items-center justify-center gap-2"
+                      >
+                        <Zap className="w-4 h-4 sm:w-5 sm:h-5 fill-amber-300 text-amber-300 animate-bounce" />
+                        <span>30秒特訓をスタート (+60 XP)</span>
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <div className="space-y-1">
+                        <h3 className="text-base sm:text-lg font-black text-emerald-900 leading-snug">
+                          全クエスト制覇！次はボス検定（模試）です！
+                        </h3>
+                        <p className="text-xs text-stone-600">
+                          【{qMeta.bossLabel}】（合格基準: {qMeta.bossPassScore}点以上）で次のステージが解放されます。
+                        </p>
+                      </div>
+
+                      {onNavigateToExam && (
+                        <button
+                          type="button"
+                          onClick={() => onNavigateToExam(stepMeta.examId)}
+                          className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-amber-500 to-[#B84E34] hover:opacity-95 text-white font-black text-sm sm:text-base cursor-pointer transition-all duration-100 shadow-[0_5px_0_#853420] active:translate-y-1 active:shadow-[0_1px_0_#853420] flex items-center justify-center gap-2"
+                        >
+                          <Trophy className="w-5 h-5 text-amber-200 animate-bounce" />
+                          <span>{isBossCleared ? 'ボス検定に再挑戦 ➔' : 'ボス検定（模試）に挑む ➔'}</span>
+                        </button>
+                      )}
+                    </>
                   )}
-                </>
-              )}
+                </div>
+
+                {/* 🐯 Duolingo風 マスコット（ホランイ / Horangi） */}
+                <div className="shrink-0 flex flex-col items-center pt-1 sm:pt-0">
+                  <HorangiMascot
+                    size="md"
+                    mood={firstIncompleteIdx !== -1 ? 'cheering' : 'trophy'}
+                    message={
+                      firstIncompleteIdx !== -1
+                        ? gameState.streakDays > 1
+                          ? `🔥 ${gameState.streakDays}日連続！`
+                          : '오늘도 화이팅!'
+                        : '축하해요! 제패!'
+                    }
+                    subMessage={
+                      firstIncompleteIdx !== -1
+                        ? gameState.streakDays > 1
+                          ? 'この調子で1問解こう！'
+                          : '今日も一歩進めよう！'
+                        : 'ボス検定に挑戦しよう！'
+                    }
+                    interactive={true}
+                  />
+                </div>
+              </div>
             </div>
 
             {/* ★ Duolingo風 冒険ステップトレイル（縦に並ぶ触覚ノード） */}
@@ -619,12 +647,22 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                       key={tIdx}
                       className={`relative flex flex-col items-center z-10 transition-transform ${offsetClass}`}
                     >
-                      {/* 現在地の場合の浮遊吹き出しバッジ */}
+                      {/* 現在地の場合の浮遊吹き出しバッジ ＆ ソナー発光リング ＆ ミニホランイ */}
                       {isCurrent && (
-                        <div className="absolute -top-7 px-2.5 py-0.5 rounded-full bg-[#B84E34] text-white text-[10px] font-black shadow-md animate-bounce whitespace-nowrap z-20 flex items-center gap-1 ring-2 ring-white">
-                          <Zap className="w-2.5 h-2.5 fill-amber-300 text-amber-300" />
-                          <span>ここから！</span>
-                        </div>
+                        <>
+                          <div className="absolute -top-7 px-2.5 py-0.5 rounded-full bg-[#B84E34] text-white text-[10.5px] font-black shadow-md animate-bounce whitespace-nowrap z-20 flex items-center gap-1 ring-2 ring-white">
+                            <Zap className="w-3 h-3 fill-amber-300 text-amber-300" />
+                            <span>ここから！</span>
+                          </div>
+
+                          {/* ソナーのように広がる発光パルスリング */}
+                          <div className="absolute top-0 w-14 h-14 sm:w-16 sm:h-16 rounded-3xl border-2 border-[#B84E34] animate-sonar-ping pointer-events-none" />
+
+                          {/* ミニマスコットがノードの隣から手を振る */}
+                          <div className="absolute -left-12 sm:-left-14 -top-2 z-20 hidden xs:block">
+                            <HorangiMascot size="sm" mood="cheering" showMessage={false} interactive={true} />
+                          </div>
+                        </>
                       )}
 
                       {/* 3D立体ノードボタン */}
@@ -644,7 +682,10 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                         title={task}
                       >
                         {isDone ? (
-                          <Check className="w-6 h-6 stroke-[3]" />
+                          <div className="relative flex items-center justify-center">
+                            <Check className="w-6 h-6 stroke-[3]" />
+                            <Sparkles className="w-3.5 h-3.5 fill-amber-300 text-amber-300 absolute -top-1 -right-1 animate-star-spin" />
+                          </div>
                         ) : isCurrent ? (
                           <Zap className="w-6 h-6 fill-amber-300 text-amber-300" />
                         ) : (
@@ -1347,7 +1388,38 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
 
             {/* 問題コンテンツ */}
             {!drillFinished ? (
-              <div className="space-y-4">
+              <div className="space-y-3.5">
+                {/* 🐯 Duolingo風 マスコット感情リアクション（回答前・正解・不正解で動的に変化） */}
+                <div className="flex justify-center -mb-1">
+                  <HorangiMascot
+                    size="md"
+                    mood={
+                      !drillIsAnswered
+                        ? 'studying'
+                        : drillSelectedOption === activeDrill.questions[drillQuestionIndex].correctIndex
+                        ? 'happy'
+                        : 'encouraging'
+                    }
+                    message={
+                      !drillIsAnswered
+                        ? '어느 쪽이 맞을까요?'
+                        : drillSelectedOption === activeDrill.questions[drillQuestionIndex].correctIndex
+                        ? '정답! 완벽해요! 🎉'
+                        : '괜찮아요! 해설을 확인해봐요!'
+                    }
+                    subMessage={
+                      !drillIsAnswered
+                        ? 'どれが正しいかな？'
+                        : drillSelectedOption === activeDrill.questions[drillQuestionIndex].correctIndex
+                        ? '素晴らしい！正解です！'
+                        : '大丈夫！解説をチェックしよう！'
+                    }
+                    showXpBadge={drillIsAnswered && drillSelectedOption === activeDrill.questions[drillQuestionIndex].correctIndex}
+                    xpAmount={60}
+                    interactive={true}
+                  />
+                </div>
+
                 <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-[#E8E2D5] space-y-2">
                   <span className="text-[10px] font-black uppercase text-[#B84E34] tracking-wider">
                     TARGET SKILL: {activeDrill.targetSkill}
@@ -1426,10 +1498,18 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                 )}
               </div>
             ) : (
-              /* ドリル終了結果画面 */
+              /* ドリル終了結果画面（トロフィーマスコット） */
               <div className="text-center py-4 space-y-4 animate-in zoom-in-95">
-                <div className="w-16 h-16 rounded-3xl bg-amber-50 text-amber-700 border border-amber-200 flex items-center justify-center mx-auto shadow-sm">
-                  <Award className="w-8 h-8 text-amber-600" />
+                <div className="flex justify-center">
+                  <HorangiMascot
+                    size="lg"
+                    mood="trophy"
+                    message="특훈 클리어! 축하합니다! 🏆"
+                    subMessage="特訓クリア！クエスト達成！"
+                    showXpBadge={true}
+                    xpAmount={60}
+                    interactive={true}
+                  />
                 </div>
                 <div>
                   <h4 className="text-lg sm:text-xl font-black text-[#1B2A38]">
