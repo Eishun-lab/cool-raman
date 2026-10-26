@@ -24,6 +24,8 @@ import {
   Unlock,
   Trophy,
   Flame,
+  GraduationCap,
+  X,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { speechService } from '../../utils/speech';
@@ -194,10 +196,10 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
     // 1. 総合到達度サマリー
     let overallCanDoSummary = '';
     if (passed) {
-      overallCanDoSummary = `🎉【合格基準到達】得点 ${earnedScore}点（正答率 ${percentage}% / 合格ライン ${activeExam.passScore || 60}点クリア）。${activeExam.title}の要求水準を充足しています。公式Can-Do基準に基づき、基礎知識および実戦運用能力が確立されていると判定されます。`;
+      overallCanDoSummary = `【合格基準到達】得点 ${earnedScore}点（正答率 ${percentage}% / 合格ライン ${activeExam.passScore || 60}点クリア）。${activeExam.title}の要求水準を充足しています。公式Can-Do基準に基づき、基礎知識および実戦運用能力が確立されていると判定されます。`;
     } else {
       const diff = (activeExam.passScore || 60) - earnedScore;
-      overallCanDoSummary = `⚠️【要補強判定】得点 ${earnedScore}点（正答率 ${percentage}% / 合格ライン ${activeExam.passScore || 60}点まであと${diff}点）。現時点で重要規則・語彙の定着にムラがあり、特に失点した設問の文法規則・パターンの再確認が必要です。以下のカルテに従って復習を進めてください。`;
+      overallCanDoSummary = `【要補強判定】得点 ${earnedScore}点（正答率 ${percentage}% / 合格ライン ${activeExam.passScore || 60}点まであと${diff}点）。現時点で重要規則・語彙の定着にムラがあり、特に失点した設問の文法規則・パターンの再確認が必要です。以下のカルテに従って復習を進めてください。`;
     }
 
     // 2. 現在できること（公的Can-Do達成・あなたの強み）
@@ -432,7 +434,8 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
                   : 'bg-white border border-stone-200 text-stone-600 hover:bg-stone-50'
               }`}
             >
-              <span>🏛️ ハングル能力検定（4試験）</span>
+              <Award className="w-3.5 h-3.5" />
+              <span>ハングル能力検定（4試験）</span>
             </button>
             <button
               type="button"
@@ -443,7 +446,8 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
                   : 'bg-white border border-stone-200 text-stone-600 hover:bg-stone-50'
               }`}
             >
-              <span>🎓 TOPIK（2試験）</span>
+              <GraduationCap className="w-3.5 h-3.5" />
+              <span>TOPIK（2試験）</span>
             </button>
           </div>
         </div>
@@ -455,8 +459,8 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
           <section className="space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#E8E2D5]">
               <div className="flex items-center gap-2">
-                <span className="w-8 h-8 rounded-xl bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD] flex items-center justify-center text-lg">
-                  🏛️
+                <span className="w-8 h-8 rounded-xl bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD] flex items-center justify-center">
+                  <Award className="w-4 h-4 text-[#B84E34]" />
                 </span>
                 <div>
                   <h2 className="text-lg sm:text-xl font-black text-[#1B2A38]">
@@ -548,8 +552,8 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
           <section className="space-y-4 pt-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#E8E2D5]">
               <div className="flex items-center gap-2">
-                <span className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center justify-center text-lg">
-                  🎓
+                <span className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center justify-center">
+                  <GraduationCap className="w-4 h-4 text-indigo-700" />
                 </span>
                 <div>
                   <h2 className="text-lg sm:text-xl font-black text-[#1B2A38]">
@@ -821,7 +825,10 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
           {/* 問題ナンバーパレット（クリックで瞬時に移動） */}
           <div className="bg-white border border-stone-200 rounded-3xl p-4 sm:p-5 mt-6 shadow-2xs">
             <div className="flex items-center justify-between text-xs font-bold text-stone-500 mb-3">
-              <span>📋 解答状況パレット</span>
+              <span className="flex items-center gap-1.5">
+                <Layers className="w-3.5 h-3.5 text-stone-500" />
+                解答状況パレット
+              </span>
               <span>
                 解答済: {answeredCount} / 未解答: {unansweredCount}
               </span>
@@ -967,7 +974,8 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
                 onClick={onNavigateToRoadmap}
                 className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#B84E34] to-orange-600 text-white font-bold text-xs hover:opacity-90 shadow-sm transition-all flex items-center gap-1.5 shrink-0 cursor-pointer active:scale-95"
               >
-                <span>🗺️ ロードマップを進める</span>
+                <Compass className="w-3.5 h-3.5" />
+                <span>クエストを進める</span>
                 <ChevronRight className="w-3.5 h-3.5" />
               </button>
             )}
@@ -990,7 +998,8 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
               onClick={onNavigateToRoadmap}
               className="px-5 py-2.5 rounded-xl border border-[#B84E34] bg-orange-50 text-xs font-bold text-[#B84E34] hover:bg-orange-100 transition-all flex items-center gap-1.5 cursor-pointer"
             >
-              🗺️ ロードマップへ戻る
+              <Compass className="w-3.5 h-3.5" />
+              <span>クエストへ戻る</span>
             </button>
           )}
           <button
@@ -1018,8 +1027,8 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
       <section className="bg-gradient-to-br from-[#FAF7F2] to-white border-2 border-[#E8E2D5] rounded-3xl p-5 sm:p-8 shadow-sm space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#E8E2D5]">
           <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-[#B84E34] text-white flex items-center justify-center text-xl shadow-xs">
-              📋
+            <div className="w-10 h-10 rounded-2xl bg-[#B84E34] text-white flex items-center justify-center shadow-xs">
+              <Target className="w-5 h-5" />
             </div>
             <div>
               <h3 className="text-base sm:text-lg font-black text-[#1B2A38] flex items-center gap-2">
@@ -1055,7 +1064,7 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
             }`}
           >
             <Compass className="w-3.5 h-3.5" />
-            <span>🎯 次にすべきこと（処方箋）</span>
+            <span>次にすべきこと（処方箋）</span>
             <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-stone-100">
               {evaluation.diagnosticReport.nextActions.length}
             </span>
@@ -1071,7 +1080,7 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
             }`}
           >
             <Check className="w-3.5 h-3.5" />
-            <span>🟢 現在できること（Can-Do到達）</span>
+            <span>現在できること（Can-Do到達）</span>
             <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-800">
               {evaluation.diagnosticReport.strengths.length}
             </span>
@@ -1087,7 +1096,7 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
             }`}
           >
             <AlertCircle className="w-3.5 h-3.5" />
-            <span>⚠️ まだ不足していること（失点根拠）</span>
+            <span>不足していること（失点根拠）</span>
             <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-rose-100 text-rose-800">
               {evaluation.diagnosticReport.weaknesses.length}
             </span>
@@ -1187,8 +1196,8 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <span className="w-6 h-6 rounded-lg bg-rose-100 text-rose-700 text-xs font-black flex items-center justify-center">
-                        ❌
+                      <span className="w-6 h-6 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center">
+                        <X className="w-3.5 h-3.5" />
                       </span>
                       <h4 className="text-xs sm:text-sm font-black text-[#1B2A38]">
                         {item.title}
@@ -1246,7 +1255,7 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
       <div className="space-y-4">
         <div className="flex items-center justify-between px-1">
           <h3 className="text-base font-extrabold text-[#1B2A38]">
-            📝 全問題の解答・解説 ＆ 弱点復習
+            全問題の解答・解説 ＆ 弱点復習
           </h3>
           <span className="text-xs text-stone-500 font-bold">全{activeExam.questionCount}問</span>
         </div>
@@ -1267,11 +1276,11 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
                 <div className="flex items-center justify-between gap-2 pb-2 border-b border-stone-100">
                   <div className="flex items-center gap-2">
                     <span
-                      className={`w-6 h-6 rounded-lg text-xs font-black flex items-center justify-center ${
+                      className={`w-6 h-6 rounded-lg flex items-center justify-center ${
                         isCorrect ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
                       }`}
                     >
-                      {isCorrect ? '⭕️' : '❌'}
+                      {isCorrect ? <Check className="w-3.5 h-3.5" /> : <X className="w-3.5 h-3.5" />}
                     </span>
                     <span className="font-bold text-xs text-[#1B2A38]">第{idx + 1}問</span>
                     <span className="text-[10px] font-bold text-stone-500 bg-stone-100 px-2 py-0.5 rounded-md">

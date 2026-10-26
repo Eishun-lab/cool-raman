@@ -94,7 +94,7 @@ export const ROADMAP_STEPS: RoadmapStep[] = [
     links: [
       { id: 'lesson-1', label: '第1課 ハングルの読み方パズル' },
       { id: 'lesson-4', label: '第4課 漢数字・固有数字' },
-      { id: 'phrase-1', label: '🗣️ 直感フレーズ01: 自己紹介・注文', tab: 'chunks' },
+      { id: 'phrase-1', label: '直感フレーズ01: 自己紹介・注文', tab: 'chunks' },
       { id: 'qa-9', label: '参考書Q9 連音化・有声音化の法則', tab: 'reference' },
     ],
   },
@@ -419,9 +419,9 @@ export const ROADMAP_STEPS: RoadmapStep[] = [
     },
     links: [
       { id: 'dict-41', label: '辞書41〜80: 中級接続・順序・理由', tab: 'dictionary' },
-      { id: 'chunk-1', label: '💬 実践チャンク: 相づち・リアクション', tab: 'chunks' },
-      { id: 'colloc-1', label: '🔗 助詞コロケーション: 日常動作', tab: 'collocations' },
-      { id: 'phrase-15', label: '🗣️ 直感フレーズ15: 感情・共感相づち', tab: 'chunks' },
+      { id: 'chunk-1', label: '実践チャンク: 相づち・リアクション', tab: 'chunks' },
+      { id: 'colloc-1', label: '助詞コロケーション: 日常動作', tab: 'collocations' },
+      { id: 'phrase-15', label: '直感フレーズ15: 感情・共感相づち', tab: 'chunks' },
     ],
   },
   {
@@ -500,7 +500,7 @@ export const ROADMAP_STEPS: RoadmapStep[] = [
     links: [
       { id: 'dict-81', label: '辞書81: -느라고（悪結果の理由）', tab: 'dictionary' },
       { id: 'dict-82', label: '辞書82: -는 바람에（予期せぬ原因）', tab: 'dictionary' },
-      { id: 'colloc-10', label: '🔗 助詞コロケーション: 身体・感情慣用句', tab: 'collocations' },
+      { id: 'colloc-10', label: '助詞コロケーション: 身体・感情慣用句', tab: 'collocations' },
       { id: 'pair-20', label: '似ていて紛らわしい表現60選', tab: 'reference' },
     ],
   },
@@ -578,7 +578,7 @@ export const ROADMAP_STEPS: RoadmapStep[] = [
       breakthrough: '1) 論述文では一人称（나/저）を完全に封印し、「~할 필요가 있다」「~해야 마땅하다」「~(으)ㄹ 것이 요구된다」のような客観的・当為的文末表現に統一することで、C1レベルのアカデミック・ライティングの文体を確立する。2) 頭の中で日本語の漢字語から韓国語へ音変換するクセを止め、必ず「韓国語のネイティブコーパス（社説・模範解答）で実際に使われている名詞＋動詞のペア（コロケーション）」だけを組み合わせて文を組み立てる。',
     },
     links: [
-      { id: 'vocab-401', label: '📖 重要単語 No.401〜500（中上級必須語彙）', tab: 'dictionary' },
+      { id: 'vocab-401', label: '重要単語 No.401〜500（中上級必須語彙）', tab: 'dictionary' },
       { id: 'dict-111', label: '辞書111: -는 한편（論理接続）', tab: 'dictionary' },
       { id: 'dict-125', label: '辞書125: -고자（格式ある目的）', tab: 'dictionary' },
       { id: 'col-1', label: '特別コラム01: 中級へ羽ばたくブースター', tab: 'reference' },
@@ -657,9 +657,9 @@ export const ROADMAP_STEPS: RoadmapStep[] = [
       breakthrough: '意味が通じるだけの「文法的に正しい文（Grammatically Correct）」から、母語話者が最も自然と感じる「イディオマティックな文（Idiomatically Natural）」へと基準を引き上げる。例えば「とても似ている」を「매우 비슷하다」で済ませず「판박이다 / 빼닮았다」、「失敗して当然だ」を「실패하는 것은 당연하다」ではなく「실패하기 마련이다 / 불 보듯 뻔하다」と表現できるよう、漢字語を固有語や慣用表現に『言い換える（パラフレーズする）逆引き訓練』を徹底する。',
     },
     links: [
-      { id: 'slang-1', label: '🔥 若者スラング・新造語30選', tab: 'chunks' },
-      { id: 'colloc-30', label: '🔗 助詞コロケーション: 抽象・思考・ことわざ', tab: 'collocations' },
-      { id: 'phrase-30', label: '🗣️ 直感フレーズ80選', tab: 'chunks' },
+      { id: 'slang-1', label: '若者スラング・新造語30選', tab: 'chunks' },
+      { id: 'colloc-30', label: '助詞コロケーション: 抽象・思考・ことわざ', tab: 'collocations' },
+      { id: 'phrase-30', label: '直感フレーズ80選', tab: 'chunks' },
     ],
   },
 ];

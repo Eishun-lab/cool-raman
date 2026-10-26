@@ -152,7 +152,7 @@ export function findGuideLinksForWord(item: WordItem): GuideLinkItem[] {
       links.push({
         id: `dict-${dict.id}`,
         type: 'dict',
-        label: `🔖 No.${dict.no} ${dict.grammar.split('/')[0].trim()}`,
+        label: `文法 No.${dict.no}: ${dict.grammar.split('/')[0].trim()}`,
         targetId: dict.id,
         anchor: dict.id,
       });
@@ -167,7 +167,7 @@ export function findGuideLinksForWord(item: WordItem): GuideLinkItem[] {
       links.push({
         id: `lesson-${map.lessonId}`,
         type: 'lesson',
-        label: `📖 ${map.label}`,
+        label: `教科書: ${map.label}`,
         targetId: map.lessonId,
         anchor: map.lessonId,
       });
@@ -188,7 +188,7 @@ export function findGuideLinksForWord(item: WordItem): GuideLinkItem[] {
     links.push({
       id: `vocab-${matchedVocab.id}`,
       type: 'vocab',
-      label: `🔤 重要単語: ${matchedVocab.word} (${matchedVocab.meaning})`,
+      label: `重要単語: ${matchedVocab.word} (${matchedVocab.meaning})`,
       targetId: matchedVocab.id,
       anchor: matchedVocab.id,
     });
@@ -200,7 +200,7 @@ export function findGuideLinksForWord(item: WordItem): GuideLinkItem[] {
     links.push({
       id: 'numbers-guide',
       type: 'numbers',
-      label: '🔢 数字・時刻・助数詞マスター',
+      label: '数字完全攻略マスター',
       targetId: 'numbers-guide',
       anchor: 'numbers-guide',
     });
@@ -228,7 +228,7 @@ export function findGuideLinksForGrammar(note: GrammarNote): GuideLinkItem[] {
       links.push({
         id: `dict-${dict.id}`,
         type: 'dict',
-        label: `🔖 No.${dict.no} ${dict.grammar.split('/')[0].trim()}`,
+        label: `文法 No.${dict.no}: ${dict.grammar.split('/')[0].trim()}`,
         targetId: dict.id,
         anchor: dict.id,
       });
@@ -242,7 +242,7 @@ export function findGuideLinksForGrammar(note: GrammarNote): GuideLinkItem[] {
       links.push({
         id: `lesson-${map.lessonId}`,
         type: 'lesson',
-        label: `📖 ${map.label}`,
+        label: `教科書: ${map.label}`,
         targetId: map.lessonId,
         anchor: map.lessonId,
       });

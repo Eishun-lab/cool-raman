@@ -16,14 +16,14 @@ export interface GamificationState {
 const STORAGE_KEY = 'hanmoa_gamification_v2';
 
 export const LEVEL_TIERS = [
-  { level: 1, minXp: 0, title: 'ハングル冒険者', badge: '🌱 Lv.1', desc: '文字と発音の旅路がスタート！' },
-  { level: 2, minXp: 120, title: '入門サバイバー', badge: '🔤 Lv.2', desc: 'ハングルと基本挨拶を習得！' },
-  { level: 3, minXp: 300, title: '初級トラベラー', badge: '☕ Lv.3', desc: '日常短文で意思疎通ができる！' },
-  { level: 4, minXp: 600, title: '初級コミュニケーター', badge: '🏰 Lv.4', desc: '旅行や日常会話が自立！' },
-  { level: 5, minXp: 1100, title: '中級スピーカー', badge: '🚀 Lv.5', desc: '間接話法と敬語で社会会話！' },
-  { level: 6, minXp: 1800, title: '論理ディベーター', badge: '📊 Lv.6', desc: 'ニュースや社会問題で議論可能！' },
-  { level: 7, minXp: 2800, title: 'アカデミックプロ', badge: '🎓 Lv.7', desc: '専門商談・論述作文を自在に展開！' },
-  { level: 8, minXp: 4200, title: 'ネイティブマスター', badge: '👑 Lv.8', desc: '韓国語の最高峰に到達！' },
+  { level: 1, minXp: 0, title: 'ハングル冒険者', badge: 'Lv.1', desc: '文字と発音の旅路がスタート！' },
+  { level: 2, minXp: 120, title: '入門サバイバー', badge: 'Lv.2', desc: 'ハングルと基本挨拶を習得！' },
+  { level: 3, minXp: 300, title: '初級トラベラー', badge: 'Lv.3', desc: '日常短文で意思疎通ができる！' },
+  { level: 4, minXp: 600, title: '初級コミュニケーター', badge: 'Lv.4', desc: '旅行や日常会話が自立！' },
+  { level: 5, minXp: 1100, title: '中級スピーカー', badge: 'Lv.5', desc: '間接話法と敬語で社会会話！' },
+  { level: 6, minXp: 1800, title: '論理ディベーター', badge: 'Lv.6', desc: 'ニュースや社会問題で議論可能！' },
+  { level: 7, minXp: 2800, title: 'アカデミックプロ', badge: 'Lv.7', desc: '専門商談・論述作文を自在に展開！' },
+  { level: 8, minXp: 4200, title: 'ネイティブマスター', badge: 'Lv.8', desc: '韓国語の最高峰に到達！' },
 ];
 
 export const getTodayDateString = (): string => {

@@ -30,6 +30,23 @@ import {
   X,
   Play,
   RotateCcw,
+  Languages,
+  MessageSquare,
+  Send,
+  TrendingUp,
+  Briefcase,
+  Crown,
+  Coffee,
+  ShoppingBag,
+  Heart,
+  Building2,
+  PhoneCall,
+  MessagesSquare,
+  Presentation,
+  Tv,
+  Lightbulb,
+  ShieldAlert,
+  AlertTriangle,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { RoadmapStep, GuideTab } from '../../types/guide';
@@ -120,9 +137,7 @@ const STEP_META: Record<
 const STAGE_QUEST_META: Record<
   number,
   {
-    icon: string;
     stageName: string;
-    scenarioIcon: string;
     scenarioTitle: string;
     themeGradient: string;
     bossLabel: string;
@@ -130,77 +145,83 @@ const STAGE_QUEST_META: Record<
   }
 > = {
   1: {
-    icon: '🔤',
     stageName: 'ハングル解読アイランド',
-    scenarioIcon: '☕',
     scenarioTitle: '明洞のカフェで、メニューを指差さずに「아메리카노 하나 주세요」と注文してレシートを受け取れる！',
     themeGradient: 'from-emerald-500 to-teal-600',
     bossLabel: 'ハングル検定 5級 模擬試験',
     bossPassScore: 60,
   },
   2: {
-    icon: '🦴',
     stageName: '日常会話の骨格アイランド',
-    scenarioIcon: '🛍️',
     scenarioTitle: '韓国人の友達に「週末は何をしたの？」と聞かれて、自分の予定や過去の行動をスラスラ即答できる！',
     themeGradient: 'from-sky-500 to-blue-600',
     bossLabel: 'ハングル検定 5級 模擬試験',
     bossPassScore: 60,
   },
   3: {
-    icon: '🧗',
     stageName: '不規則活用・感情表現アイランド',
-    scenarioIcon: '💌',
     scenarioTitle: '服屋で「少し小さいので大きいサイズを見せてください」と要望を伝え、推しにファンレターを書ける！',
     themeGradient: 'from-amber-500 to-orange-600',
     bossLabel: 'ハングル検定 4級 模擬試験',
     bossPassScore: 70,
   },
   4: {
-    icon: '🏰',
     stageName: '初級完全制覇・自立アイランド',
-    scenarioIcon: '🏨',
     scenarioTitle: 'ホテルのチェックインで「荷物を預かってもらえますか？朝食は何時ですか？」と全て韓国語で交渉できる！',
     themeGradient: 'from-rose-500 to-red-600',
     bossLabel: 'TOPIK I 模擬試験（初級完成）',
     bossPassScore: 50,
   },
   5: {
-    icon: '🚀',
     stageName: '社会・伝言・間接話法アイランド',
-    scenarioIcon: '🏢',
     scenarioTitle: '職場で「キム課長から電話があり、会議は午後2時から始めるとのことでした」と正確に報告・伝言できる！',
     themeGradient: 'from-violet-500 to-purple-600',
     bossLabel: 'ハングル検定 3級 模擬試験',
     bossPassScore: 70,
   },
   6: {
-    icon: '📊',
     stageName: '論理ディスカッションアイランド',
-    scenarioIcon: '🗣️',
     scenarioTitle: '若者の流行や就職事情について、賛成・反対の理由を添えて韓国人と20分間議論できる！',
     themeGradient: 'from-blue-600 to-indigo-700',
     bossLabel: 'ハングル検定 準2級 模擬試験',
     bossPassScore: 70,
   },
   7: {
-    icon: '🎓',
     stageName: 'ビジネス商談・学術小論文アイランド',
-    scenarioIcon: '💼',
     scenarioTitle: 'ビジネス会議で新商品をプレゼンし、相手の反論に対して論理的根拠を示して納得させられる！',
     themeGradient: 'from-teal-600 to-cyan-700',
     bossLabel: 'TOPIK II 模擬試験（中上級）',
     bossPassScore: 40,
   },
   8: {
-    icon: '👑',
     stageName: 'ネイティブ・文化的共生アイランド',
-    scenarioIcon: '🌟',
     scenarioTitle: 'テレビの時事討論番組を字幕なしで100%理解し、ジョークも含めて現地の人と対等に笑い合える！',
     themeGradient: 'from-rose-600 via-pink-600 to-amber-500',
     bossLabel: 'TOPIK II 模擬試験（最上級）',
     bossPassScore: 70,
   },
+};
+
+const STAGE_ICONS: Record<number, React.FC<{ className?: string }>> = {
+  1: Languages,
+  2: MessageSquare,
+  3: Sparkles,
+  4: Compass,
+  5: Send,
+  6: TrendingUp,
+  7: Briefcase,
+  8: Crown,
+};
+
+const SCENARIO_ICONS: Record<number, React.FC<{ className?: string }>> = {
+  1: Coffee,
+  2: ShoppingBag,
+  3: Heart,
+  4: Building2,
+  5: PhoneCall,
+  6: MessagesSquare,
+  7: Presentation,
+  8: Tv,
 };
 
 type RoadmapViewMode = 'quest' | 'matrix' | 'focus';
@@ -402,6 +423,8 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
   const renderStageCard = (step: RoadmapStep, isSingleView: boolean) => {
     const qMeta = STAGE_QUEST_META[step.step];
     const stepMeta = STEP_META[step.step];
+    const StageIcon = STAGE_ICONS[step.step] || Sparkles;
+    const ScenarioIcon = SCENARIO_ICONS[step.step] || Coffee;
     const totalQuests = step.scopePriority.wbsBreakdown.length;
     const isUnlocked = gameState.freeExploreMode || step.step <= gameState.unlockedStage;
 
@@ -469,9 +492,9 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
         <div className="flex items-center justify-between gap-3 pb-3 border-b border-stone-100 flex-wrap sm:flex-nowrap">
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
             <div
-              className={`w-11 h-11 sm:w-13 sm:h-13 rounded-2xl bg-gradient-to-br ${qMeta.themeGradient} text-white flex items-center justify-center text-2xl shadow-xs shrink-0`}
+              className={`w-11 h-11 sm:w-13 sm:h-13 rounded-2xl bg-gradient-to-br ${qMeta.themeGradient} text-white flex items-center justify-center shadow-xs shrink-0`}
             >
-              {qMeta.icon}
+              <StageIcon className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5 flex-wrap">
@@ -527,9 +550,10 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
               <p className="text-sm sm:text-base font-black text-[#1B2A38] leading-snug">
                 {step.scopePriority.wbsBreakdown[firstIncompleteIdx]}
               </p>
-              <p className="text-xs text-stone-600 line-clamp-1">
-                🎯 {qMeta.scenarioTitle}
-              </p>
+              <div className="flex items-center gap-1.5 text-xs text-stone-600 line-clamp-1">
+                <ScenarioIcon className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                <span className="truncate">{qMeta.scenarioTitle}</span>
+              </div>
             </div>
             <button
               type="button"
@@ -574,7 +598,7 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
         <div className="space-y-2">
           <div className="flex items-center justify-between px-1">
             <span className="text-xs font-black text-[#1B2A38]">
-              📋 必須クエスト一覧
+              必須クエスト一覧
             </span>
             <span className="text-[11px] text-stone-500">タップでチェック</span>
           </div>
@@ -604,7 +628,7 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                           : 'bg-white border-2 border-stone-300 text-transparent hover:border-[#B84E34]'
                       }`}
                     >
-                      ✓
+                      <Check className="w-3.5 h-3.5 stroke-[3]" />
                     </div>
                     <span
                       className={`text-xs sm:text-sm font-bold leading-snug truncate ${
@@ -654,12 +678,13 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
           <div className="space-y-0.5">
             <div className="flex items-center gap-2">
               <span className="flex items-center gap-1 text-xs font-black text-[#B84E34]">
-                <Trophy className="w-3.5 h-3.5 text-amber-500" />
+                <Award className="w-3.5 h-3.5 text-amber-500" />
                 <span>ステージボス検定</span>
               </span>
               {isBossCleared && (
-                <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-300">
-                  🏆 撃破済み（最高: {bossScore}点）
+                <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-300 flex items-center gap-1">
+                  <Trophy className="w-3 h-3 text-amber-600" />
+                  <span>撃破済み（最高: {bossScore}点）</span>
                 </span>
               )}
             </div>
@@ -685,7 +710,7 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
           </div>
         </div>
 
-        {/* 💡 攻略ガイド・つまずき対策・会話例（アコーディオンで情報過多を防止） */}
+        {/* 攻略ガイド・つまずき対策・会話例（アコーディオンで情報過多を防止） */}
         <div className="border border-stone-200 rounded-2xl overflow-hidden bg-stone-50/50">
           <button
             type="button"
@@ -693,7 +718,9 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
             className="w-full p-3 sm:p-3.5 flex items-center justify-between text-xs sm:text-sm font-bold text-stone-700 hover:text-stone-900 hover:bg-stone-100/60 transition-all cursor-pointer"
           >
             <span className="flex items-center gap-2">
-              <span className="w-5 h-5 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center text-xs">💡</span>
+              <span className="w-5 h-5 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center text-xs">
+                <Lightbulb className="w-3.5 h-3.5 text-amber-700" />
+              </span>
               <span>攻略ガイド・代表会話・つまずき対策</span>
             </span>
             <span className="text-xs text-stone-500 flex items-center gap-1">
@@ -734,20 +761,20 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
 
               {/* 挫折防止スコープガード */}
               <div className="p-3 rounded-xl bg-stone-50 border border-stone-200 text-xs text-stone-700 flex items-start gap-2">
-                <span className="text-rose-600 font-black shrink-0">🛑 挫折防止の制約:</span>
-                <span>{step.scopePriority.scopeGuard}</span>
+                <ShieldAlert className="w-3.5 h-3.5 text-rose-600 shrink-0 mt-0.5" />
+                <span><strong>挫折防止の制約: </strong>{step.scopePriority.scopeGuard}</span>
               </div>
 
               {/* つまずきポイント */}
               <div className="p-3 rounded-xl bg-amber-50/60 border border-amber-200 text-xs text-stone-700 flex items-start gap-2">
-                <span className="text-amber-700 font-black shrink-0">⚠️ つまずき予防:</span>
-                <span>{step.learningExperience.commonStumblingBlock}</span>
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
+                <span><strong>つまずき予防: </strong>{step.learningExperience.commonStumblingBlock}</span>
               </div>
 
               {/* 5分縮小プロトコル */}
               <div className="p-3 rounded-xl bg-rose-50/50 border border-rose-200 text-xs text-stone-700 flex items-start gap-2">
-                <span className="text-[#B84E34] font-black shrink-0">🛟 5分縮小プロトコル:</span>
-                <span>{step.learningExperience.riskAndFallback.fallbackProtocol}</span>
+                <LifeBuoy className="w-3.5 h-3.5 text-[#B84E34] shrink-0 mt-0.5" />
+                <span><strong>5分縮小プロトコル: </strong>{step.learningExperience.riskAndFallback.fallbackProtocol}</span>
               </div>
             </div>
           )}
@@ -809,12 +836,12 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
       <div className="bg-white border border-stone-200/90 rounded-2xl p-2.5 sm:p-3 shadow-2xs flex items-center justify-between gap-2 flex-wrap">
         {/* レベル・XP表示 */}
         <div className="flex items-center gap-2 sm:gap-2.5">
-          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-[#B84E34] to-[#8f3a24] text-white flex items-center justify-center font-black text-base shadow-2xs shrink-0">
-            {levelInfo.currentTier.badge.split(' ')[0]}
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-[#B84E34] to-[#8f3a24] text-white flex items-center justify-center font-black shadow-2xs shrink-0">
+            <Award className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
           </div>
           <div className="space-y-0.5">
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-[11px] font-black px-2 py-0.2 rounded-full bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD]">
+              <span className="text-[11px] font-black px-2 py-0.5 rounded-full bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD]">
                 {levelInfo.currentTier.badge}
               </span>
               <span className="text-xs sm:text-sm font-black text-[#1B2A38]">
@@ -864,8 +891,9 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
       {/* 🧭 ロードマップ モード切替 */}
       <div className="flex items-center justify-between gap-2 pb-1 border-b border-stone-200/80 flex-wrap">
         <div className="flex items-center gap-2">
+          <Compass className="w-5 h-5 text-[#B84E34]" />
           <span className="text-base sm:text-lg font-black text-[#1B2A38]">
-            🗺️ ロードマップ
+            クエストロードマップ
           </span>
           <span className="text-xs text-stone-500 hidden sm:inline">
             30秒特訓とボス検定で能動的に進めよう
@@ -926,6 +954,7 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                 const isUnlocked = gameState.freeExploreMode || s.step <= gameState.unlockedStage;
                 const bossScore = gameState.clearedBossExams[STEP_META[s.step]?.examId];
                 const isBossCleared = bossScore !== undefined && bossScore >= STAGE_QUEST_META[s.step]?.bossPassScore;
+                const PillIcon = STAGE_ICONS[s.step] || Sparkles;
 
                 return (
                   <button
@@ -943,10 +972,10 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                         : 'bg-stone-100/70 border border-stone-200/50 text-stone-400'
                     }`}
                   >
-                    <span className="text-sm">{STAGE_QUEST_META[s.step]?.icon}</span>
+                    <PillIcon className={`w-3.5 h-3.5 ${isSelected ? 'text-white' : 'text-[#B84E34]'}`} />
                     <span className="whitespace-nowrap">Stage {s.step}</span>
                     {isBossCleared ? (
-                      <span className="text-[10px] text-amber-300">🏆</span>
+                      <Trophy className="w-3 h-3 text-amber-300" />
                     ) : !isUnlocked ? (
                       <Lock className="w-3 h-3 text-stone-400" />
                     ) : null}
@@ -962,7 +991,7 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
               className="px-2.5 py-1.5 rounded-xl border border-stone-200 bg-white text-stone-600 hover:text-stone-900 text-xs font-bold shrink-0 shadow-2xs transition-all cursor-pointer whitespace-nowrap"
               title="1ステージずつ集中して解くか、全8ステージをスクロールで一覧するか切り替えます"
             >
-              {questDisplayMode === 'focused' ? '全一覧 ➔' : '🎯 集中'}
+              {questDisplayMode === 'focused' ? '全8ステージ表示' : '集中表示'}
             </button>
           </div>
 
@@ -1134,7 +1163,10 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                           </ul>
                         </div>
                         <div className="pt-2 border-t border-amber-200/50">
-                          <strong className="text-rose-700 font-bold block text-[11px] mb-0.5">🛑 広げすぎない制約:</strong>
+                          <strong className="text-rose-700 font-bold block text-[11px] mb-0.5">
+                            <ShieldAlert className="w-3.5 h-3.5 inline mr-1 text-rose-600" />
+                            広げすぎない制約:
+                          </strong>
                           <p className="text-[11px] text-stone-600 bg-white/70 p-1.5 rounded-lg border border-amber-200/40">
                             {step.scopePriority.scopeGuard}
                           </p>
@@ -1160,7 +1192,10 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                           </p>
                         </div>
                         <div className="pt-1.5 border-t border-emerald-200/50">
-                          <strong className="text-stone-900 font-bold block text-[11px] mb-0.5">🎬 行動シナリオ例:</strong>
+                          <strong className="text-stone-900 font-bold block text-[11px] mb-0.5">
+                            <Sparkles className="w-3.5 h-3.5 inline mr-1 text-[#B84E34]" />
+                            行動シナリオ例:
+                          </strong>
                           <p className="text-stone-600 text-[11px]">{step.goalDefinition.userStory}</p>
                         </div>
                       </div>
@@ -1178,12 +1213,16 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                       </div>
                       <div className="space-y-2 text-stone-700 leading-relaxed">
                         <div>
-                          <strong className="text-rose-950 font-bold block text-[11px] mb-0.5">⚠️ 事前に知っておく壁:</strong>
+                          <strong className="text-rose-950 font-bold block text-[11px] mb-0.5">
+                            <AlertTriangle className="w-3.5 h-3.5 inline mr-1 text-amber-600" />
+                            事前に知っておく壁:
+                          </strong>
                           <p className="text-[11px] text-stone-600">{step.learningExperience.commonStumblingBlock}</p>
                         </div>
                         <div className="pt-2 border-t border-rose-200/50">
                           <strong className="text-[#B84E34] font-black block text-[11px] mb-1">
-                            🛡️ 忙しい日の5分縮小プロトコル:
+                            <LifeBuoy className="w-3.5 h-3.5 inline mr-1 text-[#B84E34]" />
+                            忙しい日の5分縮小プロトコル:
                           </strong>
                           <p className="text-[11px] text-stone-700 bg-white/80 p-2 rounded-xl border border-rose-200/50 font-medium">
                             {step.learningExperience.riskAndFallback.fallbackProtocol}
@@ -1309,9 +1348,15 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                   </span>
                 </div>
                 <div className="flex items-center gap-3 text-xs text-stone-500 font-mono">
-                  <span>⏱️ 想定学習時間: <strong className="text-stone-800">{activeStep.timeHours}</strong></span>
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5 text-stone-400" />
+                    想定学習時間: <strong className="text-stone-800">{activeStep.timeHours}</strong>
+                  </span>
                   <span>•</span>
-                  <span>📅 目安期間: <strong className="text-stone-800">{activeStep.scopePriority.timeboxWeeks}</strong></span>
+                  <span className="flex items-center gap-1">
+                    <Calendar className="w-3.5 h-3.5 text-stone-400" />
+                    目安期間: <strong className="text-stone-800">{activeStep.scopePriority.timeboxWeeks}</strong>
+                  </span>
                 </div>
               </div>
 
@@ -1420,7 +1465,8 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
 
                 <div className="bg-white border border-stone-200 rounded-2xl p-4 space-y-1.5 shadow-2xs">
                   <span className="text-xs font-black text-stone-800 flex items-center gap-1.5">
-                    <span>🎬 説明できるストーリー例（学習完了後の具体的行動シナリオ）:</span>
+                    <Sparkles className="w-4 h-4 text-[#B84E34]" />
+                    <span>説明できるストーリー例（学習完了後の具体的行動シナリオ）:</span>
                   </span>
                   <p className="text-xs text-stone-700 leading-relaxed bg-[#FAF7F2] p-3 rounded-xl border border-[#E8E2D5]">
                     {activeStep.goalDefinition.userStory}
@@ -1434,7 +1480,10 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
                   <div className="bg-rose-50/40 p-4 rounded-2xl border border-rose-200/70 space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="font-black text-rose-900">🔥 Must（必須の骨格）</span>
+                      <span className="font-black text-rose-900 flex items-center gap-1.5">
+                        <Flame className="w-4 h-4 text-rose-600" />
+                        Must（必須の骨格）
+                      </span>
                       <span className="text-[10px] px-2 py-0.2 rounded-full bg-rose-100 text-rose-800 font-bold">最優先</span>
                     </div>
                     <ul className="space-y-1.5 pl-1">
@@ -1449,7 +1498,10 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
 
                   <div className="bg-amber-50/40 p-4 rounded-2xl border border-amber-200/70 space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="font-black text-amber-900">⭐ Should（日常の展開）</span>
+                      <span className="font-black text-amber-900 flex items-center gap-1.5">
+                        <Sparkles className="w-4 h-4 text-amber-500" />
+                        Should（日常の展開）
+                      </span>
                       <span className="text-[10px] px-2 py-0.2 rounded-full bg-amber-100 text-amber-800 font-bold">推奨</span>
                     </div>
                     <ul className="space-y-1.5 pl-1">
@@ -1464,7 +1516,7 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
 
                   <div className="bg-stone-50 p-4 rounded-2xl border border-stone-200 space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="font-black text-stone-700">💤 Could（今は捨てる）</span>
+                      <span className="font-black text-stone-700">Could（後回しでOK）</span>
                       <span className="text-[10px] px-2 py-0.2 rounded-full bg-stone-200 text-stone-600 font-bold">後回し</span>
                     </div>
                     <ul className="space-y-1.5 pl-1">
@@ -1495,7 +1547,10 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                   </div>
 
                   <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-xl text-xs flex items-start gap-2">
-                    <span className="text-amber-700 font-black shrink-0">🛑 スコープ拡大防止原則:</span>
+                    <span className="text-amber-800 font-black shrink-0 flex items-center gap-1">
+                      <ShieldAlert className="w-4 h-4 text-amber-600" />
+                      スコープ拡大防止原則:
+                    </span>
                     <span className="text-stone-700">{activeStep.scopePriority.scopeGuard}</span>
                   </div>
                 </div>
@@ -1516,8 +1571,9 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                     </div>
 
                     <div className="pt-2 border-t border-[#E8E2D5] space-y-1.5">
-                      <strong className="text-stone-900 font-bold block text-[11px]">
-                        🎉 ドーパミンが出るミニ到達目標（マイルストーン）:
+                      <strong className="text-stone-900 font-bold block text-[11px] flex items-center gap-1">
+                        <Trophy className="w-3.5 h-3.5 text-amber-500" />
+                        ミニ到達目標（マイルストーン）:
                       </strong>
                       <div className="space-y-1 pl-1">
                         {activeStep.learningExperience.miniMilestones.map((m, idx) => (
@@ -1615,15 +1671,19 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                   </div>
 
                   <div className="text-xs text-stone-600 leading-relaxed bg-white/60 p-3 rounded-xl border border-[#F0D5CC]/60">
-                    <strong className="text-[#B84E34]">💡 言語学的評価点: </strong>
+                    <strong className="text-[#B84E34] flex items-center gap-1 mb-0.5">
+                      <Lightbulb className="w-3.5 h-3.5 text-[#B84E34]" />
+                      言語学的評価点:
+                    </strong>
                     <span>{activeStep.representativeSpeech.linguisticPoint}</span>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                  <div className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-4 space-y-1.5">
-                    <div className="font-bold text-amber-900 flex items-center gap-1.5 text-xs">
-                      <span>⚠️ 日本語話者の頻出誤用の罠 (SLA):</span>
+                  <div className="bg-rose-50/70 border border-rose-200/80 rounded-2xl p-4 space-y-1.5">
+                    <div className="font-bold text-rose-900 flex items-center gap-1.5 text-xs">
+                      <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
+                      <span>日本語話者の頻出誤用の罠 (SLA):</span>
                     </div>
                     <p className="text-stone-700 leading-relaxed">
                       {activeStep.slaTips.frequentError}
@@ -1632,7 +1692,8 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
 
                   <div className="bg-emerald-50/70 border border-emerald-200/80 rounded-2xl p-4 space-y-1.5">
                     <div className="font-bold text-emerald-900 flex items-center gap-1.5 text-xs">
-                      <span>💡 認知言語学的ブレイクスルー (打開策):</span>
+                      <Lightbulb className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>認知言語学的ブレイクスルー (打開策):</span>
                     </div>
                     <p className="text-stone-700 leading-relaxed">
                       {activeStep.slaTips.breakthrough}
@@ -1646,7 +1707,7 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
       )}
 
       {/* ===================================================================== */}
-      {/* ⚡️ 30秒クイック特訓ドリル モーダル                                    */}
+      {/* 30秒クイック特訓ドリル モーダル                                      */}
       {/* ===================================================================== */}
       {activeDrill && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
@@ -1655,7 +1716,7 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
             <div className="flex items-center justify-between pb-3 border-b border-stone-100">
               <div className="flex items-center gap-2">
                 <span className="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-black text-sm">
-                  ⚡️
+                  <Zap className="w-4 h-4 text-amber-600" />
                 </span>
                 <div>
                   <h4 className="text-sm sm:text-base font-black text-[#1B2A38]">
@@ -1722,13 +1783,13 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                       >
                         <span>{opt}</span>
                         {drillIsAnswered && isCorrectOpt && (
-                          <span className="text-[11px] font-black text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-md">
-                            ⭕️ 正解
+                          <span className="text-[11px] font-black text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-md flex items-center gap-1">
+                            <Check className="w-3 h-3 text-emerald-700" /> 正解
                           </span>
                         )}
                         {drillIsAnswered && isSelected && !isCorrectOpt && (
-                          <span className="text-[11px] font-black text-rose-700 bg-rose-100 px-2 py-0.5 rounded-md">
-                            ❌ 不正解
+                          <span className="text-[11px] font-black text-rose-700 bg-rose-100 px-2 py-0.5 rounded-md flex items-center gap-1">
+                            <X className="w-3 h-3 text-rose-700" /> 不正解
                           </span>
                         )}
                       </button>
@@ -1740,7 +1801,7 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                 {drillIsAnswered && (
                   <div className="p-3.5 bg-amber-50/70 border border-amber-200/80 rounded-2xl text-xs space-y-2 animate-in fade-in">
                     <p className="text-stone-700 leading-relaxed font-medium">
-                      💡 <strong>解説: </strong>{activeDrill.questions[drillQuestionIndex].explanation}
+                      <strong className="text-[#B84E34]">解説: </strong>{activeDrill.questions[drillQuestionIndex].explanation}
                     </p>
                     <div className="flex justify-end pt-1">
                       <button
@@ -1758,8 +1819,8 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
             ) : (
               /* ドリル終了結果画面 */
               <div className="text-center py-4 space-y-4 animate-in zoom-in-95">
-                <div className="w-16 h-16 rounded-3xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-3xl mx-auto shadow-sm">
-                  🎉
+                <div className="w-16 h-16 rounded-3xl bg-amber-50 text-amber-700 border border-amber-200 flex items-center justify-center mx-auto shadow-sm">
+                  <Award className="w-8 h-8 text-amber-600" />
                 </div>
                 <div>
                   <h4 className="text-lg sm:text-xl font-black text-[#1B2A38]">
@@ -1770,8 +1831,9 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                   </p>
                 </div>
 
-                <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-2xl text-xs font-bold text-emerald-800">
-                  ✨ クエストが「クリア済み」に更新され、進捗バーが伸びました！
+                <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-2xl text-xs font-bold text-emerald-800 flex items-center justify-center gap-1.5">
+                  <Sparkles className="w-4 h-4 text-emerald-600" />
+                  <span>クエストが「クリア済み」に更新され、進捗バーが伸びました！</span>
                 </div>
 
                 <button
