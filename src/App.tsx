@@ -57,8 +57,8 @@ export const App: React.FC = () => {
             </div>
           </div>
 
-          {/* ナビゲーション */}
-          <nav className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+          {/* デスクトップ ナビゲーション */}
+          <nav className="hidden md:flex items-center gap-1 sm:gap-1.5 shrink-0">
             {[
               { id: 'dashboard', label: 'ホーム', icon: '🏠' },
               { id: 'roadmap', label: 'ロードマップ', icon: '🗺️' },
@@ -70,14 +70,14 @@ export const App: React.FC = () => {
                 key={tab.id}
                 title={tab.label}
                 onClick={() => setActiveTab(tab.id as MainTab)}
-                className={`h-8 sm:h-9 px-2 sm:px-3 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 shrink-0 active:scale-95 ${
+                className={`h-9 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 shrink-0 active:scale-95 cursor-pointer ${
                   activeTab === tab.id
                     ? 'bg-[#B84E34] text-white shadow-xs'
                     : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
                 }`}
               >
-                <span className="text-sm sm:text-base leading-none shrink-0">{tab.icon}</span>
-                <span className="hidden md:inline whitespace-nowrap">{tab.label}</span>
+                <span className="text-base leading-none shrink-0">{tab.icon}</span>
+                <span className="whitespace-nowrap">{tab.label}</span>
               </button>
             ))}
           </nav>
@@ -85,9 +85,9 @@ export const App: React.FC = () => {
       </header>
 
       {/* メインコンテンツ */}
-      <main className="flex-1">
+      <main className="flex-1 pb-20 md:pb-8">
         {activeTab === 'dashboard' ? (
-          <div className="max-w-6xl mx-auto px-4 py-8 sm:py-12">
+          <div className="max-w-6xl mx-auto px-3 sm:px-6 py-6 sm:py-12">
             {/* ヒーローセクション */}
             <div className="text-center max-w-2xl mx-auto mb-12">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold mb-4">
@@ -219,7 +219,7 @@ export const App: React.FC = () => {
             </div>
           </div>
         ) : activeTab === 'roadmap' ? (
-          <div className="max-w-5xl mx-auto px-3 sm:px-6 py-6 sm:py-8 space-y-4">
+          <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 py-2 sm:py-6">
             <VisualRoadmapView
               onNavigateToExam={(examId) => {
                 if (examId) setTargetExamId(examId as ExamType);
@@ -241,8 +241,8 @@ export const App: React.FC = () => {
             }}
           />
         ) : activeTab === 'numbers' ? (
-          <div className="max-w-5xl mx-auto px-3 sm:px-6 py-6 sm:py-8">
-            <div className="mb-6 flex items-center justify-between gap-3">
+          <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 py-3 sm:py-6">
+            <div className="mb-4 sm:mb-6 flex items-center justify-between gap-3">
               <div>
                 <h2 className="text-xl sm:text-2xl font-black text-stone-800">数字完全攻略マスター</h2>
                 <p className="text-xs sm:text-sm text-stone-500">漢数詞・固有数詞・時刻・日付の完全攻略ガイド</p>
@@ -257,7 +257,7 @@ export const App: React.FC = () => {
             <KoreanNumbersGuideView showPronunciation={true} isLargeFont={false} />
           </div>
         ) : activeTab === 'exam' ? (
-          <div className="py-6">
+          <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 py-2 sm:py-6">
             <MockExamView
               initialExamId={targetExamId}
               onNavigateToTextbookLesson={(lessonId) => {
@@ -273,8 +273,8 @@ export const App: React.FC = () => {
             />
           </div>
         ) : activeTab === 'quiz' ? (
-          <div className="py-6">
-            <div className="max-w-3xl mx-auto px-3 sm:px-6 mb-4 flex items-center justify-between gap-3">
+          <div className="w-full max-w-3xl mx-auto px-2 sm:px-4 py-3 sm:py-6">
+            <div className="mb-4 flex items-center justify-between gap-3">
               <div>
                 <h2 className="text-xl sm:text-2xl font-black text-stone-800">ジャンル別 実力テスト</h2>
                 <p className="text-xs sm:text-sm text-stone-500">四択テストで弱点を即座にあぶり出し定着</p>
@@ -290,6 +290,43 @@ export const App: React.FC = () => {
           </div>
         ) : null}
       </main>
+
+      {/* 📱 モバイル用 固定ボトムナビゲーション (画面下部で親指タップ・全幅利用) */}
+      {activeTab !== 'textbook' && (
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#FAF7F2]/95 backdrop-blur-md border-t border-[#E8E2D5] px-2 py-1 flex items-center justify-around shadow-lg">
+          {[
+            { id: 'dashboard', label: 'ホーム', icon: '🏠' },
+            { id: 'roadmap', label: 'マップ', icon: '🗺️' },
+            { id: 'textbook', label: '教科書', icon: '📖' },
+            { id: 'exam', label: '模試', icon: '🎓' },
+            { id: 'numbers', label: '数字', icon: '🔢' },
+          ].map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => {
+                  setActiveTab(tab.id as MainTab);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className={`flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition-all cursor-pointer ${
+                  isActive
+                    ? 'text-[#B84E34] font-black'
+                    : 'text-stone-500 hover:text-stone-800 font-medium'
+                }`}
+              >
+                <span className={`text-lg leading-none transition-transform ${isActive ? 'scale-115' : ''}`}>
+                  {tab.icon}
+                </span>
+                <span className={`text-[10px] tracking-tight leading-tight mt-1 ${isActive ? 'font-black' : ''}`}>
+                  {tab.label}
+                </span>
+              </button>
+            );
+          })}
+        </nav>
+      )}
     </div>
   );
 };

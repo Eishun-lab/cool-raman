@@ -395,7 +395,7 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
   // ==========================================================================
   if (viewState === 'list') {
     return (
-      <div className="max-w-6xl mx-auto px-3 sm:px-6 py-6 sm:py-10 space-y-10">
+      <div className="w-full space-y-6 sm:space-y-8">
         {/* ヘッダー紹介セクション */}
         <div className="text-center max-w-3xl mx-auto space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 text-amber-900 text-xs font-black shadow-2xs">
@@ -905,9 +905,9 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
   // ③ 模擬試験 採点・結果レポート画面（終了後：Can-Do学習カルテ完備）
   // ==========================================================================
   return (
-    <div className="max-w-4xl mx-auto px-3 sm:px-6 py-6 sm:py-10 space-y-8">
+    <div className="w-full space-y-6 sm:space-y-8">
       {/* 総合スコアカード */}
-      <div className="bg-white border border-stone-200 rounded-3xl p-6 sm:p-8 shadow-md text-center space-y-5">
+      <div className="bg-white border border-stone-200 rounded-2xl sm:rounded-3xl p-4 sm:p-7 shadow-md text-center space-y-4 sm:space-y-5">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black tracking-wide bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD]">
           {activeExam.title} 公式判定結果
         </div>
