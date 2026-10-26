@@ -453,85 +453,67 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
 
     return (
       <div key={step.step} className="w-full space-y-3">
-        {/* 🌟 Duolingo風 フルカラー・エリア看板（Thematic Unit Banner） */}
+        {/* 🌟 Duolingo Feather風 ユニット看板（Thematic Unit Banner） */}
         <div
-          className={`bg-gradient-to-r ${district.bannerGradient} text-white rounded-3xl p-3.5 sm:p-5 shadow-md border-b-4 ${district.bannerBorder} relative overflow-hidden`}
+          className={`bg-gradient-to-r ${district.bannerGradient} text-white rounded-3xl p-4 sm:p-5 shadow-md border-b-4 ${district.bannerBorder} relative overflow-hidden`}
         >
           {/* 背景の光彩装飾 */}
           <div className="absolute -right-8 -bottom-10 w-44 h-44 bg-white/10 rounded-full blur-xl pointer-events-none" />
 
-          <div className="relative z-10 space-y-2.5">
-            {/* 上段：駅番号サイン ＆ エリア前後切替 ＆ ガイドボタン */}
+          <div className="relative z-10 space-y-3">
+            {/* 上段：駅番号サイン ＆ スッキリしたエリア前後切替 */}
             <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <SeoulSubwaySign
-                  stationCode={district.stationCode}
-                  lineName={district.lineName}
-                  lineColor={district.lineColor}
-                  koName={district.koName}
-                />
-                <span className="text-[10px] font-black bg-black/25 backdrop-blur-xs px-2 py-0.5 rounded-full border border-white/20">
-                  {step.badge.split('/')[0].trim()}
+              <div className="flex items-center gap-2">
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-white text-slate-900 shadow-xs">
+                  {district.stationCode}
+                </span>
+                <span className="text-xs font-black text-white/90 tracking-wide">
+                  {district.koName}
                 </span>
               </div>
 
-              <div className="flex items-center gap-1">
-                {/* エリア前後切替 */}
-                <div className="flex items-center bg-black/25 backdrop-blur-xs rounded-xl p-0.5 border border-white/20">
-                  <button
-                    type="button"
-                    disabled={selectedStage <= 1}
-                    onClick={() => {
-                      sound.playTap();
-                      setSelectedStage((prev) => Math.max(1, prev - 1));
-                    }}
-                    className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
-                      selectedStage <= 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/20 text-white'
-                    }`}
-                    title="前のエリア"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  <span className="text-[11px] font-black px-1.5 text-white/95 whitespace-nowrap">
-                    {selectedStage}/8
-                  </span>
-                  <button
-                    type="button"
-                    disabled={selectedStage >= 8}
-                    onClick={() => {
-                      sound.playTap();
-                      setSelectedStage((prev) => Math.min(8, prev + 1));
-                    }}
-                    className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
-                      selectedStage >= 8 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/20 text-white'
-                    }`}
-                    title="次のエリア"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-
-                {/* エリアガイドボタン */}
+              {/* 前へ / 次へ エリア切替 */}
+              <div className="flex items-center bg-black/25 backdrop-blur-md rounded-xl p-0.5 border border-white/20">
                 <button
                   type="button"
+                  disabled={selectedStage <= 1}
                   onClick={() => {
                     sound.playTap();
-                    setActiveStepIndex(step.step - 1);
-                    setShowGuideModal(true);
+                    setSelectedStage((prev) => Math.max(1, prev - 1));
                   }}
-                  className="h-8 px-2.5 rounded-xl bg-white/20 hover:bg-white/30 backdrop-blur-xs border border-white/30 text-white text-xs font-black flex items-center gap-1 shadow-2xs transition-all cursor-pointer active:scale-95"
-                  title="エリア学習ガイド・文法詳細"
+                  className={`px-2 py-1 rounded-lg flex items-center gap-1 text-xs font-black transition-all cursor-pointer ${
+                    selectedStage <= 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/20 text-white'
+                  }`}
+                  title="前のエリア"
                 >
-                  <BookOpen className="w-3.5 h-3.5" />
-                  <span className="hidden xs:inline">ガイド</span>
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                  <span className="hidden xs:inline">前へ</span>
+                </button>
+                <span className="text-xs font-black px-2 text-white/95 whitespace-nowrap">
+                  {selectedStage} / 8
+                </span>
+                <button
+                  type="button"
+                  disabled={selectedStage >= 8}
+                  onClick={() => {
+                    sound.playTap();
+                    setSelectedStage((prev) => Math.min(8, prev + 1));
+                  }}
+                  className={`px-2 py-1 rounded-lg flex items-center gap-1 text-xs font-black transition-all cursor-pointer ${
+                    selectedStage >= 8 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/20 text-white'
+                  }`}
+                  title="次のエリア"
+                >
+                  <span className="hidden xs:inline">次へ</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
 
-            {/* 中段：エリア名 ＆ 短尺キャッチコピー（改行事故を完全防止） */}
-            <div className="space-y-0.5">
+            {/* 中段：エリア名 ＆ キャッチコピー */}
+            <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <h3 className="text-base sm:text-xl font-black tracking-tight leading-snug break-keep">
+                <h3 className="text-lg sm:text-2xl font-black tracking-tight leading-snug break-keep">
                   Area {step.step}: {district.jaName}
                 </h3>
                 {isStageCleared && (
@@ -540,20 +522,20 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                   </span>
                 )}
               </div>
-              <p className="text-xs text-white/90 font-medium leading-relaxed break-keep">
+              <p className="text-xs sm:text-sm text-white/90 font-medium leading-relaxed break-keep">
                 {district.shortCatch || district.subTitle}
               </p>
             </div>
 
             {/* 下段：探訪進捗プログレスバー */}
-            <div className="flex items-center justify-between gap-3 pt-0.5">
-              <div className="flex-1 bg-black/25 rounded-full h-2 overflow-hidden p-0.5">
+            <div className="flex items-center justify-between gap-3 pt-1">
+              <div className="flex-1 bg-black/25 rounded-full h-2.5 overflow-hidden p-0.5">
                 <div
-                  className="bg-amber-300 h-full rounded-full transition-all duration-500"
+                  className="bg-amber-300 h-full rounded-full transition-all duration-500 shadow-xs"
                   style={{ width: `${progressPercent}%` }}
                 />
               </div>
-              <span className="text-[11px] font-black text-white/90 font-mono shrink-0">
+              <span className="text-[11px] font-black text-white/95 font-mono shrink-0">
                 {doneCount} / {totalQuests} 達成 ({progressPercent}%)
               </span>
             </div>
@@ -678,63 +660,28 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
   return (
     <div className="w-full space-y-3 sm:space-y-4">
       {/* ===================================================================== */}
-      {/* 🌟 メインヘッダー：ソウル地下鉄路線風エリアカルーセル ＆ 学習ガイド       */}
+      {/* 🌟 メインステータスバー：エリア表示 ＆ ストリーク ＆ XP ＆ 学習ガイド   */}
       {/* ===================================================================== */}
-      <div className="bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl p-2 sm:p-2.5 shadow-xs flex items-center justify-between gap-2">
-        {/* ステージ切り替えカルーセル */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 min-w-0 flex-1">
-          {ROADMAP_STEPS.map((s) => {
-            const isSelected = s.step === selectedStage;
-            const isUnlocked = gameState.freeExploreMode || s.step <= gameState.unlockedStage;
-            const bossScore = gameState.clearedBossExams[STEP_META[s.step]?.examId];
-            const isBossCleared = bossScore !== undefined && bossScore >= STAGE_QUEST_META[s.step]?.bossPassScore;
-            const d = SEOUL_WORLD_DISTRICTS[s.step] || SEOUL_WORLD_DISTRICTS[1];
-            const shortJa = d.shortTitle || d.jaName.split('・')[0];
-
-            return (
-              <button
-                key={s.step}
-                type="button"
-                onClick={() => {
-                  sound.playTap();
-                  setSelectedStage(s.step);
-                }}
-                className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-black transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
-                  isSelected
-                    ? 'text-white shadow-xs ring-2 ring-slate-900/10'
-                    : isUnlocked
-                    ? 'bg-slate-50 border border-slate-200 text-slate-700 hover:bg-slate-100'
-                    : 'bg-slate-100/70 border border-slate-200/60 text-slate-400'
-                }`}
-                style={isSelected ? { backgroundColor: d.lineColor } : undefined}
-              >
-                <span
-                  className={`px-1.5 py-0.5 rounded-full text-[10px] font-black tracking-tight ${
-                    isSelected ? 'bg-white/25 text-white' : 'text-white'
-                  }`}
-                  style={!isSelected ? { backgroundColor: isUnlocked ? d.lineColor : '#94A3B8' } : undefined}
-                >
-                  {d.stationCode}
-                </span>
-                <span className="whitespace-nowrap">{shortJa}</span>
-                {isBossCleared ? (
-                  <Trophy className={`w-3 h-3 ${isSelected ? 'text-amber-200' : 'text-amber-500'}`} />
-                ) : !isUnlocked ? (
-                  <Lock className="w-3 h-3 text-slate-400" />
-                ) : null}
-              </button>
-            );
-          })}
+      <div className="bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl px-3.5 py-2.5 shadow-xs flex items-center justify-between gap-3">
+        {/* 左側：現在のエリア */}
+        <div className="flex items-center gap-2">
+          <div
+            className="w-3.5 h-3.5 rounded-full shrink-0 shadow-xs ring-2 ring-white"
+            style={{ backgroundColor: SEOUL_WORLD_DISTRICTS[selectedStage]?.lineColor || '#B84E34' }}
+          />
+          <span className="text-xs sm:text-sm font-black text-slate-800 tracking-tight">
+            Area {selectedStage}: {SEOUL_WORLD_DISTRICTS[selectedStage]?.shortTitle || SEOUL_WORLD_DISTRICTS[selectedStage]?.jaName}
+          </span>
         </div>
 
         {/* 右側：ストリーク ＆ XP ＆ 学習ガイド */}
-        <div className="flex items-center gap-1.5 shrink-0">
-          <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-orange-50 border border-orange-200/90 text-orange-950 font-black text-xs shadow-2xs">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <div className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl bg-orange-50 border border-orange-200/90 text-orange-950 font-black text-xs shadow-2xs">
             <Flame className="w-3.5 h-3.5 text-orange-500 animate-pulse" />
             <span>{gameState.streakDays}日</span>
           </div>
 
-          <div className="hidden xs:flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-50 border border-amber-200/90 text-amber-950 font-black text-xs shadow-2xs">
+          <div className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200/90 text-amber-950 font-black text-xs shadow-2xs">
             <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
             <span>{gameState.xp} XP</span>
           </div>
@@ -749,7 +696,7 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
             title="学習目標・WBS・1枚シート・SLA母語干渉分析を一括確認"
           >
             <BookOpen className="w-3.5 h-3.5 text-amber-300" />
-            <span className="hidden sm:inline">学習ガイド</span>
+            <span>ガイド</span>
           </button>
         </div>
       </div>
