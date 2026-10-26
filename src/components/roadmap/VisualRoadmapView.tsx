@@ -271,6 +271,9 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
     districtName: string;
   } | null>(null);
 
+  // ロックノードタップ時の案内トースト
+  const [lockedHint, setLockedHint] = useState<string | null>(null);
+
   // レベル情報
   const levelInfo = useMemo(() => calculateLevelInfo(gameState.xp), [gameState.xp]);
 
@@ -448,84 +451,124 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
     );
 
     return (
-      <div key={step.step} className="w-full space-y-4">
+      <div key={step.step} className="w-full space-y-3">
         {/* 🌟 Duolingo風 フルカラー・エリア看板（Thematic Unit Banner） */}
         <div
-          className={`bg-gradient-to-r ${district.bannerGradient} text-white rounded-3xl p-4 sm:p-6 shadow-md border-b-4 ${district.bannerBorder} relative overflow-hidden`}
+          className={`bg-gradient-to-r ${district.bannerGradient} text-white rounded-3xl p-3.5 sm:p-5 shadow-md border-b-4 ${district.bannerBorder} relative overflow-hidden`}
         >
           {/* 背景の光彩装飾 */}
           <div className="absolute -right-8 -bottom-10 w-44 h-44 bg-white/10 rounded-full blur-xl pointer-events-none" />
 
-          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="space-y-2 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                {/* ソウル地下鉄 駅名標プレート */}
+          <div className="relative z-10 space-y-2.5">
+            {/* 上段：駅番号サイン ＆ エリア前後切替 ＆ ガイドボタン */}
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 flex-wrap">
                 <SeoulSubwaySign
                   stationCode={district.stationCode}
                   lineName={district.lineName}
                   lineColor={district.lineColor}
                   koName={district.koName}
                 />
-                <span className="text-[10.5px] font-black bg-black/25 backdrop-blur-xs px-2.5 py-1 rounded-full border border-white/20">
-                  {step.badge}
+                <span className="text-[10px] font-black bg-black/25 backdrop-blur-xs px-2 py-0.5 rounded-full border border-white/20">
+                  {step.badge.split('/')[0].trim()}
                 </span>
-                {isStageCleared && (
-                  <span className="text-[10.5px] font-black bg-emerald-400 text-emerald-950 px-2.5 py-1 rounded-full flex items-center gap-1 shadow-2xs">
-                    <CheckCircle2 className="w-3 h-3" /> エリア制覇
-                  </span>
-                )}
               </div>
 
-              <div>
-                <h3 className="text-lg sm:text-2xl font-black tracking-tight leading-snug">
-                  Area {step.step}: {district.jaName}
-                </h3>
-                <p className="text-xs sm:text-sm text-white/90 font-medium mt-0.5 leading-relaxed">
-                  {district.subTitle}
-                </p>
+              <div className="flex items-center gap-1">
+                {/* エリア前後切替 */}
+                <div className="flex items-center bg-black/25 backdrop-blur-xs rounded-xl p-0.5 border border-white/20">
+                  <button
+                    type="button"
+                    disabled={selectedStage <= 1}
+                    onClick={() => {
+                      sound.playTap();
+                      setSelectedStage((prev) => Math.max(1, prev - 1));
+                    }}
+                    className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
+                      selectedStage <= 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/20 text-white'
+                    }`}
+                    title="前のエリア"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <span className="text-[11px] font-black px-1.5 text-white/95 whitespace-nowrap">
+                    {selectedStage}/8
+                  </span>
+                  <button
+                    type="button"
+                    disabled={selectedStage >= 8}
+                    onClick={() => {
+                      sound.playTap();
+                      setSelectedStage((prev) => Math.min(8, prev + 1));
+                    }}
+                    className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
+                      selectedStage >= 8 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/20 text-white'
+                    }`}
+                    title="次のエリア"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* エリアガイドボタン */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    sound.playTap();
+                    setActiveStepIndex(step.step - 1);
+                    setShowGuideModal(true);
+                  }}
+                  className="h-8 px-2.5 rounded-xl bg-white/20 hover:bg-white/30 backdrop-blur-xs border border-white/30 text-white text-xs font-black flex items-center gap-1 shadow-2xs transition-all cursor-pointer active:scale-95"
+                  title="エリア学習ガイド・文法詳細"
+                >
+                  <BookOpen className="w-3.5 h-3.5" />
+                  <span className="hidden xs:inline">ガイド</span>
+                </button>
               </div>
             </div>
 
-            {/* 右側：ガイドブックボタン ＆ エリア進捗 */}
-            <div className="flex sm:flex-col items-center sm:items-end justify-between gap-2 shrink-0">
-              <button
-                type="button"
-                onClick={() => {
-                  sound.playTap();
-                  setActiveStepIndex(step.step - 1);
-                  setShowGuideModal(true);
-                }}
-                className="px-3.5 py-2 rounded-2xl bg-white/20 hover:bg-white/30 backdrop-blur-xs border-2 border-white/40 text-white text-xs font-black flex items-center gap-1.5 shadow-xs transition-all cursor-pointer active:translate-y-0.5"
-              >
-                <BookOpen className="w-3.5 h-3.5" />
-                <span>エリアガイド</span>
-              </button>
-
-              <div className="text-right">
-                <span className="text-[11px] font-black text-white/90 block">
-                  探訪進捗: {doneCount} / {totalQuests}
-                </span>
-                <div className="w-24 bg-black/25 rounded-full h-2 overflow-hidden mt-1 p-0.5">
-                  <div
-                    className="bg-amber-300 h-full rounded-full transition-all duration-500"
-                    style={{ width: `${progressPercent}%` }}
-                  />
-                </div>
+            {/* 中段：エリア名 ＆ 短尺キャッチコピー（改行事故を完全防止） */}
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-2">
+                <h3 className="text-base sm:text-xl font-black tracking-tight leading-snug break-keep">
+                  Area {step.step}: {district.jaName}
+                </h3>
+                {isStageCleared && (
+                  <span className="text-[10px] font-black bg-emerald-400 text-emerald-950 px-2 py-0.5 rounded-full flex items-center gap-1 shrink-0 shadow-2xs">
+                    <CheckCircle2 className="w-3 h-3" /> 制覇
+                  </span>
+                )}
               </div>
+              <p className="text-xs text-white/90 font-medium leading-relaxed break-keep">
+                {district.shortCatch || district.subTitle}
+              </p>
+            </div>
+
+            {/* 下段：探訪進捗プログレスバー */}
+            <div className="flex items-center justify-between gap-3 pt-0.5">
+              <div className="flex-1 bg-black/25 rounded-full h-2 overflow-hidden p-0.5">
+                <div
+                  className="bg-amber-300 h-full rounded-full transition-all duration-500"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+              <span className="text-[11px] font-black text-white/90 font-mono shrink-0">
+                {doneCount} / {totalQuests} 達成 ({progressPercent}%)
+              </span>
             </div>
           </div>
         </div>
 
         {/* ロック時の案内オーバーレイ */}
         {!isUnlocked ? (
-          <div className="bg-stone-50 border border-stone-200 rounded-3xl p-6 text-center space-y-3">
+          <div className="bg-white border border-stone-200 rounded-3xl p-6 text-center space-y-3 shadow-xs">
             <div className="w-12 h-12 rounded-2xl bg-stone-800 text-white flex items-center justify-center text-lg shadow-md mx-auto">
               <Lock className="w-6 h-6" />
             </div>
             <h4 className="text-base font-black text-stone-800">
               Stage {step.step} は順次解放中です
             </h4>
-            <p className="text-xs text-stone-600 max-w-sm mx-auto">
+            <p className="text-xs text-stone-600 max-w-sm mx-auto leading-relaxed">
               前のステージ（Stage {step.step - 1}）のボス検定に合格するか、「自由解放」で即座に挑戦できます。
             </p>
             <div className="flex items-center justify-center gap-2 pt-1">
@@ -549,108 +592,20 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
           </div>
         ) : (
           <>
-            {/* ★ ユーザー要望：今日やることは決まっているわけだから、そこだけでいい（Hero Card） */}
-            <div className="bg-white border-2 border-amber-300/80 rounded-3xl p-4 sm:p-5 shadow-xs relative overflow-hidden">
-              <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-4">
-                <div className="space-y-2.5 flex-1 min-w-0 w-full">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10.5px] font-black uppercase tracking-wider">
-                      <Zap className="w-3 h-3 fill-amber-600 text-amber-600" />
-                      {firstIncompleteIdx !== -1
-                        ? `今日のNEXT STEP : 第 ${firstIncompleteIdx + 1} 問`
-                        : 'ステージ全特訓クリア！'}
-                    </span>
-                    <span className="text-[11px] font-bold text-stone-500 font-mono">
-                      {doneCount}/{totalQuests} 達成
-                    </span>
-                  </div>
-
-                  {firstIncompleteIdx !== -1 ? (
-                    <>
-                      <div className="space-y-1">
-                        <h3 className="text-base sm:text-lg font-black text-[#1B2A38] leading-snug">
-                          {step.scopePriority.wbsBreakdown[firstIncompleteIdx]}
-                        </h3>
-                        <p className="text-xs text-stone-600 flex items-center gap-1">
-                          <Sparkles className="w-3.5 h-3.5 text-[#B84E34] shrink-0" />
-                          <span className="truncate">{qMeta.scenarioTitle}</span>
-                        </p>
-                      </div>
-
-                      {/* Duolingo風 3D立体プッシュボタン */}
-                      <button
-                        type="button"
-                        onClick={() => startQuestDrill(step.step, firstIncompleteIdx)}
-                        className="w-full py-3.5 px-5 rounded-2xl bg-[#B84E34] hover:bg-[#a2432c] text-white font-black text-sm sm:text-base cursor-pointer transition-all duration-100 shadow-[0_5px_0_#853420] active:translate-y-1 active:shadow-[0_1px_0_#853420] flex items-center justify-center gap-2"
-                      >
-                        <Zap className="w-4 h-4 sm:w-5 sm:h-5 fill-amber-300 text-amber-300 animate-bounce" />
-                        <span>30秒特訓をスタート (+60 XP)</span>
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <div className="space-y-1">
-                        <h3 className="text-base sm:text-lg font-black text-emerald-900 leading-snug">
-                          全クエスト制覇！次はボス検定（模試）です！
-                        </h3>
-                        <p className="text-xs text-stone-600">
-                          【{qMeta.bossLabel}】（合格基準: {qMeta.bossPassScore}点以上）で次のステージが解放されます。
-                        </p>
-                      </div>
-
-                      {onNavigateToExam && (
-                        <button
-                          type="button"
-                          onClick={() => onNavigateToExam(stepMeta.examId)}
-                          className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-amber-500 to-[#B84E34] hover:opacity-95 text-white font-black text-sm sm:text-base cursor-pointer transition-all duration-100 shadow-[0_5px_0_#853420] active:translate-y-1 active:shadow-[0_1px_0_#853420] flex items-center justify-center gap-2"
-                        >
-                          <Trophy className="w-5 h-5 text-amber-200 animate-bounce" />
-                          <span>{isBossCleared ? 'ボス検定に再挑戦 ➔' : 'ボス検定（模試）に挑む ➔'}</span>
-                        </button>
-                      )}
-                    </>
-                  )}
-                </div>
-
-                {/* 🐯 Duolingo風 マスコット（ホランイ / Horangi） */}
-                <div className="shrink-0 flex flex-col items-center pt-1 sm:pt-0">
-                  <HorangiMascot
-                    size="md"
-                    mood={firstIncompleteIdx !== -1 ? 'cheering' : 'trophy'}
-                    message={
-                      firstIncompleteIdx !== -1
-                        ? gameState.streakDays > 1
-                          ? `🔥 ${gameState.streakDays}日連続！`
-                          : '오늘도 화이팅!'
-                        : '축하해요! 제패!'
-                    }
-                    subMessage={
-                      firstIncompleteIdx !== -1
-                        ? gameState.streakDays > 1
-                          ? 'この調子で1問解こう！'
-                          : '今日も一歩進めよう！'
-                        : 'ボス検定に挑戦しよう！'
-                    }
-                    interactive={true}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* ★ Duolingo × LingoDeer風 ソウル探訪アドベンチャートレイル */}
+            {/* ★ Duolingo式 ソウル探訪アドベンチャートレイル（余計な重複カードを廃止し、トレイルそのものが主役！） */}
             <div
-              className={`${district.canvasBg} border-2 border-stone-200/90 rounded-3xl p-5 sm:p-7 shadow-xs relative overflow-hidden`}
+              className={`${district.canvasBg} border-2 border-stone-200/90 rounded-3xl px-3 sm:px-6 py-6 sm:py-8 shadow-xs relative overflow-hidden`}
             >
               {/* 上部ラベル */}
-              <div className="text-center mb-3 relative z-10">
-                <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-white/90 border border-stone-200 text-[10.5px] font-black text-stone-600 uppercase tracking-widest shadow-2xs">
-                  <Compass className="w-3 h-3 text-[#B84E34]" />
+              <div className="text-center mb-5 relative z-10">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/95 border border-stone-200 text-[10.5px] font-black text-stone-600 uppercase tracking-widest shadow-2xs">
+                  <Compass className="w-3.5 h-3.5 text-[#B84E34]" />
                   <span>SEOUL ADVENTURE TRAIL : {district.koName}</span>
                 </span>
               </div>
 
-              {/* 街並みランドマーク装飾（タップすると韓国語ネイティブ発音！） */}
-              <div className="absolute top-14 left-2.5 sm:left-8 z-10">
+              {/* 街並みランドマーク装飾（左右端に配置し、中央ノードと絶対に重ならない設計） */}
+              <div className="absolute top-16 left-1 sm:left-6 z-10 pointer-events-auto">
                 <SeoulLandmarkDeco
                   step={step.step}
                   position="topLeft"
@@ -660,7 +615,7 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                 />
               </div>
 
-              <div className="absolute top-1/2 -translate-y-8 right-2.5 sm:right-8 z-10">
+              <div className="absolute top-1/2 -translate-y-8 right-1 sm:right-6 z-10 pointer-events-auto">
                 <SeoulLandmarkDeco
                   step={step.step}
                   position="midRight"
@@ -670,7 +625,7 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                 />
               </div>
 
-              <div className="absolute bottom-24 left-2.5 sm:left-8 z-10">
+              <div className="absolute bottom-28 left-1 sm:left-6 z-10 pointer-events-auto">
                 <SeoulLandmarkDeco
                   step={step.step}
                   position="bottomLeft"
@@ -680,78 +635,87 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                 />
               </div>
 
-              <div className="relative py-4 flex flex-col items-center gap-7">
+              <div className="relative py-2 flex flex-col items-center gap-8">
                 {/* 背景の縦方向道路ライン */}
-                <div className="absolute top-6 bottom-14 left-1/2 w-2.5 -translate-x-1/2 bg-white/80 border-x border-stone-200/80 rounded-full" />
+                <div className="absolute top-4 bottom-20 left-1/2 w-2.5 -translate-x-1/2 bg-white/80 border-x border-stone-200/80 rounded-full" />
 
                 {step.scopePriority.wbsBreakdown.map((task, tIdx) => {
-                  const isDone = !!gameState.completedQuests[`s${step.step}_t${tIdx}`];
+                  const questKey = `s${step.step}_t${tIdx}`;
+                  const isDone = !!gameState.completedQuests[questKey];
                   const isCurrent = tIdx === firstIncompleteIdx;
                   const isLocked = !isDone && !isCurrent && !gameState.freeExploreMode;
-                  // S字交互配置
+                  const drill = STAGE_DRILLS[questKey];
+                  const displayTitle = drill?.title || task.replace(/^[①-⑤\d\.\s]+/, '');
+
+                  // モバイルで左右に寄りすぎて端やランドマークと被らないよう、適度な揺れに抑制
                   const offsets = [
                     'translate-x-0',
-                    'translate-x-5 sm:translate-x-8',
-                    'translate-x-8 sm:translate-x-12',
-                    'translate-x-3 sm:translate-x-6',
-                    '-translate-x-5 sm:-translate-x-8',
+                    'translate-x-4 sm:translate-x-7',
+                    'translate-x-6 sm:translate-x-10',
+                    '-translate-x-3 sm:-translate-x-6',
+                    'translate-x-0',
                   ];
                   const offsetClass = offsets[tIdx % offsets.length];
 
                   return (
                     <React.Fragment key={tIdx}>
                       <div
-                        className={`relative flex flex-col items-center z-10 transition-transform ${offsetClass}`}
+                        className={`relative flex flex-col items-center z-20 transition-transform ${offsetClass}`}
                       >
-                        {/* 現在地の場合の浮遊吹き出しバッジ ＆ ソナー発光リング ＆ ミニホランイ */}
+                        {/* 現在地の場合の浮遊吹き出しバッジ ＆ ソナー発光リング ＆ マスコット */}
                         {isCurrent && (
                           <>
-                            <div className="absolute -top-7 px-2.5 py-0.5 rounded-full bg-[#B84E34] text-white text-[10.5px] font-black shadow-md animate-bounce whitespace-nowrap z-20 flex items-center gap-1 ring-2 ring-white">
+                            <div className="absolute -top-7 px-2.5 py-0.5 rounded-full bg-[#B84E34] text-white text-[10.5px] font-black shadow-md animate-bounce whitespace-nowrap z-30 flex items-center gap-1 ring-2 ring-white">
                               <Zap className="w-3 h-3 fill-amber-300 text-amber-300" />
                               <span>ここから！</span>
                             </div>
 
                             {/* ソナーのように広がる発光パルスリング */}
-                            <div className="absolute top-0 w-14 h-14 sm:w-16 sm:h-16 rounded-3xl border-2 border-[#B84E34] animate-sonar-ping pointer-events-none" />
+                            <div className="absolute top-0 w-16 h-16 sm:w-18 sm:h-18 rounded-3xl border-2 border-[#B84E34] animate-sonar-ping pointer-events-none" />
 
                             {/* ミニマスコットがノードの隣から手を振る */}
-                            <div className="absolute -left-12 sm:-left-14 -top-2 z-20 hidden xs:block">
+                            <div className="absolute -left-11 sm:-left-14 -top-2 z-30">
                               <HorangiMascot size="sm" mood="cheering" showMessage={false} interactive={true} />
                             </div>
                           </>
                         )}
 
-                        {/* 3D立体ノードボタン */}
+                        {/* 3D立体ノードボタン（タッチターゲット64px以上・ロック時もタップ案内が反応！） */}
                         <button
                           type="button"
                           onClick={() => {
-                            if (!isLocked) startQuestDrill(step.step, tIdx);
+                            if (isLocked) {
+                              sound.playTap();
+                              setLockedHint(`前のクエスト（第${tIdx}問）をクリアすると解放されます！`);
+                              setTimeout(() => setLockedHint(null), 3000);
+                            } else {
+                              startQuestDrill(step.step, tIdx);
+                            }
                           }}
-                          disabled={isLocked}
-                          className={`w-14 h-14 sm:w-16 sm:h-16 rounded-3xl flex items-center justify-center font-black transition-all cursor-pointer relative ${
+                          className={`w-16 h-16 sm:w-18 sm:h-18 rounded-3xl flex items-center justify-center font-black transition-all cursor-pointer relative z-20 active:scale-95 ${
                             isDone
                               ? 'bg-emerald-500 text-white shadow-[0_5px_0_#047857] hover:bg-emerald-600 active:translate-y-1 active:shadow-[0_1px_0_#047857]'
                               : isCurrent
                               ? 'bg-[#B84E34] text-white shadow-[0_5px_0_#853420] ring-4 ring-[#B84E34]/30 hover:bg-[#a2432c] active:translate-y-1 active:shadow-[0_1px_0_#853420]'
-                              : 'bg-stone-200 text-stone-400 shadow-[0_4px_0_#a8a29e] cursor-not-allowed opacity-80'
+                              : 'bg-stone-200 text-stone-500 shadow-[0_4px_0_#a8a29e] hover:bg-stone-300/80 active:translate-y-0.5'
                           }`}
-                          title={task}
+                          title={displayTitle}
                         >
                           {isDone ? (
                             <div className="relative flex items-center justify-center">
-                              <Check className="w-6 h-6 stroke-[3]" />
+                              <Check className="w-7 h-7 stroke-[3]" />
                               <Sparkles className="w-3.5 h-3.5 fill-amber-300 text-amber-300 absolute -top-1 -right-1 animate-star-spin" />
                             </div>
                           ) : isCurrent ? (
-                            <Zap className="w-6 h-6 fill-amber-300 text-amber-300" />
+                            <Zap className="w-7 h-7 fill-amber-300 text-amber-300 animate-pulse" />
                           ) : (
-                            <Lock className="w-5 h-5 text-stone-400" />
+                            <Lock className="w-6 h-6 text-stone-400" />
                           )}
                         </button>
 
-                        {/* ノード下部のミニタイトル */}
-                        <span className="text-[11px] font-bold text-stone-800 bg-white/85 backdrop-blur-2xs px-2.5 py-0.5 rounded-lg border border-stone-200/60 mt-2 max-w-[155px] text-center leading-tight shadow-2xs">
-                          {task.replace(/^[①-⑤\d\.\s]+/, '')}
+                        {/* ノード下部のミニタイトル（改行事故を防止・単一行でスマート表示） */}
+                        <span className="text-[11.5px] font-bold text-stone-800 bg-white/95 backdrop-blur-xs px-3 py-1 rounded-xl border border-stone-200/90 mt-2 text-center leading-tight shadow-2xs whitespace-nowrap break-keep select-none pointer-events-none">
+                          {displayTitle}
                         </span>
                       </div>
 
@@ -767,71 +731,114 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                   );
                 })}
 
-                {/* ボス検定ノード */}
-                <div className="relative flex flex-col items-center z-10 mt-3">
+                {/* 🏰 ボス検定（模試）ノード：トレイル終点の凱旋ポイント */}
+                <div className="relative flex flex-col items-center z-20 mt-4 mb-2">
+                  {isBossCleared ? (
+                    <div className="absolute -top-7 px-3 py-0.5 rounded-full bg-emerald-600 text-white text-[10.5px] font-black shadow-md flex items-center gap-1 ring-2 ring-white whitespace-nowrap z-30">
+                      <CheckCircle2 className="w-3 h-3" />
+                      <span>エリア制覇！</span>
+                    </div>
+                  ) : isStageCleared ? (
+                    <div className="absolute -top-7 px-3 py-0.5 rounded-full bg-amber-500 text-white text-[10.5px] font-black shadow-md animate-bounce flex items-center gap-1 ring-2 ring-white whitespace-nowrap z-30">
+                      <Trophy className="w-3 h-3 text-amber-200" />
+                      <span>ボス検定に挑戦！</span>
+                    </div>
+                  ) : null}
+
                   <button
                     type="button"
-                    onClick={() => onNavigateToExam && onNavigateToExam(stepMeta.examId)}
-                    className={`w-16 h-16 sm:w-18 sm:h-18 rounded-3xl flex items-center justify-center font-black transition-all cursor-pointer shadow-[0_6px_0_#b45309] active:translate-y-1 active:shadow-[0_2px_0_#b45309] ${
+                    onClick={() => {
+                      sound.playTap();
+                      if (onNavigateToExam) {
+                        onNavigateToExam(stepMeta.examId);
+                      }
+                    }}
+                    className={`w-18 h-18 sm:w-20 sm:h-20 rounded-3xl flex items-center justify-center font-black transition-all cursor-pointer relative z-20 active:scale-95 ${
                       isBossCleared
-                        ? 'bg-gradient-to-br from-amber-400 to-amber-600 text-white ring-4 ring-amber-300'
-                        : 'bg-gradient-to-br from-[#1B2A38] to-[#2E4256] text-white'
+                        ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-[0_6px_0_#065f46] ring-4 ring-emerald-300'
+                        : isStageCleared
+                        ? 'bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 text-white shadow-[0_6px_0_#b45309] ring-4 ring-amber-300 animate-pulse'
+                        : 'bg-gradient-to-br from-[#1B2A38] to-[#2E4256] text-white shadow-[0_6px_0_#0f172a]'
                     }`}
                     title={qMeta.bossLabel}
                   >
-                    <Trophy className="w-7 h-7 text-amber-300" />
+                    <Trophy className="w-8 h-8 text-amber-300" />
                   </button>
-                  <div className="text-center mt-2 space-y-0.5 bg-white/90 px-3 py-1 rounded-xl border border-stone-200/80 shadow-2xs">
-                    <span className="text-xs font-black text-[#1B2A38] block">{qMeta.bossLabel}</span>
+
+                  <div className="text-center mt-2.5 space-y-0.5 bg-white/95 px-3.5 py-1.5 rounded-xl border border-stone-200/90 shadow-2xs max-w-[220px]">
+                    <span className="text-xs font-black text-[#1B2A38] block leading-tight break-keep">
+                      {qMeta.bossLabel}
+                    </span>
                     <span className="text-[10px] text-stone-500 font-bold block">
-                      {isBossCleared ? `撃破済 (${bossScore}点)` : `合格ライン: ${qMeta.bossPassScore}点`}
+                      {isBossCleared
+                        ? `合格達成 (${bossScore}点)`
+                        : isStageCleared
+                        ? `合格ライン: ${qMeta.bossPassScore}点 (挑戦可能！)`
+                        : `全5問クリアで解放 (合格ライン: ${qMeta.bossPassScore}点)`}
                     </span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* 前後エリア切り替えフッター */}
-            <div className="flex items-center justify-between pt-1">
-              <button
-                type="button"
-                disabled={selectedStage <= 1}
-                onClick={() => {
-                  sound.playTap();
-                  setSelectedStage((prev) => Math.max(1, prev - 1));
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
-                  selectedStage <= 1
-                    ? 'text-stone-300 border border-stone-200 cursor-not-allowed'
-                    : 'text-stone-700 border border-stone-200 bg-white hover:bg-stone-50'
-                }`}
-              >
-                <ChevronLeft className="w-3.5 h-3.5" />
-                <span>前のエリア</span>
-              </button>
+            {/* 次のエリアへの誘導・前後切替フッター */}
+            <div className="space-y-2 pt-1 pb-4">
+              {isStageCleared && selectedStage < 8 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    sound.playVictory();
+                    setSelectedStage((prev) => Math.min(8, prev + 1));
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-95 text-white font-black text-sm shadow-[0_4px_0_#065f46] active:translate-y-1 active:shadow-[0_1px_0_#065f46] transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <span>次のエリア（Stage {selectedStage + 1}）へ進む</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              )}
 
-              <span className="text-xs font-black text-stone-400">
-                {district.stationCode} {district.jaName} ({selectedStage}/8)
-              </span>
+              <div className="flex items-center justify-between">
+                <button
+                  type="button"
+                  disabled={selectedStage <= 1}
+                  onClick={() => {
+                    sound.playTap();
+                    setSelectedStage((prev) => Math.max(1, prev - 1));
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
+                    selectedStage <= 1
+                      ? 'text-stone-300 border border-stone-200 cursor-not-allowed'
+                      : 'text-stone-700 border border-stone-200 bg-white hover:bg-stone-50'
+                  }`}
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                  <span>前のエリア</span>
+                </button>
 
-              <button
-                type="button"
-                disabled={selectedStage >= 8}
-                onClick={() => {
-                  sound.playTap();
-                  setSelectedStage((prev) => Math.min(8, prev + 1));
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
-                  selectedStage >= 8
-                    ? 'text-stone-300 border border-stone-200 cursor-not-allowed'
-                    : 'text-stone-700 border border-stone-200 bg-white hover:bg-stone-50'
-                }`}
-              >
-                <span>次のエリア</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
+                <span className="text-xs font-black text-stone-400">
+                  {district.stationCode} {district.shortTitle || district.jaName} ({selectedStage}/8)
+                </span>
+
+                <button
+                  type="button"
+                  disabled={selectedStage >= 8}
+                  onClick={() => {
+                    sound.playTap();
+                    setSelectedStage((prev) => Math.min(8, prev + 1));
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
+                    selectedStage >= 8
+                      ? 'text-stone-300 border border-stone-200 cursor-not-allowed'
+                      : 'text-stone-700 border border-stone-200 bg-white hover:bg-stone-50'
+                  }`}
+                >
+                  <span>次のエリア</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
           </>
         )}
@@ -891,11 +898,16 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
           })}
         </div>
 
-        {/* 右側：ストリーク ＆ 単一の「学習ガイド」ボタン */}
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        {/* 右側：ストリーク ＆ XP ＆ 学習ガイド */}
+        <div className="flex items-center gap-1.5 shrink-0">
           <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 font-bold text-xs shadow-2xs">
             <Flame className="w-3.5 h-3.5 text-orange-500 animate-pulse" />
             <span>{gameState.streakDays}日</span>
+          </div>
+
+          <div className="hidden xs:flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-900 font-bold text-xs shadow-2xs">
+            <Zap className="w-3.5 h-3.5 text-indigo-600 fill-indigo-600" />
+            <span>{gameState.xp} XP</span>
           </div>
 
           <button
@@ -904,11 +916,11 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
               sound.playTap();
               setShowGuideModal(true);
             }}
-            className="px-3 py-1.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
-            title="目標定義・WBS・1枚シート・SLA母語干渉分析・設定を一括確認"
+            className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+            title="学習目標・WBS・1枚シート・SLA母語干渉分析を一括確認"
           >
             <BookOpen className="w-3.5 h-3.5 text-amber-300" />
-            <span className="whitespace-nowrap">学習ガイド</span>
+            <span className="hidden sm:inline">学習ガイド</span>
           </button>
         </div>
       </div>
@@ -1466,6 +1478,16 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
           districtName={activeTreasureModal.districtName}
           onClose={() => setActiveTreasureModal(null)}
         />
+      )}
+
+      {/* ===================================================================== */}
+      {/* 🔒 ロックノードタップ時の案内トースト（無反応・不具合感を防止）            */}
+      {/* ===================================================================== */}
+      {lockedHint && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-stone-900/95 backdrop-blur-md text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2 border border-stone-700 max-w-sm text-center">
+          <Lock className="w-4 h-4 text-amber-300 shrink-0" />
+          <span>{lockedHint}</span>
+        </div>
       )}
     </div>
   );

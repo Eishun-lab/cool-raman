@@ -1,14 +1,10 @@
 import React, { useState } from 'react';
 import {
-  Home,
   Compass,
   GraduationCap,
   BookOpen,
   Sparkles,
   ChevronRight,
-  ArrowRight,
-  Flame,
-  Award
 } from 'lucide-react';
 import { MockExamView } from './components/mockExam/MockExamView';
 import { VisualRoadmapView } from './components/roadmap/VisualRoadmapView';
@@ -20,15 +16,8 @@ import hanmoaLogo from './assets/logo.jpg';
 
 type MainTab = 'dashboard' | 'roadmap' | 'exam' | 'library' | 'quiz';
 
-const NAV_ITEMS = [
-  { id: 'dashboard' as const, label: 'ホーム', icon: Home },
-  { id: 'roadmap' as const, label: 'クエスト', icon: Compass },
-  { id: 'exam' as const, label: '模擬試験', icon: GraduationCap },
-  { id: 'library' as const, label: 'ライブラリ', icon: BookOpen },
-];
-
 export const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<MainTab>('dashboard');
+  const [activeTab, setActiveTab] = useState<MainTab>('roadmap');
   const [studyGuideAnchor, setStudyGuideAnchor] = useState<string | undefined>(undefined);
   const [librarySubTab, setLibrarySubTab] = useState<'textbook' | 'numbers'>('textbook');
   const [targetExamId, setTargetExamId] = useState<ExamType | undefined>(undefined);
@@ -36,14 +25,14 @@ export const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#FAF7F2] text-[#1B2A38] font-sans flex flex-col">
       {/* トップヘッダー */}
-      <header className="sticky top-0 z-40 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#E8E2D5] px-3 sm:px-6 h-14 sm:h-16 flex items-center">
+      <header className="sticky top-0 z-40 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#E8E2D5] px-3 sm:px-6 h-13 sm:h-15 flex items-center">
         <div className="max-w-7xl mx-auto w-full flex items-center justify-between gap-2">
           {/* ロゴ */}
           <div
-            onClick={() => setActiveTab('dashboard')}
-            className="flex items-center gap-2 sm:gap-3 cursor-pointer group shrink-0 select-none"
+            onClick={() => setActiveTab('roadmap')}
+            className="flex items-center gap-2 sm:gap-2.5 cursor-pointer group shrink-0 select-none"
           >
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl overflow-hidden border border-[#E8E2D5] shadow-2xs group-hover:scale-105 transition-all shrink-0 bg-[#FAF7F2]">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl overflow-hidden border border-[#E8E2D5] shadow-2xs group-hover:scale-105 transition-all shrink-0 bg-[#FAF7F2]">
               <img
                 src={hanmoaLogo}
                 alt="HanMoa Logo"
@@ -51,47 +40,59 @@ export const App: React.FC = () => {
               />
             </div>
             <div className="shrink-0">
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <span className="font-black text-base sm:text-xl tracking-tight text-[#1B2A38] whitespace-nowrap">
+              <div className="flex items-center gap-1.5">
+                <span className="font-black text-base sm:text-lg tracking-tight text-[#1B2A38] whitespace-nowrap">
                   HanMoa
                 </span>
-                <span className="hidden md:inline-flex text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD] whitespace-nowrap">
-                  All-in-One Hub
+                <span className="text-[10px] font-black tracking-wider px-2 py-0.5 rounded-full bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD] whitespace-nowrap">
+                  Quest
                 </span>
               </div>
-              <p className="text-[11px] text-stone-500 hidden lg:block leading-tight">
-                韓国語 総合学習 ＆ TOPIK・ハン検 模擬試験ハブ
-              </p>
             </div>
           </div>
 
-          {/* デスクトップ ナビゲーション */}
-          <nav className="hidden md:flex items-center gap-1 sm:gap-1.5 shrink-0">
-            {NAV_ITEMS.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-              return (
+          {/* 右側アクション：マップ以外なら「戻る」、マップなら「模試」「ライブラリ」へのスマートリンク */}
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            {activeTab !== 'roadmap' ? (
+              <button
+                type="button"
+                onClick={() => setActiveTab('roadmap')}
+                className="h-8 sm:h-9 px-3 rounded-xl bg-[#B84E34] hover:bg-[#a2432c] text-white text-xs font-black shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+              >
+                <Compass className="w-3.5 h-3.5" />
+                <span>探訪マップへ戻る</span>
+              </button>
+            ) : (
+              <div className="flex items-center gap-1">
                 <button
-                  key={tab.id}
-                  title={tab.label}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`h-9 px-3.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 shrink-0 active:scale-95 cursor-pointer ${
-                    isActive
-                      ? 'bg-[#B84E34] text-white shadow-xs'
-                      : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/60'
-                  }`}
+                  type="button"
+                  title="模擬試験一覧"
+                  onClick={() => setActiveTab('exam')}
+                  className="h-8 px-2.5 sm:px-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-stone-600 hover:text-stone-900 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
                 >
-                  <Icon className="w-4 h-4 stroke-[2.2]" />
-                  <span className="whitespace-nowrap">{tab.label}</span>
+                  <GraduationCap className="w-3.5 h-3.5 text-stone-500" />
+                  <span className="hidden xs:inline">模擬試験</span>
                 </button>
-              );
-            })}
-          </nav>
+                <button
+                  type="button"
+                  title="文法大辞典・参考書ライブラリ"
+                  onClick={() => {
+                    setLibrarySubTab('textbook');
+                    setActiveTab('library');
+                  }}
+                  className="h-8 px-2.5 sm:px-3 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-stone-600 hover:text-stone-900 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                >
+                  <BookOpen className="w-3.5 h-3.5 text-stone-500" />
+                  <span className="hidden xs:inline">ライブラリ</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
       {/* メインコンテンツ */}
-      <main className="flex-1 pb-20 md:pb-8">
+      <main className="flex-1 pb-6">
         {activeTab === 'dashboard' ? (
           <div className="max-w-6xl mx-auto px-3 sm:px-6 py-4 sm:py-8">
             {/* 🐯 Duolingo風 ウェルカムバナー */}
@@ -246,7 +247,7 @@ export const App: React.FC = () => {
                 setLibrarySubTab('textbook');
                 setActiveTab('library');
               }}
-              onBackToDashboard={() => setActiveTab('dashboard')}
+              onBackToDashboard={() => setActiveTab('roadmap')}
               onNavigateToRoadmap={() => setActiveTab('roadmap')}
             />
           </div>
@@ -259,7 +260,7 @@ export const App: React.FC = () => {
                 if (examId) setTargetExamId(examId as ExamType);
                 setActiveTab('exam');
               }}
-              onBackToDashboard={() => setActiveTab('dashboard')}
+              onBackToDashboard={() => setActiveTab('roadmap')}
             />
           </div>
         ) : activeTab === 'quiz' ? (
@@ -271,46 +272,16 @@ export const App: React.FC = () => {
               </div>
               <button
                 type="button"
-                onClick={() => setActiveTab('dashboard')}
+                onClick={() => setActiveTab('roadmap')}
                 className="text-xs font-bold px-3 py-1.5 bg-white border border-stone-200 hover:bg-stone-50 rounded-xl shadow-2xs shrink-0 cursor-pointer"
               >
-                ホームへ戻る
+                探訪マップへ戻る
               </button>
             </div>
             <ComprehensiveQuizView />
           </div>
         ) : null}
       </main>
-
-      {/* モバイル用 固定ボトムナビゲーション (画面下部で親指タップ・全幅利用) */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#FAF7F2]/95 backdrop-blur-md border-t border-[#E8E2D5] px-2 py-1 flex items-center justify-around shadow-lg">
-        {NAV_ITEMS.map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => {
-                setActiveTab(tab.id);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-xl transition-all cursor-pointer ${
-                isActive
-                  ? 'text-[#B84E34] font-black'
-                  : 'text-stone-500 hover:text-stone-800 font-medium'
-              }`}
-            >
-              <div className={`p-1 rounded-lg transition-transform ${isActive ? 'scale-110 bg-[#FAF0EC]' : ''}`}>
-                <Icon className="w-5 h-5 stroke-[2.2]" />
-              </div>
-              <span className={`text-[10px] tracking-tight leading-tight mt-0.5 ${isActive ? 'font-black' : ''}`}>
-                {tab.label}
-              </span>
-            </button>
-          );
-        })}
-      </nav>
     </div>
   );
 };

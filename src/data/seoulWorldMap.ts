@@ -19,6 +19,8 @@ export interface SeoulWorldDistrict {
   lineColor: string;
   koName: string;
   jaName: string;
+  shortTitle: string;
+  shortCatch: string;
   subTitle: string;
   bannerGradient: string;
   bannerBorder: string;
@@ -40,6 +42,8 @@ export const SEOUL_WORLD_DISTRICTS: Record<number, SeoulWorldDistrict> = {
     lineColor: '#10B981',
     koName: '홍대입구・연남동',
     jaName: '弘大入口・延南洞カフェ街',
+    shortTitle: '弘大・延南洞',
+    shortCatch: 'ハングル解読＆カフェで最初の注文！',
     subTitle: '看板のハングルを解読し、おしゃれカフェで最初の注文を成功させよう！',
     bannerGradient: 'from-[#059669] via-[#10B981] to-[#0D9488]',
     bannerBorder: 'border-emerald-700',
@@ -69,6 +73,8 @@ export const SEOUL_WORLD_DISTRICTS: Record<number, SeoulWorldDistrict> = {
     lineColor: '#0284C7',
     koName: '명동・광장시장',
     jaName: '明洞・広蔵市場ナイトマーケット',
+    shortTitle: '明洞・広蔵市場',
+    shortCatch: '屋台の数字・会計＆買い物会話！',
     subTitle: '屋台の熱気の中で、数字と基本会話を使って買い物・食べ歩きを楽しもう！',
     bannerGradient: 'from-[#0369A1] via-[#0284C7] to-[#2563EB]',
     bannerBorder: 'border-sky-800',
@@ -98,6 +104,8 @@ export const SEOUL_WORLD_DISTRICTS: Record<number, SeoulWorldDistrict> = {
     lineColor: '#D97706',
     koName: '여의도・한강공원',
     jaName: '汝矣島・漢江サンセット公園',
+    shortTitle: '汝矣島・漢江',
+    shortCatch: '漢江ピクニック＆過去の思い出語り！',
     subTitle: '夕暮れの漢江でピクニック！感情表現と不規則活用で友だちと語り合おう！',
     bannerGradient: 'from-[#D97706] via-[#EA580C] to-[#E11D48]',
     bannerBorder: 'border-amber-800',
@@ -127,6 +135,8 @@ export const SEOUL_WORLD_DISTRICTS: Record<number, SeoulWorldDistrict> = {
     lineColor: '#E11D48',
     koName: '서울역 ➔ 부산 해운대',
     jaName: 'ソウル駅 ➔ KTX釜山・海雲台',
+    shortTitle: 'ソウル駅・釜山KTX',
+    shortCatch: 'KTX乗り換え案内＆旅行プラン！',
     subTitle: '高速鉄道KTXで韓国縦断！ホテル予約からトラブル交渉まで一人で完結しよう！',
     bannerGradient: 'from-[#BE123C] via-[#E11D48] to-[#EA580C]',
     bannerBorder: 'border-rose-900',
@@ -156,6 +166,8 @@ export const SEOUL_WORLD_DISTRICTS: Record<number, SeoulWorldDistrict> = {
     lineColor: '#7C3AED',
     koName: '성수동・트렌드 팝업',
     jaName: '聖水洞・クリエイティブ街',
+    shortTitle: '聖水洞トレンド',
+    shortCatch: 'ポップアップ＆SNSレビュー！',
     subTitle: 'ソウルの最先端トレンド発信地！ニュースや噂、他人の言葉を正確に伝えよう！',
     bannerGradient: 'from-[#6D28D9] via-[#7C3AED] to-[#9333EA]',
     bannerBorder: 'border-purple-900',
@@ -185,6 +197,8 @@ export const SEOUL_WORLD_DISTRICTS: Record<number, SeoulWorldDistrict> = {
     lineColor: '#2563EB',
     koName: '강남・테헤란로',
     jaName: '江南・テヘラン路オフィス街',
+    shortTitle: '江南オフィス街',
+    shortCatch: 'ビジネスメール＆ニュース討論！',
     subTitle: 'IT企業とスタートアップが集まる摩天楼！自分の意見を論理的に主張しよう！',
     bannerGradient: 'from-[#1E40AF] via-[#2563EB] to-[#4F46E5]',
     bannerBorder: 'border-indigo-950',
@@ -214,6 +228,8 @@ export const SEOUL_WORLD_DISTRICTS: Record<number, SeoulWorldDistrict> = {
     lineColor: '#0D9488',
     koName: '광화문・여의도 방송국',
     jaName: '光化門・汝矣島メディア街',
+    shortTitle: '光化門メディア街',
+    shortCatch: '社説・論文・高難度長文読解！',
     subTitle: '報道局と官庁の中心地！社会問題やビジネス交渉を格調高い韓国語で論じよう！',
     bannerGradient: 'from-[#0F766E] via-[#0D9488] to-[#0891B2]',
     bannerBorder: 'border-teal-950',
@@ -243,6 +259,8 @@ export const SEOUL_WORLD_DISTRICTS: Record<number, SeoulWorldDistrict> = {
     lineColor: '#B84E34',
     koName: '경복궁 ➔ N서울타워 정상',
     jaName: '景福宮 ➔ Nソウルタワー頂上',
+    shortTitle: '景福宮・Nソウルタワー',
+    shortCatch: '四字熟語＆TOPIK 6級完全制覇！',
     subTitle: 'ソウルを一望する頂へ！歴史・ユーモア・哲学まで母語話者と対等に語り合おう！',
     bannerGradient: 'from-[#1B2A38] via-[#B84E34] to-[#D97706]',
     bannerBorder: 'border-stone-900',

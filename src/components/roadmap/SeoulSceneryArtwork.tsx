@@ -182,10 +182,10 @@ export const TreasureChestNode: React.FC<{
   onOpen: () => void;
 }> = ({ treasure, isOpened, onOpen }) => {
   return (
-    <div className="relative flex flex-col items-center z-10 my-1">
+    <div className="relative flex flex-col items-center z-20 my-1">
       {/* 未開封時のきらきらバウンドバッジ */}
       {!isOpened && (
-        <div className="absolute -top-6 px-2.5 py-0.5 rounded-full bg-amber-400 text-amber-950 text-[10px] font-black shadow-sm animate-bounce whitespace-nowrap z-20 flex items-center gap-1 border border-white">
+        <div className="absolute -top-6 px-2.5 py-0.5 rounded-full bg-amber-400 text-amber-950 text-[10px] font-black shadow-sm animate-bounce whitespace-nowrap z-30 flex items-center gap-1 border border-white">
           <Sparkles className="w-2.5 h-2.5 fill-amber-950" />
           <span>宝箱ボーナス！</span>
         </div>
@@ -194,7 +194,7 @@ export const TreasureChestNode: React.FC<{
       <button
         type="button"
         onClick={onOpen}
-        className={`w-15 h-14 sm:w-16 sm:h-15 rounded-2xl flex items-center justify-center transition-all cursor-pointer relative ${
+        className={`w-15 h-14 sm:w-16 sm:h-15 rounded-2xl flex items-center justify-center transition-all cursor-pointer relative z-20 active:scale-95 ${
           isOpened
             ? 'bg-amber-100 border-2 border-amber-300 text-amber-700 shadow-[0_4px_0_#d97706] active:translate-y-1 active:shadow-none'
             : 'bg-gradient-to-b from-amber-400 to-amber-500 text-white border-2 border-amber-200 shadow-[0_6px_0_#b45309] hover:brightness-105 active:translate-y-1 active:shadow-[0_1px_0_#b45309]'
