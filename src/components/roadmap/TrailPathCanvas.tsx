@@ -121,16 +121,27 @@ export const TrailPathCanvas: React.FC<TrailPathCanvasProps> = ({
           </defs>
 
           {/* 背景の柔らかな環境イラスト（川や芝生のシルエット） */}
-          <ellipse cx="60" cy="200" rx="90" ry="60" fill="#F1F5F9" />
-          <ellipse cx="320" cy="550" rx="100" ry="70" fill="#F1F5F9" />
+          <ellipse cx="60" cy="200" rx="90" ry="60" fill="#E2E8F0" opacity="0.5" />
+          <ellipse cx="320" cy="550" rx="100" ry="70" fill="#E2E8F0" opacity="0.5" />
 
-          {/* 漢江のさざ波ベクター（Step 3など） */}
+          {/* 小道脇の飛び石・自然のディテール */}
+          <circle cx="85" cy="160" r="5" fill="#CBD5E1" opacity="0.6" />
+          <circle cx="95" cy="170" r="3" fill="#CBD5E1" opacity="0.4" />
+          <circle cx="305" cy="280" r="6" fill="#CBD5E1" opacity="0.6" />
+          <circle cx="295" cy="295" r="4" fill="#CBD5E1" opacity="0.4" />
+          <circle cx="80" cy="530" r="5" fill="#CBD5E1" opacity="0.6" />
+          <circle cx="280" cy="670" r="6" fill="#CBD5E1" opacity="0.6" />
+
+          {/* 漢江の水面さざ波＆ピクニックシート（Step 3など） */}
           {step.step === 3 && (
-            <g opacity="0.35" stroke="#38BDF8" strokeWidth="2" strokeLinecap="round">
-              <path d="M 40, 220 Q 55, 215 70, 220 T 100, 220" />
-              <path d="M 50, 235 Q 65, 230 80, 235" />
-              <path d="M 280, 520 Q 295, 515 310, 520 T 340, 520" />
-              <path d="M 290, 535 Q 305, 530 320, 535" />
+            <g opacity="0.5" stroke="#38BDF8" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M 35, 215 Q 50, 210 65, 215 T 95, 215" />
+              <path d="M 45, 230 Q 60, 225 75, 230" />
+              <path d="M 275, 515 Q 290, 510 305, 515 T 335, 515" />
+              <path d="M 285, 530 Q 300, 525 315, 530" />
+              {/* ピクニックシート */}
+              <rect x="25" y="440" width="28" height="18" rx="3" fill="#FDE047" opacity="0.75" transform="rotate(-8 25 440)" />
+              <rect x="28" y="443" width="22" height="12" rx="2" fill="#FEF08A" opacity="0.9" transform="rotate(-8 25 440)" />
             </g>
           )}
 
@@ -165,7 +176,7 @@ export const TrailPathCanvas: React.FC<TrailPathCanvasProps> = ({
           />
         </svg>
 
-        {/* 🌟 2. トレイル上のノード群（文字帯を全廃し、Duolingo本家の飛び石だけに純化） */}
+        {/* 🌟 2. トレイル上のノード群（Duolingo本家 3D円形コイン ＆ 外周プログレスリング） */}
         {step.scopePriority.wbsBreakdown.map((task, tIdx) => {
           const questKey = `s${step.step}_t${tIdx}`;
           const isDone = !!completedQuests[questKey];
@@ -184,59 +195,91 @@ export const TrailPathCanvas: React.FC<TrailPathCanvasProps> = ({
                 transform: 'translate(-50%, -50%)',
               }}
             >
-              {/* 現在地の場合の START フキダシ ＆ オーラリング ＆ マスコット */}
+              {/* 現在地の場合：START フキダシ ＆ 外周リング ＆ マスコット */}
               {isCurrent && (
                 <>
-                  {/* ふんわり呼吸する光のオーラ */}
-                  <div
-                    className="absolute w-[88px] h-[88px] rounded-[32px] animate-glow-pulse pointer-events-none"
-                    style={{ backgroundColor: `${district.lineColor}25` }}
-                  />
-
-                  {/* 浮遊する START バッジ */}
-                  <div className="absolute -top-8 px-3 py-1 rounded-full bg-[#B84E34] text-white text-[11px] font-black shadow-md flex items-center gap-1 ring-2 ring-white z-30 animate-bounce whitespace-nowrap">
-                    <Zap className="w-3.5 h-3.5 fill-amber-300 text-amber-300" />
-                    <span>START</span>
+                  {/* 浮遊する START バッジ（下向きポインター矢印付き） */}
+                  <div className="absolute -top-12 flex flex-col items-center animate-bounce z-30 pointer-events-none select-none">
+                    <div className="px-3.5 py-1.5 rounded-full bg-slate-900 text-white text-[11px] font-black shadow-lg flex items-center gap-1.5 ring-2 ring-white tracking-wider whitespace-nowrap">
+                      <Zap className="w-3.5 h-3.5 fill-amber-300 text-amber-300" />
+                      <span>START</span>
+                    </div>
+                    <div className="w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[5px] border-t-slate-900 -mt-0.5" />
                   </div>
 
-                  {/* ホランイ（マスコット）がノードの隣から笑顔で応援 */}
-                  <div className="absolute -left-12 sm:-left-14 -top-3 z-30 pointer-events-none">
+                  {/* ホランイ（マスコット）がトレイル脇の地面に立ってフキダシで応援 */}
+                  <div className="absolute -left-18 sm:-left-22 top-0 z-30 flex flex-col items-center pointer-events-none select-none">
+                    <div className="relative mb-1.5 px-2.5 py-1 bg-white rounded-xl shadow-md border border-slate-200/90 text-[10px] font-black text-slate-800 whitespace-nowrap">
+                      <span>{district.shortTitle} 出発！</span>
+                      <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[4px] border-t-white" />
+                    </div>
                     <HorangiMascot size="sm" mood="cheering" showMessage={false} interactive={false} />
+                    <div className="w-10 h-2 bg-slate-900/15 rounded-full blur-[1px] -mt-1" />
                   </div>
                 </>
               )}
 
-              {/* 🍬 触覚 3D キャンディノード ボタン（文字帯なし、純粋な飛び石） */}
-              <button
-                type="button"
-                onClick={() => handleNodeClick(tIdx, isLocked)}
-                className={`candy-stone w-[68px] h-[68px] sm:w-[74px] sm:h-[74px] rounded-[26px] sm:rounded-[28px] flex items-center justify-center font-black cursor-pointer shadow-md active:scale-95 ${
-                  isShaking ? 'animate-rubber' : ''
-                } ${
-                  isDone
-                    ? 'bg-gradient-to-b from-[#10B981] to-[#059669] text-white border-b-[7px] border-[#047857]'
-                    : isCurrent
-                    ? 'bg-gradient-to-b from-[#D94632] to-[#B84E34] text-white border-b-[7px] border-[#853420]'
-                    : 'bg-gradient-to-b from-[#F1F5F9] to-[#E2E8F0] text-slate-400 border-b-[6px] border-[#CBD5E1]'
-                }`}
-                title={`第${tIdx + 1}問`}
-              >
-                {isDone ? (
-                  <div className="relative flex items-center justify-center">
-                    <Check className="w-8 h-8 stroke-[3.5]" />
-                    <Sparkles className="w-4 h-4 fill-amber-300 text-amber-300 absolute -top-1.5 -right-1.5 animate-star-spin" />
-                  </div>
-                ) : isCurrent ? (
-                  <Zap className="w-8 h-8 fill-amber-300 text-amber-300" />
-                ) : (
-                  <Lock className="w-6 h-6 text-slate-400 stroke-[2.2]" />
+              {/* 🌟 Duolingo本家 3D円形コイン（完全な円・8pxシリンダー沈み込み） */}
+              <div className="relative flex items-center justify-center">
+                {/* 外周プログレスリング（現在のアクティブノードに太い円弧ゲージ） */}
+                {isCurrent && (
+                  <svg className="absolute -inset-2.5 w-[calc(100%+20px)] h-[calc(100%+20px)] -rotate-90 pointer-events-none">
+                    <circle
+                      cx="50%"
+                      cy="50%"
+                      r="43"
+                      fill="none"
+                      stroke="#E2E8F0"
+                      strokeWidth="6"
+                    />
+                    <circle
+                      cx="50%"
+                      cy="50%"
+                      r="43"
+                      fill="none"
+                      stroke={district.lineColor || '#B84E34'}
+                      strokeWidth="6"
+                      strokeDasharray={270}
+                      strokeDashoffset={270 * 0.75}
+                      strokeLinecap="round"
+                    />
+                  </svg>
                 )}
-              </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleNodeClick(tIdx, isLocked)}
+                  className={`w-[74px] h-[74px] sm:w-[80px] sm:h-[80px] rounded-full flex items-center justify-center font-black cursor-pointer select-none transition-all relative ${
+                    isShaking ? 'animate-rubber' : ''
+                  } ${
+                    isDone
+                      ? 'bg-gradient-to-b from-[#10B981] to-[#059669] text-white border-b-[8px] border-[#047857] hover:brightness-105 active:translate-y-[6px] active:border-b-[2px]'
+                      : isCurrent
+                      ? 'bg-gradient-to-b from-[#EA580C] to-[#C2410C] text-white border-b-[8px] border-[#9A3412] hover:brightness-105 active:translate-y-[6px] active:border-b-[2px]'
+                      : 'bg-gradient-to-b from-[#F1F5F9] to-[#E2E8F0] text-slate-400 border-b-[7px] border-[#CBD5E1] cursor-pointer active:translate-y-[4px] active:border-b-[3px]'
+                  }`}
+                  title={`第${tIdx + 1}問`}
+                >
+                  {/* 上部の光彩ハイライト（Duolingo特有のツヤ感） */}
+                  <span className="absolute top-2 w-7 h-2.5 rounded-full bg-white/35 pointer-events-none" />
+
+                  {isDone ? (
+                    <div className="relative flex items-center justify-center">
+                      <Check className="w-9 h-9 stroke-[4]" />
+                      <Sparkles className="w-4 h-4 fill-amber-300 text-amber-300 absolute -top-2 -right-2 animate-star-spin" />
+                    </div>
+                  ) : isCurrent ? (
+                    <Zap className="w-9 h-9 fill-amber-300 text-amber-300 drop-shadow-xs" />
+                  ) : (
+                    <Lock className="w-6 h-6 text-slate-400 stroke-[2.5]" />
+                  )}
+                </button>
+              </div>
             </div>
           );
         })}
 
-        {/* 🌟 3. 黄金のK-カルチャー宝箱（第3問のあとの小道カーブに配置） */}
+        {/* 🌟 3. 本格 3D ベクター宝箱（木箱・金の金具・石畳の台座） */}
         {(() => {
           const chestCoord = TRAIL_COORDS.find((c) => c.type === 'treasure') || { x: 135, y: 470 };
           return (
@@ -249,46 +292,68 @@ export const TrailPathCanvas: React.FC<TrailPathCanvasProps> = ({
               }}
             >
               {!isChestOpened && (
-                <div className="absolute -top-7 px-2.5 py-0.5 rounded-full bg-amber-400 text-amber-950 text-[10.5px] font-black shadow-sm animate-bounce flex items-center gap-1 ring-2 ring-white whitespace-nowrap z-30">
-                  <Sparkles className="w-3 h-3 fill-amber-950" />
-                  <span>宝箱ボーナス！</span>
+                <div className="absolute -top-10 flex flex-col items-center animate-bounce z-30 pointer-events-none select-none">
+                  <div className="px-3 py-1 rounded-full bg-amber-400 text-amber-950 text-[10.5px] font-black shadow-md flex items-center gap-1 ring-2 ring-white whitespace-nowrap">
+                    <Sparkles className="w-3 h-3 fill-amber-950 text-amber-950" />
+                    <span>宝箱ボーナス！</span>
+                  </div>
+                  <div className="w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[4px] border-t-amber-400" />
                 </div>
               )}
 
+              {/* 宝箱の石畳台座（地面の影） */}
+              <div className="absolute bottom-1 w-20 h-5 bg-slate-900/15 rounded-full blur-[2px] pointer-events-none" />
+
+              {/* 立体的なベクター宝箱ボタン */}
               <button
                 type="button"
                 onClick={() => onOpenTreasure(step.step)}
-                className={`candy-stone w-[64px] h-[62px] sm:w-[70px] sm:h-[68px] rounded-[24px] flex items-center justify-center cursor-pointer shadow-md ${
-                  isChestOpened
-                    ? 'bg-gradient-to-b from-amber-100 to-amber-200 border-b-[5px] border-amber-400 text-amber-700'
-                    : 'bg-gradient-to-b from-amber-400 to-amber-500 border-b-[7px] border-amber-700 text-white'
-                }`}
-                title="韓国リアル文化＆スラング宝箱"
+                className="group relative cursor-pointer transition-transform hover:scale-105 active:scale-95 select-none"
+                title="韓国リアル文化＆流行語の宝箱を開く"
               >
-                <svg viewBox="0 0 64 64" className="w-9 h-9 sm:w-10 sm:h-10 drop-shadow-2xs">
-                  <rect
-                    x="10"
-                    y="28"
-                    width="44"
-                    height="24"
-                    rx="4"
-                    fill={isChestOpened ? '#F59E0B' : '#B45309'}
-                    stroke="#78350F"
-                    strokeWidth="2.5"
-                  />
+                <svg viewBox="0 0 80 72" className="w-[74px] h-[66px] sm:w-[82px] sm:h-[74px] drop-shadow-md">
+                  {/* 宝箱の下部ボディ（深い木目） */}
+                  <rect x="12" y="32" width="56" height="30" rx="6" fill="#8B4513" stroke="#5C2C0B" strokeWidth="2.5" />
+                  {/* 金の金具バンド（左右） */}
+                  <rect x="22" y="32" width="7" height="30" fill="#F59E0B" stroke="#B45309" strokeWidth="1" />
+                  <rect x="51" y="32" width="7" height="30" fill="#F59E0B" stroke="#B45309" strokeWidth="1" />
+                  {/* 鋲（リベット） */}
+                  <circle cx="25.5" cy="40" r="1.5" fill="#FEF3C7" />
+                  <circle cx="25.5" cy="54" r="1.5" fill="#FEF3C7" />
+                  <circle cx="54.5" cy="40" r="1.5" fill="#FEF3C7" />
+                  <circle cx="54.5" cy="54" r="1.5" fill="#FEF3C7" />
+
+                  {/* 宝箱のフタ（ドーム型） */}
                   <path
-                    d={isChestOpened ? 'M8 22 C8 10 56 10 56 22 Z' : 'M10 28 C10 16 54 16 54 28 Z'}
-                    fill="#FBBF24"
-                    stroke="#78350F"
+                    d="M 10 32 C 10 16 70 16 70 32 Z"
+                    fill={isChestOpened ? '#B45309' : '#A0522D'}
+                    stroke="#5C2C0B"
                     strokeWidth="2.5"
                   />
-                  <rect x="28" y="22" width="8" height="14" rx="2" fill="#FEF08A" stroke="#78350F" strokeWidth="2" />
-                  <circle cx="32" cy="29" r="2" fill="#78350F" />
+                  {/* フタの金バンド */}
+                  <path d="M 22 32 C 22 20 29 20 29 32 Z" fill="#F59E0B" stroke="#B45309" strokeWidth="1" />
+                  <path d="M 51 32 C 51 20 58 20 58 32 Z" fill="#F59E0B" stroke="#B45309" strokeWidth="1" />
+                  {/* フタの光沢ハイライト */}
+                  <path d="M 18 24 Q 40 18 62 24" stroke="rgba(255,255,255,0.4)" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+
+                  {/* 中央の金の錠前プレート */}
+                  <rect x="34" y="28" width="12" height="15" rx="3" fill="#FBBF24" stroke="#92400E" strokeWidth="1.5" />
+                  {/* 鍵穴 */}
+                  <circle cx="40" cy="34" r="2" fill="#78350F" />
+                  <path d="M 39 34 L 41 34 L 41.5 39 L 38.5 39 Z" fill="#78350F" />
+
+                  {/* キラキラ光る宝石エフェクト */}
+                  {!isChestOpened && (
+                    <g className="animate-pulse">
+                      <polygon points="68,14 70,18 74,18 71,21 72,25 68,22 64,25 65,21 62,18 66,18" fill="#FDE047" />
+                      <polygon points="12,18 13.5,21 16.5,21 14,23 15,26 12,24 9,26 10,23 7.5,21 10.5,21" fill="#FDE047" />
+                    </g>
+                  )}
                 </svg>
 
                 {isChestOpened && (
-                  <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center ring-2 ring-white shadow-2xs">
-                    <Check className="w-3 h-3 stroke-[3]" />
+                  <span className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center ring-2 ring-white shadow-xs">
+                    <Check className="w-3.5 h-3.5 stroke-[3]" />
                   </span>
                 )}
               </button>
@@ -296,7 +361,7 @@ export const TrailPathCanvas: React.FC<TrailPathCanvasProps> = ({
           );
         })()}
 
-        {/* 🌟 4. 🏰 ボス検定（模試）ノード（小道の終着点に鎮座するマイルストーン） */}
+        {/* 🌟 4. 🏰 ボス検定（Duolingo 円形ゴールドトロフィー台座） */}
         {(() => {
           const bossCoord = TRAIL_COORDS.find((c) => c.type === 'boss') || { x: 190, y: 825 };
           return (
@@ -309,17 +374,18 @@ export const TrailPathCanvas: React.FC<TrailPathCanvasProps> = ({
               }}
             >
               {isBossCleared ? (
-                <div className="absolute -top-8 px-3 py-1 rounded-full bg-emerald-600 text-white text-[11px] font-black shadow-md flex items-center gap-1 ring-2 ring-white whitespace-nowrap z-30">
+                <div className="absolute -top-9 px-3 py-1 rounded-full bg-emerald-600 text-white text-[11px] font-black shadow-md flex items-center gap-1 ring-2 ring-white whitespace-nowrap z-30">
                   <Check className="w-3.5 h-3.5 stroke-[3]" />
                   <span>エリア完全制覇！</span>
                 </div>
               ) : isStageCleared ? (
-                <div className="absolute -top-8 px-3 py-1 rounded-full bg-amber-500 text-white text-[11px] font-black shadow-md animate-bounce flex items-center gap-1 ring-2 ring-white whitespace-nowrap z-30">
+                <div className="absolute -top-9 px-3 py-1 rounded-full bg-amber-500 text-white text-[11px] font-black shadow-md animate-bounce flex items-center gap-1 ring-2 ring-white whitespace-nowrap z-30">
                   <Trophy className="w-3.5 h-3.5 text-amber-200" />
                   <span>ボス検定に挑戦！</span>
                 </div>
               ) : null}
 
+              {/* トロフィーコイン */}
               <button
                 type="button"
                 onClick={() => {
@@ -328,16 +394,17 @@ export const TrailPathCanvas: React.FC<TrailPathCanvasProps> = ({
                     onNavigateToExam(stepMeta.examId);
                   }
                 }}
-                className={`candy-stone w-[80px] h-[78px] sm:w-[86px] sm:h-[84px] rounded-[30px] flex items-center justify-center font-black cursor-pointer shadow-lg active:scale-95 ${
+                className={`w-[84px] h-[84px] sm:w-[90px] sm:h-[90px] rounded-full flex items-center justify-center font-black cursor-pointer select-none transition-all relative ${
                   isBossCleared
-                    ? 'bg-gradient-to-b from-[#10B981] to-[#047857] text-white border-b-[8px] border-[#065F46]'
+                    ? 'bg-gradient-to-b from-[#10B981] to-[#047857] text-white border-b-[8px] border-[#065F46] active:translate-y-[6px] active:border-b-[2px]'
                     : isStageCleared
-                    ? 'bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600 text-white border-b-[8px] border-amber-800'
-                    : 'bg-gradient-to-b from-[#334155] to-[#1E293B] text-white border-b-[7px] border-[#0F172A]'
+                    ? 'bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600 text-white border-b-[8px] border-[#B45309] active:translate-y-[6px] active:border-b-[2px] animate-pulse'
+                    : 'bg-gradient-to-b from-[#334155] to-[#1E293B] text-white border-b-[8px] border-[#0F172A] active:translate-y-[6px] active:border-b-[2px]'
                 }`}
                 title={qMeta.bossLabel}
               >
-                <Trophy className="w-10 h-10 text-amber-300 drop-shadow-sm" />
+                <span className="absolute top-2.5 w-8 h-3 rounded-full bg-white/35 pointer-events-none" />
+                <Trophy className="w-10 h-10 text-amber-300 drop-shadow-md" />
               </button>
 
               <div className="mt-2.5 px-3 py-1 rounded-xl bg-white/95 backdrop-blur-md shadow-xs border border-slate-200/60 text-center max-w-[210px] pointer-events-none select-none">
@@ -349,7 +416,7 @@ export const TrailPathCanvas: React.FC<TrailPathCanvasProps> = ({
                     ? `合格達成 (${bossScore}点)`
                     : isStageCleared
                     ? `合格基準: ${qMeta.bossPassScore}点 (挑戦可能！)`
-                    : `全5問クリアで解放`}
+                    : `全問クリアで解放`}
                 </span>
               </div>
             </div>

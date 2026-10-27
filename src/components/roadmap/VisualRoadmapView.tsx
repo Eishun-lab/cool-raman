@@ -462,7 +462,7 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
           <div className="absolute -right-8 -bottom-10 w-44 h-44 bg-white/10 rounded-full blur-xl pointer-events-none" />
 
           <div className="relative z-10 space-y-3">
-            {/* 上段：駅番号サイン ＆ スッキリしたエリア前後切替 */}
+            {/* 上段：駅番号サイン ＆ スッキリしたエリア前後切替 ＆ ガイドブックボタン */}
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-white text-slate-900 shadow-xs">
@@ -473,40 +473,57 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                 </span>
               </div>
 
-              {/* 前へ / 次へ エリア切替 */}
-              <div className="flex items-center bg-black/25 backdrop-blur-md rounded-xl p-0.5 border border-white/20">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                {/* 前へ / 次へ エリア切替 */}
+                <div className="flex items-center bg-black/25 backdrop-blur-md rounded-xl p-0.5 border border-white/20">
+                  <button
+                    type="button"
+                    disabled={selectedStage <= 1}
+                    onClick={() => {
+                      sound.playTap();
+                      setSelectedStage((prev) => Math.max(1, prev - 1));
+                    }}
+                    className={`px-2 py-1 rounded-lg flex items-center gap-1 text-xs font-black transition-all cursor-pointer ${
+                      selectedStage <= 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/20 text-white'
+                    }`}
+                    title="前のエリア"
+                  >
+                    <ChevronLeft className="w-3.5 h-3.5" />
+                    <span className="hidden xs:inline">前へ</span>
+                  </button>
+                  <span className="text-xs font-black px-1.5 text-white/95 whitespace-nowrap">
+                    {selectedStage} / 8
+                  </span>
+                  <button
+                    type="button"
+                    disabled={selectedStage >= 8}
+                    onClick={() => {
+                      sound.playTap();
+                      setSelectedStage((prev) => Math.min(8, prev + 1));
+                    }}
+                    className={`px-2 py-1 rounded-lg flex items-center gap-1 text-xs font-black transition-all cursor-pointer ${
+                      selectedStage >= 8 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/20 text-white'
+                    }`}
+                    title="次のエリア"
+                  >
+                    <span className="hidden xs:inline">次へ</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                {/* 📖 ガイドブックボタン（Duolingo本家スタイル） */}
                 <button
                   type="button"
-                  disabled={selectedStage <= 1}
                   onClick={() => {
                     sound.playTap();
-                    setSelectedStage((prev) => Math.max(1, prev - 1));
+                    setActiveStepIndex(selectedStage - 1);
+                    setShowGuideModal(true);
                   }}
-                  className={`px-2 py-1 rounded-lg flex items-center gap-1 text-xs font-black transition-all cursor-pointer ${
-                    selectedStage <= 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/20 text-white'
-                  }`}
-                  title="前のエリア"
+                  className="px-2.5 sm:px-3 py-1 rounded-xl bg-white/20 hover:bg-white/30 text-white text-xs font-black backdrop-blur-md border border-white/30 flex items-center gap-1 transition-all shadow-xs cursor-pointer active:scale-95"
+                  title="エリア探訪ガイドブックを開く"
                 >
-                  <ChevronLeft className="w-3.5 h-3.5" />
-                  <span className="hidden xs:inline">前へ</span>
-                </button>
-                <span className="text-xs font-black px-2 text-white/95 whitespace-nowrap">
-                  {selectedStage} / 8
-                </span>
-                <button
-                  type="button"
-                  disabled={selectedStage >= 8}
-                  onClick={() => {
-                    sound.playTap();
-                    setSelectedStage((prev) => Math.min(8, prev + 1));
-                  }}
-                  className={`px-2 py-1 rounded-lg flex items-center gap-1 text-xs font-black transition-all cursor-pointer ${
-                    selectedStage >= 8 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/20 text-white'
-                  }`}
-                  title="次のエリア"
-                >
-                  <span className="hidden xs:inline">次へ</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
+                  <BookOpen className="w-3.5 h-3.5 text-amber-300" />
+                  <span>ガイド</span>
                 </button>
               </div>
             </div>
@@ -661,45 +678,25 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
   return (
     <div className="w-full space-y-3 sm:space-y-4">
       {/* ===================================================================== */}
-      {/* 🌟 メインステータスバー：エリア表示 ＆ ストリーク ＆ XP ＆ 学習ガイド   */}
+      {/* 🌟 ゲーミフィケーションステータス（ランク ＆ ストリーク ＆ 累計XP）      */}
       {/* ===================================================================== */}
-      <div className="bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl px-3.5 py-2.5 shadow-xs flex items-center justify-between gap-3">
-        {/* 左側：現在のエリア */}
-        <div className="flex items-center gap-2">
-          <div
-            className="w-3.5 h-3.5 rounded-full shrink-0 shadow-xs ring-2 ring-white"
-            style={{ backgroundColor: SEOUL_WORLD_DISTRICTS[selectedStage]?.lineColor || '#B84E34' }}
-          />
-          <span className="text-xs sm:text-sm font-black text-slate-800 tracking-tight">
-            Area {selectedStage}: {SEOUL_WORLD_DISTRICTS[selectedStage]?.shortTitle || SEOUL_WORLD_DISTRICTS[selectedStage]?.jaName}
-          </span>
+      <div className="flex items-center justify-between px-1 py-0.5">
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-white border border-slate-200 shadow-2xs text-xs font-black text-slate-800">
+          <span className="text-sm">{levelInfo.currentTier.badge}</span>
+          <span className="hidden xs:inline">{levelInfo.currentTier.title}</span>
+          <span className="text-[10px] text-slate-400 font-mono">Lv.{Math.floor(gameState.xp / 300) + 1}</span>
         </div>
 
-        {/* 右側：ストリーク ＆ XP ＆ 学習ガイド */}
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          <div className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl bg-orange-50 border border-orange-200/90 text-orange-950 font-black text-xs shadow-2xs">
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 px-3 py-1.5 rounded-2xl bg-orange-50 border border-orange-200/90 text-orange-950 font-black text-xs shadow-2xs">
             <Flame className="w-3.5 h-3.5 text-orange-500 animate-pulse" />
-            <span>{gameState.streakDays}日</span>
+            <span>{gameState.streakDays}日 連続</span>
           </div>
 
-          <div className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200/90 text-amber-950 font-black text-xs shadow-2xs">
+          <div className="flex items-center gap-1 px-3 py-1.5 rounded-2xl bg-amber-50 border border-amber-200/90 text-amber-950 font-black text-xs shadow-2xs">
             <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
             <span>{gameState.xp} XP</span>
           </div>
-
-          <button
-            type="button"
-            onClick={() => {
-              sound.playTap();
-              setActiveStepIndex(selectedStage - 1);
-              setShowGuideModal(true);
-            }}
-            className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-black shadow-xs transition-all flex items-center gap-1 cursor-pointer"
-            title="エリア探訪ガイドブックを開く"
-          >
-            <BookOpen className="w-3.5 h-3.5 text-amber-300" />
-            <span>ガイド</span>
-          </button>
         </div>
       </div>
 
