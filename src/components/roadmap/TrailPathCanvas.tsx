@@ -104,7 +104,7 @@ export const TrailPathCanvas: React.FC<TrailPathCanvasProps> = ({
   const isPreviewDone = previewTaskIdx !== null ? !!completedQuests[`s${step.step}_t${previewTaskIdx}`] : false;
 
   return (
-    <div className="relative w-full rounded-3xl overflow-hidden bg-gradient-to-b from-[#F8FAFC] via-[#F1F5F9]/60 to-[#F8FAFC] border border-slate-200/60 shadow-xs">
+    <div className="relative w-full rounded-3xl overflow-hidden bg-gradient-to-b from-[#F8FAFC] via-[#EEF2F6]/50 to-[#F8FAFC]">
       {/* 🌟 1. 背景のSVGなめらかリバートレイル ＆ 一体化された風景ベクター */}
       <div className="relative w-full aspect-[380/890] select-none">
         <svg
@@ -208,9 +208,9 @@ export const TrailPathCanvas: React.FC<TrailPathCanvasProps> = ({
                   </div>
 
                   {/* ホランイ（マスコット）がトレイル脇の地面に立ってフキダシで応援 */}
-                  <div className="absolute -left-18 sm:-left-22 top-0 z-30 flex flex-col items-center pointer-events-none select-none">
-                    <div className="relative mb-1.5 px-2.5 py-1 bg-white rounded-xl shadow-md border border-slate-200/90 text-[10px] font-black text-slate-800 whitespace-nowrap">
-                      <span>{district.shortTitle} 出発！</span>
+                  <div className="absolute -left-16 sm:-left-20 top-0 z-30 flex flex-col items-center pointer-events-none select-none">
+                    <div className="relative mb-1 px-2.5 py-0.5 bg-white rounded-xl shadow-md border border-slate-200/90 text-[11px] font-black text-slate-800 whitespace-nowrap">
+                      <span>화이팅! 🐯</span>
                       <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[4px] border-t-white" />
                     </div>
                     <HorangiMascot size="sm" mood="cheering" showMessage={false} interactive={false} />
@@ -469,7 +469,7 @@ export const TrailPathCanvas: React.FC<TrailPathCanvasProps> = ({
               </div>
             </div>
 
-            {/* スタートボタン */}
+            {/* スタートボタン（Duolingo本家の高輝度3Dグリーンボタン） */}
             <button
               type="button"
               onClick={() => {
@@ -477,10 +477,10 @@ export const TrailPathCanvas: React.FC<TrailPathCanvasProps> = ({
                 setPreviewTaskIdx(null);
                 onStartDrill(step.step, targetIdx);
               }}
-              className="w-full py-4 rounded-2xl bg-[#B84E34] hover:bg-[#a2432c] text-white font-black text-sm sm:text-base shadow-[0_5px_0_#853420] active:translate-y-1 active:shadow-[0_1px_0_#853420] transition-all flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full py-4 rounded-2xl bg-[#58CC02] hover:bg-[#46A302] text-white font-black text-base sm:text-lg shadow-[0_6px_0_#388E00] active:translate-y-[4px] active:shadow-[0_2px_0_#388E00] transition-all flex items-center justify-center gap-2 cursor-pointer tracking-wide uppercase"
             >
-              <Zap className="w-5 h-5 fill-amber-300 text-amber-300 animate-pulse" />
-              <span>{isPreviewDone ? 'もう一度特訓する (+60 XP)' : '30秒特訓をスタート (+60 XP)'}</span>
+              <Zap className="w-5 h-5 fill-white text-white drop-shadow-xs" />
+              <span>{isPreviewDone ? 'もう一度特訓する (+60 XP)' : '特訓スタート (+60 XP)'}</span>
             </button>
           </div>
         </div>

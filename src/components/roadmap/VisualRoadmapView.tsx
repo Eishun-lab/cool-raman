@@ -47,6 +47,7 @@ import {
   Lightbulb,
   ShieldAlert,
   AlertTriangle,
+  ChevronDown,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { HorangiMascot } from '../mascot/HorangiMascot';
@@ -75,6 +76,8 @@ interface VisualRoadmapViewProps {
   onNavigateToExam?: (examId?: string) => void;
   onNavigateToContent?: (id: string, tab?: GuideTab) => void;
   showPronunciation?: boolean;
+  gameState?: GamificationState;
+  setGameState?: React.Dispatch<React.SetStateAction<GamificationState>>;
 }
 
 const STEP_META: Record<
@@ -242,6 +245,8 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
   onNavigateToExam,
   onNavigateToContent,
   showPronunciation = true,
+  gameState: propGameState,
+  setGameState: propSetGameState,
 }) => {
   const [viewMode, setViewMode] = useState<RoadmapViewMode>('quest');
   const [activeStepIndex, setActiveStepIndex] = useState(0);
@@ -249,8 +254,10 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
   const [stationTab, setStationTab] = useState<StationDetailTab>('goal');
   const [matrixFilter, setMatrixFilter] = useState<'all' | 'beginner' | 'advanced'>('all');
 
-  // ゲーミフィケーション状態管理
-  const [gameState, setGameState] = useState<GamificationState>(getInitialGamificationState);
+  // ゲーミフィケーション状態管理（props または内部ステート）
+  const [localGameState, setLocalGameState] = useState<GamificationState>(getInitialGamificationState);
+  const gameState = propGameState || localGameState;
+  const setGameState = propSetGameState || setLocalGameState;
 
   // ステージ選択（1〜8）＆表示形式（1ステージ集中 or 全体一覧）
   const [selectedStage, setSelectedStage] = useState<number>(() =>
@@ -259,6 +266,7 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
   const [questDisplayMode, setQuestDisplayMode] = useState<'focused' | 'all'>('focused');
   const [isDeepDiveOpen, setIsDeepDiveOpen] = useState(false);
   const [showGuideModal, setShowGuideModal] = useState(false);
+  const [showAreaMapModal, setShowAreaMapModal] = useState(false);
   const [guideModalTab, setGuideModalTab] = useState<'phrases' | 'grammar' | 'culture' | 'curriculum'>('phrases');
 
   // クイック特訓ドリル状態
@@ -462,54 +470,40 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
           <div className="absolute -right-8 -bottom-10 w-44 h-44 bg-white/10 rounded-full blur-xl pointer-events-none" />
 
           <div className="relative z-10 space-y-3">
-            {/* 上段：駅番号サイン ＆ スッキリしたエリア前後切替 ＆ ガイドブックボタン */}
+            {/* 上段：駅番号サイン ＆ エリア切替ドロワー ＆ ガイドブックボタン */}
             <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-white text-slate-900 shadow-xs">
+              <button
+                type="button"
+                onClick={() => {
+                  sound.playTap();
+                  setShowAreaMapModal(true);
+                }}
+                className="flex items-center gap-2 bg-black/20 hover:bg-black/30 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/20 transition-all cursor-pointer group"
+                title="全8エリアの探訪マップを開く"
+              >
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-white text-slate-900 shadow-xs">
                   {district.stationCode}
                 </span>
-                <span className="text-xs font-black text-white/90 tracking-wide">
-                  {district.koName}
+                <span className="text-xs font-black text-white/95 tracking-wide flex items-center gap-1">
+                  <span>{district.koName}</span>
+                  <ChevronDown className="w-3.5 h-3.5 text-white/70 group-hover:translate-y-0.5 transition-transform" />
                 </span>
-              </div>
+              </button>
 
               <div className="flex items-center gap-1.5 sm:gap-2">
-                {/* 前へ / 次へ エリア切替 */}
-                <div className="flex items-center bg-black/25 backdrop-blur-md rounded-xl p-0.5 border border-white/20">
-                  <button
-                    type="button"
-                    disabled={selectedStage <= 1}
-                    onClick={() => {
-                      sound.playTap();
-                      setSelectedStage((prev) => Math.max(1, prev - 1));
-                    }}
-                    className={`px-2 py-1 rounded-lg flex items-center gap-1 text-xs font-black transition-all cursor-pointer ${
-                      selectedStage <= 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/20 text-white'
-                    }`}
-                    title="前のエリア"
-                  >
-                    <ChevronLeft className="w-3.5 h-3.5" />
-                    <span className="hidden xs:inline">前へ</span>
-                  </button>
-                  <span className="text-xs font-black px-1.5 text-white/95 whitespace-nowrap">
-                    {selectedStage} / 8
-                  </span>
-                  <button
-                    type="button"
-                    disabled={selectedStage >= 8}
-                    onClick={() => {
-                      sound.playTap();
-                      setSelectedStage((prev) => Math.min(8, prev + 1));
-                    }}
-                    className={`px-2 py-1 rounded-lg flex items-center gap-1 text-xs font-black transition-all cursor-pointer ${
-                      selectedStage >= 8 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/20 text-white'
-                    }`}
-                    title="次のエリア"
-                  >
-                    <span className="hidden xs:inline">次へ</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
+                {/* 🗺️ エリア探訪マップ */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    sound.playTap();
+                    setShowAreaMapModal(true);
+                  }}
+                  className="px-2.5 sm:px-3 py-1 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-black backdrop-blur-md border border-white/20 flex items-center gap-1 transition-all shadow-xs cursor-pointer active:scale-95"
+                  title="ソウル8大エリア一覧マップを開く"
+                >
+                  <Map className="w-3.5 h-3.5 text-amber-300" />
+                  <span className="hidden xs:inline">エリア一覧</span>
+                </button>
 
                 {/* 📖 ガイドブックボタン（Duolingo本家スタイル） */}
                 <button
@@ -610,8 +604,8 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
               onNavigateToExam={onNavigateToExam}
             />
 
-            {/* 次のエリアへの誘導・前後切替フッター */}
-            <div className="space-y-2 pt-1 pb-4">
+            {/* 次のエリアへの誘導・エリアマップドロワー */}
+            <div className="pt-2 pb-6 flex flex-col items-center gap-2.5">
               {isStageCleared && selectedStage < 8 && (
                 <button
                   type="button"
@@ -620,54 +614,24 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                     setSelectedStage((prev) => Math.min(8, prev + 1));
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
-                  className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:opacity-95 text-white font-black text-sm shadow-[0_4px_0_#065f46] active:translate-y-1 active:shadow-[0_1px_0_#065f46] transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full max-w-md py-4 px-6 rounded-2xl bg-[#58CC02] hover:bg-[#46A302] text-white font-black text-base shadow-[0_6px_0_#388E00] active:translate-y-[4px] active:shadow-[0_2px_0_#388E00] transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <span>次のエリア（Stage {selectedStage + 1}）へ進む</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <Sparkles className="w-5 h-5 text-amber-200 fill-amber-200" />
+                  <span>次のエリア（Area {selectedStage + 1}）へ進む ➔</span>
                 </button>
               )}
 
-              <div className="flex items-center justify-between">
-                <button
-                  type="button"
-                  disabled={selectedStage <= 1}
-                  onClick={() => {
-                    sound.playTap();
-                    setSelectedStage((prev) => Math.max(1, prev - 1));
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
-                    selectedStage <= 1
-                      ? 'text-stone-300 border border-stone-200 cursor-not-allowed'
-                      : 'text-stone-700 border border-stone-200 bg-white hover:bg-stone-50'
-                  }`}
-                >
-                  <ChevronLeft className="w-3.5 h-3.5" />
-                  <span>前のエリア</span>
-                </button>
-
-                <span className="text-xs font-black text-stone-400">
-                  {district.stationCode} {district.shortTitle || district.jaName} ({selectedStage}/8)
-                </span>
-
-                <button
-                  type="button"
-                  disabled={selectedStage >= 8}
-                  onClick={() => {
-                    sound.playTap();
-                    setSelectedStage((prev) => Math.min(8, prev + 1));
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
-                    selectedStage >= 8
-                      ? 'text-stone-300 border border-stone-200 cursor-not-allowed'
-                      : 'text-stone-700 border border-stone-200 bg-white hover:bg-stone-50'
-                  }`}
-                >
-                  <span>次のエリア</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  sound.playTap();
+                  setShowAreaMapModal(true);
+                }}
+                className="py-2.5 px-4 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-black shadow-2xs flex items-center gap-1.5 transition-all cursor-pointer active:scale-95"
+              >
+                <Map className="w-3.5 h-3.5 text-[#B84E34]" />
+                <span>ソウル全8エリア一覧マップを開く</span>
+              </button>
             </div>
           </>
         )}
@@ -676,33 +640,8 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
   };
 
   return (
-    <div className="w-full space-y-3 sm:space-y-4">
-      {/* ===================================================================== */}
-      {/* 🌟 ゲーミフィケーションステータス（ランク ＆ ストリーク ＆ 累計XP）      */}
-      {/* ===================================================================== */}
-      <div className="flex items-center justify-between px-1 py-0.5">
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-white border border-slate-200 shadow-2xs text-xs font-black text-slate-800">
-          <span className="text-sm">{levelInfo.currentTier.badge}</span>
-          <span className="hidden xs:inline">{levelInfo.currentTier.title}</span>
-          <span className="text-[10px] text-slate-400 font-mono">Lv.{Math.floor(gameState.xp / 300) + 1}</span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 px-3 py-1.5 rounded-2xl bg-orange-50 border border-orange-200/90 text-orange-950 font-black text-xs shadow-2xs">
-            <Flame className="w-3.5 h-3.5 text-orange-500 animate-pulse" />
-            <span>{gameState.streakDays}日 連続</span>
-          </div>
-
-          <div className="flex items-center gap-1 px-3 py-1.5 rounded-2xl bg-amber-50 border border-amber-200/90 text-amber-950 font-black text-xs shadow-2xs">
-            <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-            <span>{gameState.xp} XP</span>
-          </div>
-        </div>
-      </div>
-
-      {/* ===================================================================== */}
-      {/* 🎯 選択中ステージのクエスト（今日やること Hero ＆ 3Dノードトレイル）    */}
-      {/* ===================================================================== */}
+    <div className="w-full">
+      {/* 🎯 選択中ステージのクエスト（Thematic Unit Banner ＆ 3Dノードトレイル） */}
       {renderStageCard(ROADMAP_STEPS[selectedStage - 1], true)}
 
       {/* ===================================================================== */}
@@ -1378,6 +1317,118 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===================================================================== */}
+      {/* 🗺️ ソウル 8大探訪エリア ナビゲーション ドロワー                           */}
+      {/* ===================================================================== */}
+      {showAreaMapModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in">
+          <div
+            className="w-full sm:max-w-xl max-h-[88vh] bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col animate-in slide-in-from-bottom-8 sm:zoom-in-95"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* 上部ヘッダー */}
+            <div className="p-4 sm:p-5 border-b border-stone-100 bg-[#FAF7F2] flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-2xl bg-[#B84E34]/10 text-[#B84E34] border border-[#B84E34]/20 flex items-center justify-center shrink-0">
+                  <Map className="w-5 h-5 text-[#B84E34]" />
+                </div>
+                <div>
+                  <h3 className="text-sm sm:text-base font-black text-slate-900 tracking-tight">
+                    ソウル 8大探訪エリア一覧
+                  </h3>
+                  <p className="text-xs text-stone-500 font-medium">
+                    地下鉄路線で巡る韓国語完全制覇ロードマップ
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAreaMapModal(false)}
+                className="w-8 h-8 rounded-full bg-stone-200/80 hover:bg-stone-300 text-stone-600 flex items-center justify-center cursor-pointer transition-all"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* エリアリスト */}
+            <div className="p-3 sm:p-5 overflow-y-auto space-y-2.5 flex-1">
+              {ROADMAP_STEPS.map((s) => {
+                const dist = SEOUL_WORLD_DISTRICTS[s.step];
+                const isSelected = selectedStage === s.step;
+                const isAreaUnlocked = gameState.freeExploreMode || s.step <= gameState.unlockedStage;
+
+                let areaDone = 0;
+                const qCount = s.scopePriority.wbsBreakdown.length;
+                for (let i = 0; i < qCount; i++) {
+                  if (gameState.completedQuests[`s${s.step}_t${i}`]) areaDone++;
+                }
+                const isCleared = areaDone === qCount && qCount > 0;
+                const pct = Math.round((areaDone / qCount) * 100);
+
+                return (
+                  <div
+                    key={s.step}
+                    onClick={() => {
+                      sound.playTap();
+                      setSelectedStage(s.step);
+                      setShowAreaMapModal(false);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                      isSelected
+                        ? 'bg-amber-50/70 border-amber-400 ring-2 ring-amber-300/50 shadow-xs'
+                        : isAreaUnlocked
+                        ? 'bg-white border-stone-200 hover:border-stone-300 hover:bg-stone-50'
+                        : 'bg-stone-50/70 border-stone-200 opacity-60'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      {/* 駅番号 */}
+                      <div
+                        style={{ backgroundColor: dist?.lineColor || s.stationColor }}
+                        className="w-10 h-10 rounded-2xl text-white font-black text-xs flex flex-col items-center justify-center shrink-0 shadow-2xs"
+                      >
+                        <span className="text-[10px] opacity-80 leading-none">{dist?.stationCode}</span>
+                        <span className="text-sm font-black leading-none">{s.step}</span>
+                      </div>
+
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <h4 className="text-xs sm:text-sm font-black text-slate-900 truncate">
+                            Area {s.step}: {dist?.jaName}
+                          </h4>
+                          {isCleared ? (
+                            <span className="text-[9px] font-black bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-md">
+                              制覇
+                            </span>
+                          ) : isSelected ? (
+                            <span className="text-[9px] font-black bg-amber-200 text-amber-900 px-1.5 py-0.5 rounded-md">
+                              現在地
+                            </span>
+                          ) : null}
+                        </div>
+                        <p className="text-[11px] text-stone-500 font-medium truncate mt-0.5">
+                          {dist?.shortCatch}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="text-right shrink-0">
+                      <div className="text-xs font-black text-stone-700 font-mono">
+                        {pct}%
+                      </div>
+                      <div className="text-[10px] text-stone-400">
+                        {areaDone}/{qCount}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

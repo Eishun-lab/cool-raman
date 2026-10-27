@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Compass,
   GraduationCap,
   BookOpen,
   Sparkles,
   ChevronRight,
+  Flame,
+  Zap,
 } from 'lucide-react';
 import { MockExamView } from './components/mockExam/MockExamView';
 import { VisualRoadmapView } from './components/roadmap/VisualRoadmapView';
@@ -13,6 +15,12 @@ import { ComprehensiveQuizView } from './components/ComprehensiveQuizView';
 import { HorangiMascot } from './components/mascot/HorangiMascot';
 import { ExamType } from './types/mockExam';
 import hanmoaLogo from './assets/logo.jpg';
+import {
+  GamificationState,
+  getInitialGamificationState,
+  saveGamificationState,
+  calculateLevelInfo,
+} from './utils/gamification';
 
 type MainTab = 'dashboard' | 'roadmap' | 'exam' | 'library' | 'quiz';
 
@@ -22,45 +30,80 @@ export const App: React.FC = () => {
   const [librarySubTab, setLibrarySubTab] = useState<'textbook' | 'numbers'>('textbook');
   const [targetExamId, setTargetExamId] = useState<ExamType | undefined>(undefined);
 
+  // ゲーミフィケーション状態管理（最上位で一元管理）
+  const [gameState, setGameState] = useState<GamificationState>(getInitialGamificationState);
+
+  useEffect(() => {
+    saveGamificationState(gameState);
+  }, [gameState]);
+
+  const levelInfo = useMemo(() => calculateLevelInfo(gameState.xp), [gameState.xp]);
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-800 font-sans flex flex-col">
-      {/* トップヘッダー */}
-      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-3 sm:px-6 h-13 sm:h-15 flex items-center shadow-2xs">
-        <div className="max-w-7xl mx-auto w-full flex items-center justify-between gap-2">
-          {/* ロゴ */}
+      {/* 🌟 Duolingo本家スタイル 一体型スティッキートップバー */}
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-3 sm:px-6 h-13 sm:h-14 flex items-center shadow-2xs">
+        <div className="max-w-4xl mx-auto w-full flex items-center justify-between gap-2">
+          {/* ロゴ ＆ 言語バッジ */}
           <div
             onClick={() => setActiveTab('roadmap')}
-            className="flex items-center gap-2 sm:gap-2.5 cursor-pointer group shrink-0 select-none"
+            className="flex items-center gap-2 cursor-pointer group shrink-0 select-none"
           >
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl overflow-hidden border border-slate-200 shadow-2xs group-hover:scale-105 transition-all shrink-0 bg-white">
+            <div className="w-8 h-8 rounded-xl overflow-hidden border border-slate-200 shadow-2xs group-hover:scale-105 transition-all shrink-0 bg-white">
               <img
                 src={hanmoaLogo}
                 alt="HanMoa Logo"
                 className="w-full h-full object-cover"
               />
             </div>
-            <div className="shrink-0">
-              <div className="flex items-center gap-1.5">
-                <span className="font-black text-base sm:text-lg tracking-tight text-slate-900 whitespace-nowrap">
-                  HanMoa
-                </span>
-                <span className="text-[10px] font-black tracking-wider px-2 py-0.5 rounded-full bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD] whitespace-nowrap">
-                  Quest
-                </span>
-              </div>
+            <div className="flex items-center gap-1.5">
+              <span className="font-black text-base sm:text-lg tracking-tight text-slate-900 whitespace-nowrap">
+                HanMoa
+              </span>
+              <span className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-stone-100 text-stone-700 border border-stone-200 whitespace-nowrap">
+                🇰🇷 韓国語
+              </span>
             </div>
           </div>
 
-          {/* 右側アクション：マップ以外なら「戻る」、マップなら「模試」「ライブラリ」へのスマートリンク */}
+          {/* 右側：Duolingo式 ステータス（ストリーク ＆ XP ＆ レベル） ＆ ナビゲーション */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            {/* ストリーク（炎） */}
+            <div
+              className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-orange-50 border border-orange-200/90 text-orange-950 font-black text-xs shadow-2xs"
+              title={`${gameState.streakDays}日連続学習中！`}
+            >
+              <Flame className="w-3.5 h-3.5 text-orange-500 fill-orange-500 animate-pulse" />
+              <span>{gameState.streakDays}</span>
+            </div>
+
+            {/* XP（ジェム/稲妻） */}
+            <div
+              className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-50 border border-amber-200/90 text-amber-950 font-black text-xs shadow-2xs"
+              title={`累計獲得経験値: ${gameState.xp} XP`}
+            >
+              <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+              <span>{gameState.xp}</span>
+            </div>
+
+            {/* ランク/レベル */}
+            <div
+              className="hidden xs:flex items-center gap-1 px-2 py-1 rounded-xl bg-slate-100 border border-slate-200 text-slate-800 font-black text-xs shadow-2xs"
+              title={`現在のランク: ${levelInfo.currentTier.title}`}
+            >
+              <span className="text-xs">{levelInfo.currentTier.badge}</span>
+              <span className="text-[10px] text-slate-600 font-mono">Lv.{Math.floor(gameState.xp / 300) + 1}</span>
+            </div>
+
+            {/* ナビゲーションアイコン */}
             {activeTab !== 'roadmap' ? (
               <button
                 type="button"
                 onClick={() => setActiveTab('roadmap')}
-                className="h-8 sm:h-9 px-3 rounded-xl bg-[#B84E34] hover:bg-[#a2432c] text-white text-xs font-black shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+                className="h-8 px-2.5 rounded-xl bg-[#B84E34] hover:bg-[#a2432c] text-white text-xs font-black shadow-xs transition-all flex items-center gap-1 cursor-pointer"
               >
                 <Compass className="w-3.5 h-3.5" />
-                <span>探訪マップへ戻る</span>
+                <span className="hidden xs:inline">マップ</span>
               </button>
             ) : (
               <div className="flex items-center gap-1">
@@ -68,10 +111,9 @@ export const App: React.FC = () => {
                   type="button"
                   title="模擬試験一覧"
                   onClick={() => setActiveTab('exam')}
-                  className="h-8 px-2.5 sm:px-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                  className="w-8 h-8 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 flex items-center justify-center cursor-pointer shadow-2xs transition-all"
                 >
-                  <GraduationCap className="w-3.5 h-3.5 text-slate-500" />
-                  <span className="hidden xs:inline">模擬試験</span>
+                  <GraduationCap className="w-4 h-4 text-slate-600" />
                 </button>
                 <button
                   type="button"
@@ -80,10 +122,9 @@ export const App: React.FC = () => {
                     setLibrarySubTab('textbook');
                     setActiveTab('library');
                   }}
-                  className="h-8 px-2.5 sm:px-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                  className="w-8 h-8 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 flex items-center justify-center cursor-pointer shadow-2xs transition-all"
                 >
-                  <BookOpen className="w-3.5 h-3.5 text-slate-500" />
-                  <span className="hidden xs:inline">ライブラリ</span>
+                  <BookOpen className="w-4 h-4 text-slate-600" />
                 </button>
               </div>
             )}
@@ -222,6 +263,8 @@ export const App: React.FC = () => {
         ) : activeTab === 'roadmap' ? (
           <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 py-2 sm:py-6">
             <VisualRoadmapView
+              gameState={gameState}
+              setGameState={setGameState}
               onNavigateToExam={(examId) => {
                 if (examId) setTargetExamId(examId as ExamType);
                 setActiveTab('exam');
