@@ -5,11 +5,11 @@ import {
   Bookmark,
   HelpCircle,
   MessageCircle,
-  Search,
 } from 'lucide-react';
 import { StudyGuideView } from '../StudyGuideView';
 import { KoreanNumbersGuideView } from '../KoreanNumbersGuideView';
 import { GuideTab } from '../../types/guide';
+import { sound } from '../../utils/audioSynth';
 
 interface LibraryHubViewProps {
   initialAnchor?: string;
@@ -52,7 +52,10 @@ export const LibraryHubView: React.FC<LibraryHubViewProps> = ({
               <button
                 key={tab.id}
                 type="button"
-                onClick={() => setActiveSubTab(tab.id)}
+                onClick={() => {
+                  sound.playTap();
+                  setActiveSubTab(tab.id);
+                }}
                 className={`px-3.5 py-2 rounded-2xl text-xs font-black transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
                   isActive
                     ? 'text-white -translate-y-0.5'

@@ -28,6 +28,7 @@ import {
   Compass,
   Clock,
   Award,
+  AlertCircle,
 } from 'lucide-react';
 import { GuideTab, GuideProgressState, ItemManualStatus, LevelMode } from '../types/guide';
 import {
@@ -59,6 +60,7 @@ import { KoreanNumbersGuideView } from './KoreanNumbersGuideView';
 import { TestLesson, WordItem } from '../types';
 import { findMyLessonExamplesForGuide } from '../utils/guideMatcher';
 import { speechService } from '../utils/speech';
+import { sound } from '../utils/audioSynth';
 
 // 教科書 4大ステージ（章）定義
 const TEXTBOOK_STAGES = [
@@ -1107,20 +1109,20 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
   const displayedDicts = useMemo(() => {
     let list = GRAMMAR_DICT_DATA;
 
+    const query = (grammarSearch || searchQuery).trim().toLowerCase();
     // 検索または目的別カテゴリーが指定されている場合は全体から絞り込み
-    if (grammarCategory !== 'all' || grammarSearch.trim()) {
+    if (grammarCategory !== 'all' || query) {
       if (grammarCategory !== 'all') {
         list = list.filter((d) => getGrammarCategory(d) === grammarCategory);
       }
-      if (grammarSearch.trim()) {
-        const q = grammarSearch.trim().toLowerCase();
+      if (query) {
         list = list.filter(
           (d) =>
-            d.grammar.toLowerCase().includes(q) ||
-            d.meaning.toLowerCase().includes(q) ||
-            d.example.toLowerCase().includes(q) ||
-            d.tip.toLowerCase().includes(q) ||
-            d.connection.toLowerCase().includes(q)
+            d.grammar.toLowerCase().includes(query) ||
+            d.meaning.toLowerCase().includes(query) ||
+            d.example.toLowerCase().includes(query) ||
+            d.tip.toLowerCase().includes(query) ||
+            d.connection.toLowerCase().includes(query)
         );
       }
     } else if (statusFilter === 'all') {
@@ -1141,7 +1143,7 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
       }
     }
     return list.filter((d) => matchesStatusFilter(d.id));
-  }, [dictRange, grammarCategory, grammarSearch, statusFilter, levelMode, guideProgress, myExamplesMap]);
+  }, [dictRange, grammarCategory, grammarSearch, searchQuery, statusFilter, levelMode, guideProgress, myExamplesMap]);
 
   // 参考書Q&Aのフィルター
   const filteredQAs = useMemo(() => {
@@ -1550,65 +1552,78 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
       addedFeedbackIds[id] || (vocabCandidate ? isWordInVocab(vocabCandidate.expression) : false);
 
     return (
-      <div className="space-y-2.5 pt-2 border-t border-[#EDE7DC] font-sans">
+      <div className="space-y-3 pt-3 border-t-2 border-stone-100 font-sans">
         {/* ① 講師・生徒の手動ステータス切り替えピル ＆ アクションボタンバー */}
-        <div className="flex flex-wrap items-center gap-1.5">
-          {/* 3段階 手動ステータスセレクター */}
-          <div className="flex items-center gap-1 bg-[#FAF7F2] p-1 rounded-xl border border-[#E8E2D5] text-[11px] font-bold">
-            <span className="text-[#756D63] px-1 hidden sm:inline">ステータス:</span>
+        <div className="flex flex-wrap items-center gap-2">
+          {/* 3段階 手動ステータスセレクター（Duolingo 3Dキャンディピル） */}
+          <div className="flex items-center gap-1 bg-stone-100 p-1 rounded-2xl border border-stone-200 text-xs font-black shadow-2xs">
+            <span className="text-stone-500 px-1.5 hidden sm:inline text-[11px]">習得度:</span>
             <button
               type="button"
-              onClick={(e) => setItemManualStatus(id, 'unexplored', e)}
-              className={`px-2 py-1 rounded-lg transition-all cursor-pointer whitespace-nowrap ${
+              onClick={(e) => {
+                sound.playTap();
+                setItemManualStatus(id, 'unexplored', e);
+              }}
+              className={`px-2.5 py-1 rounded-xl transition-all cursor-pointer whitespace-nowrap text-xs font-black ${
                 status === 'unexplored'
-                  ? 'bg-white text-[#544D45] shadow-2xs border border-[#D5CEC5]'
-                  : 'text-[#8A8075] hover:text-[#1B2A38]'
+                  ? 'bg-white text-stone-800 shadow-[0_2px_0_#CBD5E1] border border-stone-300 -translate-y-0.5'
+                  : 'text-stone-500 hover:text-stone-900'
               }`}
             >
               ⚪ 未開拓
             </button>
             <button
               type="button"
-              onClick={(e) => setItemManualStatus(id, 'learning', e)}
-              className={`px-2 py-1 rounded-lg transition-all cursor-pointer whitespace-nowrap ${
+              onClick={(e) => {
+                sound.playTap();
+                setItemManualStatus(id, 'learning', e);
+              }}
+              className={`px-2.5 py-1 rounded-xl transition-all cursor-pointer whitespace-nowrap text-xs font-black ${
                 status === 'learning'
-                  ? 'bg-amber-100 text-amber-900 shadow-2xs border border-amber-300'
-                  : 'text-[#8A8075] hover:text-amber-800'
+                  ? 'bg-amber-400 text-white shadow-[0_2px_0_#D97706] border border-amber-500 -translate-y-0.5'
+                  : 'text-stone-500 hover:text-amber-800'
               }`}
             >
-              🟡 練習中
+              🟡 特訓中
             </button>
             <button
               type="button"
-              onClick={(e) => setItemManualStatus(id, 'mastered', e)}
-              className={`px-2 py-1 rounded-lg transition-all cursor-pointer whitespace-nowrap ${
+              onClick={(e) => {
+                sound.playCorrect();
+                setItemManualStatus(id, 'mastered', e);
+              }}
+              className={`px-2.5 py-1 rounded-xl transition-all cursor-pointer whitespace-nowrap text-xs font-black ${
                 status === 'mastered'
-                  ? 'bg-emerald-600 text-white shadow-2xs border border-emerald-600'
-                  : 'text-[#8A8075] hover:text-emerald-700'
+                  ? 'bg-[#58CC02] text-white shadow-[0_2px_0_#388E00] border border-[#58CC02] -translate-y-0.5'
+                  : 'text-stone-500 hover:text-emerald-700'
               }`}
             >
-              🟢 実戦クリア！
+              🟢 習得完了！
             </button>
           </div>
 
           {/* 🎯 次の授業で使うピン留め */}
           <button
             type="button"
-            onClick={(e) => toggleMission(id, e)}
-            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer border whitespace-nowrap ${
+            onClick={(e) => {
+              sound.playTap();
+              toggleMission(id, e);
+            }}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-xs font-black transition-all cursor-pointer border-2 whitespace-nowrap ${
               isMission
-                ? 'bg-[#B84E34] text-white border-[#B84E34] shadow-xs'
-                : 'bg-white text-[#544D45] hover:text-[#B84E34] hover:border-[#B84E34] border-[#E2DDD2]'
+                ? 'bg-[#1CB0F6] text-white border-[#1CB0F6] shadow-[0_2px_0_#1899D6] -translate-y-0.5'
+                : 'bg-white text-stone-700 hover:text-sky-600 border-stone-200 shadow-[0_2px_0_#E5E7EB]'
             }`}
           >
-            <span>{isMission ? '🎯 次回ミッション中' : '🎯 次の授業で使う'}</span>
+            <span>{isMission ? '🎯 ミッション登録中' : '🎯 次の特訓で使う'}</span>
           </button>
 
           {vocabCandidate && onAddWordToVocab && (
             <button
               type="button"
               disabled={alreadyInVocab}
-              onClick={(e) =>
+              onClick={(e) => {
+                sound.playCorrect();
                 handleAddGuideItemToVocab(
                   id,
                   vocabCandidate.expression,
@@ -1616,23 +1631,23 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                   vocabCandidate.reading,
                   vocabCandidate.exampleSentence,
                   e
-                )
-              }
-              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition-all cursor-pointer border whitespace-nowrap sm:ml-auto ${
+                );
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-xs font-black transition-all cursor-pointer border-2 whitespace-nowrap sm:ml-auto ${
                 alreadyInVocab
-                  ? 'bg-[#FAF7F2] text-[#8A8075] border-[#E8E2D5] cursor-default'
-                  : 'bg-[#FAF0EC] text-[#B84E34] hover:bg-[#F5E3DC] border-[#F0D5CD]'
+                  ? 'bg-stone-100 text-stone-500 border-stone-200 cursor-default'
+                  : 'bg-purple-50 text-purple-700 hover:bg-purple-100 border-purple-200 shadow-[0_2px_0_#E9D5FF] active:translate-y-0.5'
               }`}
             >
               {alreadyInVocab ? (
                 <>
-                  <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 stroke-[2.5]" />
                   <span>1秒めくり追加済</span>
                 </>
               ) : (
                 <>
-                  <Plus className="w-3.5 h-3.5 shrink-0" />
-                  <span>自分のテスト(1秒めくり)に追加</span>
+                  <Plus className="w-3.5 h-3.5 shrink-0 stroke-[2.5]" />
+                  <span>1秒めくりに追加</span>
                 </>
               )}
             </button>
@@ -1714,7 +1729,7 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
     );
   };
 
-  // レッスン本文（コア概念・公式・例文・落とし穴）のレンダリング関数
+  // レッスン本文（コア概念・公式・例文・落とし穴）のレンダリング関数（Duolingoスタイル）
   const renderLessonContent = (
     lesson: (typeof LESSONS_DATA)[0],
     stepTab: 'all' | 'concept' | 'rules' | 'examples' | 'pitfall' = 'all'
@@ -1722,59 +1737,72 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
     const firstEx = lesson.examples[0];
     return (
       <div className="space-y-4">
-        {/* ① 本課のコアコンセプト */}
+        {/* ① 本課のコアコンセプト（Duolingo 3Dヒントカード） */}
         {(stepTab === 'all' || stepTab === 'concept') && (
-          <div className="p-3.5 bg-[#FAF7F2]/80 rounded-xl text-[#3A332C] leading-relaxed border-l-3 border-[#B84E34] space-y-1.5">
-            <div className={`font-bold text-[#1B2A38] ${isLargeFont ? 'text-base sm:text-lg' : 'text-sm sm:text-base'}`}>
-              {lesson.concept.title}
+          <div className="p-4 bg-gradient-to-r from-emerald-50 via-teal-50/50 to-white rounded-2xl border-2 border-emerald-200/90 shadow-[0_2.5px_0_#A7F3D0] space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="p-1 rounded-xl bg-[#58CC02] text-white shadow-xs">
+                <Sparkles className="w-4 h-4 stroke-[2.5]" />
+              </span>
+              <div className={`font-black text-emerald-950 ${isLargeFont ? 'text-base sm:text-lg' : 'text-sm sm:text-base'}`}>
+                {lesson.concept.title}
+              </div>
             </div>
-            <p className={`whitespace-pre-line ${isLargeFont ? 'text-base sm:text-lg' : 'text-sm sm:text-base'}`}>
+            <p className={`whitespace-pre-line text-slate-700 leading-relaxed font-medium pl-1 ${isLargeFont ? 'text-base sm:text-lg' : 'text-sm sm:text-base'}`}>
               {lesson.concept.description}
             </p>
           </div>
         )}
 
-        {/* ② 公式・接続ルール */}
+        {/* ② 公式・接続ルール（Duolingo 3Dフォーミュラタイル） */}
         {(stepTab === 'all' || stepTab === 'rules') && (
-          <div className="space-y-2.5">
-            <div className={`font-bold text-[#1B2A38] ${isLargeFont ? 'text-base sm:text-lg' : 'text-sm sm:text-base'}`}>
-              {lesson.rules.title}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="p-1 rounded-xl bg-[#1CB0F6] text-white shadow-xs">
+                <Target className="w-4 h-4 stroke-[2.5]" />
+              </span>
+              <div className={`font-black text-slate-900 ${isLargeFont ? 'text-base sm:text-lg' : 'text-sm sm:text-base'}`}>
+                {lesson.rules.title}
+              </div>
             </div>
             {lesson.rules.items && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {lesson.rules.items.map((rule, rIndex) => (
-                  <div key={rIndex} className="p-3 bg-white/90 rounded-xl border border-[#EDE7DC] space-y-1">
-                    <strong className={`text-[#B84E34] block ${isLargeFont ? 'text-sm sm:text-base' : 'text-xs sm:text-sm'}`}>
+                  <div
+                    key={rIndex}
+                    className="p-3.5 bg-white rounded-2xl border-2 border-stone-200 shadow-[0_2.5px_0_#E5E7EB] space-y-1.5 hover:border-sky-300 transition-colors"
+                  >
+                    <span className="inline-block px-2.5 py-0.5 rounded-lg bg-sky-50 text-sky-800 border border-sky-200 font-black text-xs">
                       {rule.label}
-                    </strong>
-                    <div className={`text-[#423B33] whitespace-pre-line leading-relaxed ${isLargeFont ? 'text-sm sm:text-base' : 'text-xs sm:text-sm'}`}>
+                    </span>
+                    <div className={`text-slate-800 font-bold whitespace-pre-line leading-relaxed ${isLargeFont ? 'text-sm sm:text-base' : 'text-xs sm:text-sm'}`}>
                       {rule.content}
                     </div>
-                    {rule.sub && <div className={`text-[#756D63] ${isLargeFont ? 'text-xs' : 'text-[11px]'}`}>{rule.sub}</div>}
+                    {rule.sub && <div className={`text-stone-500 font-medium ${isLargeFont ? 'text-xs' : 'text-[11px]'}`}>{rule.sub}</div>}
                   </div>
                 ))}
               </div>
             )}
 
             {lesson.rules.table && (
-              <div className="overflow-x-auto rounded-xl border border-[#EDE7DC] bg-white text-xs">
+              <div className="overflow-x-auto rounded-2xl border-2 border-stone-200 bg-white text-xs shadow-[0_2.5px_0_#E5E7EB]">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-[#FAF7F2] border-b border-[#EDE7DC] text-[#756D63]">
+                    <tr className="bg-slate-100 border-b-2 border-stone-200 text-slate-700">
                       {lesson.rules.table.headers.map((h, hIndex) => (
-                        <th key={hIndex} className="py-2 px-2.5 font-bold whitespace-nowrap">
+                        <th key={hIndex} className="py-2.5 px-3 font-black whitespace-nowrap">
                           {h}
                         </th>
                       ))}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#EDE7DC]">
+                  <tbody className="divide-y divide-stone-100">
                     {lesson.rules.table.rows.map((row, rIndex) => (
-                      <tr key={rIndex} className="hover:bg-white/50 transition-colors">
+                      <tr key={rIndex} className="hover:bg-slate-50 transition-colors">
                         {row.map((cell, cIndex) => (
                           <td
                             key={cIndex}
-                            className={`py-2 px-2.5 whitespace-nowrap ${cIndex === 0 ? 'font-bold text-[#1B2A38]' : 'font-mono'}`}
+                            className={`py-2.5 px-3 whitespace-nowrap ${cIndex === 0 ? 'font-black text-slate-900' : 'font-mono text-slate-700'}`}
                           >
                             {cell}
                           </td>
@@ -1788,42 +1816,61 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
           </div>
         )}
 
-        {/* ③ 日常会話のリアル例文3選 */}
+        {/* ③ 日常会話のリアル例文3選（Duolingo インタラクティブ音声スピーチカード） */}
         {(stepTab === 'all' || stepTab === 'examples') && (
           <div className="space-y-3 pt-1">
             <div className="flex items-center justify-between">
-              <div className={`font-bold text-[#B84E34] flex items-center gap-1.5 ${isLargeFont ? 'text-base' : 'text-sm sm:text-base'}`}>
-                <span>③ 日常会話のリアル例文3選</span>
+              <div className={`font-black text-slate-900 flex items-center gap-2 ${isLargeFont ? 'text-base' : 'text-sm sm:text-base'}`}>
+                <span className="p-1 rounded-xl bg-[#58CC02] text-white shadow-xs">
+                  <Volume2 className="w-4 h-4 stroke-[2.5]" />
+                </span>
+                <span>③ 日常会話のリアル例文（タップで発音）</span>
               </div>
               {/* カタカナ発音表示ON/OFFトグル */}
               <button
                 type="button"
                 onClick={togglePronunciation}
-                className={`flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-black transition-all cursor-pointer border-2 shadow-[0_2px_0_#E5E7EB] active:translate-y-0.5 ${
                   showPronunciation
-                    ? 'bg-[#FAF0EC] text-[#B84E34] border border-[#E8D0C7]'
-                    : 'bg-[#EDE7DC] text-[#756D63]'
+                    ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                    : 'bg-white text-stone-600 border-stone-200'
                 }`}
                 title={showPronunciation ? 'カタカナ発音を非表示にする' : 'カタカナ発音を表示する'}
               >
-                {showPronunciation ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                {showPronunciation ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                 <span>{showPronunciation ? '発音ON' : '発音OFF'}</span>
               </button>
             </div>
 
-            <div className="space-y-3 divide-y divide-[#EDE7DC] bg-[#FAF7F2]/60 rounded-xl p-3.5 border border-[#EDE7DC]/70">
+            <div className="space-y-2.5">
               {lesson.examples.map((ex, exIndex) => (
-                <div key={exIndex} className={exIndex > 0 ? 'pt-2.5' : ''}>
-                  <div className={`font-bold text-[#1B2A38] tracking-tight ${isLargeFont ? 'text-lg sm:text-xl' : 'text-base sm:text-lg'}`}>
-                    {ex.ko}
-                  </div>
-                  {showPronunciation && (
-                    <div className={`text-[#8A8075] font-mono mt-0.5 ${isLargeFont ? 'text-sm' : 'text-xs'}`}>
-                      {ex.reading}
+                <div
+                  key={exIndex}
+                  className="p-3.5 sm:p-4 bg-white rounded-2xl border-2 border-stone-200/90 shadow-[0_3px_0_#E5E7EB] flex items-start gap-3 group hover:border-emerald-300 transition-colors"
+                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sound.playTap();
+                      speechService.speak(ex.ko);
+                    }}
+                    className="w-10 h-10 rounded-2xl bg-[#58CC02] hover:bg-[#46A302] active:scale-95 text-white flex items-center justify-center shrink-0 shadow-[0_2.5px_0_#388E00] cursor-pointer transition-all"
+                    title="音声を再生"
+                  >
+                    <Volume2 className="w-5 h-5 stroke-[2.5]" />
+                  </button>
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <div className={`font-black text-slate-900 tracking-tight leading-snug ${isLargeFont ? 'text-lg sm:text-xl' : 'text-base sm:text-lg'}`}>
+                      {ex.ko}
                     </div>
-                  )}
-                  <div className={`text-[#423B33] mt-0.5 ${isLargeFont ? 'text-base' : 'text-sm'}`}>
-                    {ex.ja}
+                    {showPronunciation && (
+                      <div className={`text-stone-500 font-mono text-xs font-semibold ${isLargeFont ? 'text-sm' : 'text-xs'}`}>
+                        [{ex.reading}]
+                      </div>
+                    )}
+                    <div className={`text-slate-700 font-bold leading-normal ${isLargeFont ? 'text-base' : 'text-sm'}`}>
+                      {ex.ja}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -1831,14 +1878,16 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
           </div>
         )}
 
-        {/* ④ 初心者が絶対間違える落とし穴 */}
+        {/* ④ 初心者が絶対間違える落とし穴（Duolingo 3Dコーションカード） */}
         {(stepTab === 'all' || stepTab === 'pitfall') && (
-          <div className="p-3.5 bg-amber-50/70 border-l-3 border-amber-500 rounded-r-xl space-y-1 text-amber-950">
-            <div className={`font-bold flex items-center gap-1.5 text-amber-900 ${isLargeFont ? 'text-base' : 'text-sm'}`}>
-              <span>⚠️ 落とし穴注意:</span>
-              <span>{lesson.pitfall.title}</span>
+          <div className="p-4 bg-amber-50/80 rounded-2xl border-2 border-amber-300 shadow-[0_2.5px_0_#FDE68A] space-y-2">
+            <div className={`font-black flex items-center gap-2 text-amber-950 ${isLargeFont ? 'text-base' : 'text-sm'}`}>
+              <span className="p-1 rounded-xl bg-amber-500 text-white shadow-xs">
+                <AlertCircle className="w-4 h-4 stroke-[2.5]" />
+              </span>
+              <span>落とし穴注意: {lesson.pitfall.title}</span>
             </div>
-            <p className={`leading-relaxed ${isLargeFont ? 'text-base' : 'text-sm'}`}>
+            <p className={`leading-relaxed text-amber-950/90 font-medium pl-1 ${isLargeFont ? 'text-base' : 'text-sm'}`}>
               {lesson.pitfall.content}
             </p>
           </div>
@@ -1850,10 +1899,10 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
             <button
               type="button"
               onClick={() => scrollTo(lesson.refLink!.id, lesson.refLink!.tab)}
-              className="inline-flex items-center gap-1 text-xs text-[#B84E34] hover:underline font-bold cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-50 text-sky-800 border border-sky-200 hover:bg-sky-100 text-xs font-black transition-colors cursor-pointer"
             >
               <span>🔗 {lesson.refLink.label}</span>
-              <ExternalLink className="w-3 h-3" />
+              <ExternalLink className="w-3.5 h-3.5" />
             </button>
           </div>
         )}
@@ -1874,10 +1923,10 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] text-[#1B2A38] font-sans selection:bg-[#F0D5CD] selection:text-[#B84E34] pb-28">
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 font-sans selection:bg-emerald-100 selection:text-emerald-900 pb-28">
       {/* ===================== 上部固定ツールバー（極薄1段・スクロール連動自動収納） ===================== */}
       <header
-        className={`sticky top-[56px] sm:top-[64px] z-30 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#E8E2D5] px-2.5 sm:px-6 py-2 transition-transform duration-300 transform-gpu ${
+        className={`sticky top-[56px] sm:top-[64px] z-30 bg-white/95 backdrop-blur-md border-b-2 border-stone-200/90 shadow-2xs px-2.5 sm:px-6 py-2 transition-transform duration-300 transform-gpu ${
           showBars ? 'translate-y-0' : '-translate-y-full'
         }`}
         style={{
@@ -1893,29 +1942,28 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
               type="button"
               onClick={onBackToNote}
               title="ホームへ戻る"
-              className="flex items-center gap-1 sm:gap-1.5 px-2.5 py-1 rounded-xl border border-[#E2DDD2] bg-white hover:bg-[#FAF7F2] text-xs font-bold text-[#1B2A38] transition-all shadow-2xs cursor-pointer shrink-0 active:scale-95 h-8"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border-2 border-stone-200 bg-white hover:bg-stone-50 text-xs font-black text-stone-700 transition-all shadow-[0_2px_0_#E5E7EB] cursor-pointer shrink-0 active:translate-y-0.5 h-9"
             >
-              <ArrowLeft className="w-3.5 h-3.5 text-[#B84E34]" />
-              <span className="hidden sm:inline">ホームへ戻る</span>
-              <span className="sm:hidden text-xs">ホーム</span>
+              <ArrowLeft className="w-3.5 h-3.5 text-stone-600 stroke-[2.5]" />
+              <span className="hidden sm:inline">戻る</span>
             </button>
           )}
 
-          {/* リアルタイムインデックス検索バー（十分な横幅を確保） */}
-          <div className="relative flex-1 min-w-[120px] max-w-sm sm:max-w-md">
-            <Search className="w-3.5 h-3.5 text-[#948C82] absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          {/* リアルタイムインデックス検索バー */}
+          <div className="relative flex-1 min-w-[120px]">
+            <Search className="w-3.5 h-3.5 text-stone-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="教科書・辞書・会話を検索..."
-              className="w-full pl-7 pr-7 py-1 rounded-xl bg-white border border-[#E2DDD2] focus:border-[#B84E34] focus:outline-none text-xs text-[#1B2A38] placeholder-[#948C82] transition-colors h-8"
+              placeholder="教科書・文法・表現を検索..."
+              className="w-full pl-8 pr-7 py-1.5 rounded-xl bg-white border-2 border-stone-200/90 focus:border-emerald-400 focus:outline-none text-xs text-stone-900 placeholder-stone-400 transition-colors h-9"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-[#948C82] hover:text-[#1B2A38] p-0.5 rounded cursor-pointer"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 p-0.5 rounded cursor-pointer"
                 title="検索をクリア"
               >
                 <X className="w-3.5 h-3.5" />
@@ -1965,19 +2013,48 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
             )}
           </div>
 
-          {/* 🧭 学習メニュー・進捗詳細 統合ツールボタン（1つのツールボタンに集約） */}
+          {/* 難易度ピル（初級/中級/上級）Duolingo 3Dスタイル */}
+          <div className="inline-flex p-0.5 bg-stone-200/80 rounded-xl shrink-0 h-9 items-center">
+            {(['beginner', 'intermediate', 'advanced'] as const).map((mode) => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => changeLevelMode(mode)}
+                className={`px-2 sm:px-2.5 py-1 rounded-lg text-[11px] font-black transition-all cursor-pointer ${
+                  levelMode === mode
+                    ? mode === 'beginner'
+                      ? 'bg-[#58CC02] text-white shadow-[0_2px_0_#388E00]'
+                      : mode === 'intermediate'
+                      ? 'bg-[#1CB0F6] text-white shadow-[0_2px_0_#1899D6]'
+                      : 'bg-[#FF9600] text-white shadow-[0_2px_0_#CC7A00]'
+                    : 'text-stone-600 hover:text-stone-900'
+                }`}
+                title={
+                  mode === 'beginner'
+                    ? '初級：ハングル基礎・基本文法80選'
+                    : mode === 'intermediate'
+                    ? '中級：複文・慣用句・スラング'
+                    : '上級：四字熟語・時事論述'
+                }
+              >
+                {mode === 'beginner' ? '初級' : mode === 'intermediate' ? '中級' : '上級'}
+              </button>
+            ))}
+          </div>
+
+          {/* 🧭 学習メニュー・進捗詳細 統合ツールボタン */}
           <button
             type="button"
             onClick={() => setShowDashboard(!showDashboard)}
-            className={`flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-xl border transition-all cursor-pointer shrink-0 text-xs font-bold h-8 ${
+            className={`flex items-center gap-1 px-2.5 rounded-xl border-2 transition-all cursor-pointer shrink-0 text-xs font-black h-9 ${
               showDashboard
-                ? 'bg-[#B84E34] text-white border-[#B84E34] shadow-xs'
-                : 'bg-white text-[#756D63] hover:text-[#1B2A38] border-[#E2DDD2]'
+                ? 'bg-stone-900 text-white border-stone-900 shadow-[0_2px_0_#000]'
+                : 'bg-white text-stone-700 hover:bg-stone-50 border-stone-200 shadow-[0_2px_0_#E5E7EB]'
             }`}
-            title="学習メニュー・ツール（章選択・進捗・ミッション・文字サイズ）"
+            title="進捗詳細・章切り替え"
           >
-            <Compass className={`w-3.5 h-3.5 ${showDashboard ? 'text-white' : 'text-[#B84E34]'}`} />
-            <span>進捗詳細</span>
+            <Compass className={`w-3.5 h-3.5 ${showDashboard ? 'text-white' : 'text-amber-500'}`} />
+            <span className="hidden sm:inline">進捗</span>
             {(progressStats.totalCleared > 0 || activeMissionDetails.length > 0) && (
               <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ml-0.5 ${
                 showDashboard ? 'bg-white/20 text-white' : 'bg-emerald-50 text-emerald-800 border border-emerald-200'
@@ -1987,56 +2064,6 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
             )}
             {showDashboard ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
           </button>
-        </div>
-
-        {/* レベル切り替えタブ（🔰 初級 | 🌿 中級 | 👑 上級） */}
-        <div className="max-w-4xl mx-auto flex items-center justify-between gap-1.5 mt-1.5 pt-1.5 border-t border-[#E8E2D5]/70">
-          <div className="flex items-center gap-1.5 min-w-0">
-            <span className="text-[10px] font-bold text-[#8A8075] shrink-0">難易度:</span>
-            <div className="inline-flex p-0.5 bg-[#EAE4D9]/80 rounded-lg shrink-0">
-              <button
-                type="button"
-                onClick={() => changeLevelMode('beginner')}
-                className={`px-2.5 py-0.5 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
-                  levelMode === 'beginner'
-                    ? 'bg-white text-emerald-800 shadow-2xs font-extrabold'
-                    : 'text-[#6B635B] hover:text-[#1B2A38]'
-                }`}
-                title="初級モード：第1〜30課・基本文法80選・日常会話（中級以上を隠す）"
-              >
-                初級
-              </button>
-              <button
-                type="button"
-                onClick={() => changeLevelMode('intermediate')}
-                className={`px-2.5 py-0.5 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
-                  levelMode === 'intermediate'
-                    ? 'bg-[#1E3A5F] text-white shadow-2xs font-extrabold'
-                    : 'text-[#6B635B] hover:text-[#1B2A38]'
-                }`}
-                title="中級モード：第4章・中級文法100選・身体慣用句40選・スラング60選"
-              >
-                中級
-              </button>
-              <button
-                type="button"
-                onClick={() => changeLevelMode('advanced')}
-                className={`px-2.5 py-0.5 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
-                  levelMode === 'advanced'
-                    ? 'bg-gradient-to-r from-amber-600 to-amber-700 text-white shadow-2xs font-extrabold'
-                    : 'text-[#6B635B] hover:text-[#1B2A38]'
-                }`}
-                title="上級モード：四字熟語40選・時事論述20選・TOPIK 5-6級高級文法"
-              >
-                上級
-              </button>
-            </div>
-          </div>
-          <div className="text-[10px] text-[#8A8075] truncate hidden sm:block">
-            {levelMode === 'beginner' && 'ハングル基礎・日常基本文法（1-2級）'}
-            {levelMode === 'intermediate' && '実践複文・身体慣用句・スラング（3-4級）'}
-            {levelMode === 'advanced' && '時事論述・四字熟語・TOPIK高級（5-6級）'}
-          </div>
         </div>
       </header>
 
@@ -2132,22 +2159,22 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
               </div>
             </div>
 
-            {/* ② 📚 教科書 章選択 ＆ すべて開く/閉じる */}
+            {/* ② 📚 教科書 章選択 ＆ すべて開く/閉じる（Duolingo 3Dスタイル） */}
             {activeTab === 'textbook' && (
-              <div className="bg-[#FAF7F2] p-2.5 sm:p-3 rounded-2xl border border-stone-200 space-y-2 shadow-2xs">
+              <div className="bg-white p-3 sm:p-4 rounded-3xl border-2 border-stone-200/90 space-y-2.5 shadow-[0_3px_0_#E5E7EB]">
                 {/* ヘッダー行: 章を選択タイトル + すべて開く/閉じる */}
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1.5">
-                    <BookOpen className="w-4 h-4 text-[#58CC02]" />
-                    <span className="text-xs font-black text-stone-800">章を選択</span>
-                    <span className="text-[10px] font-bold text-stone-600 bg-white px-2 py-0.5 rounded-full border border-stone-200">
+                    <BookOpen className="w-4 h-4 text-[#58CC02] stroke-[2.5]" />
+                    <span className="text-xs font-black text-slate-800">章を選択</span>
+                    <span className="text-[10px] font-black text-slate-600 bg-stone-100 px-2 py-0.5 rounded-full border border-stone-200">
                       {lessonRange === 'all' ? `全${LESSONS_DATA.length}課` : `${lessonRange}課`}
                     </span>
                   </div>
                   <button
                     type="button"
                     onClick={handleToggleExpandAll}
-                    className="px-2.5 py-1 rounded-xl text-xs font-black text-emerald-700 hover:bg-emerald-50 cursor-pointer whitespace-nowrap border border-emerald-200 bg-white shadow-2xs"
+                    className="px-2.5 py-1 rounded-xl text-xs font-black text-emerald-700 hover:bg-emerald-50 cursor-pointer whitespace-nowrap border-2 border-emerald-200 bg-white shadow-[0_2px_0_#A7F3D0] active:translate-y-0.5"
                   >
                     {expandAllLessons ? 'すべて閉じる' : 'すべて開く'}
                   </button>
@@ -2161,7 +2188,7 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                     onClick={() => setLessonRange('all')}
                     className={`px-3 py-1.5 rounded-xl text-xs font-black whitespace-nowrap transition-all cursor-pointer border-2 flex items-center gap-1 shrink-0 ${
                       lessonRange === 'all'
-                        ? 'bg-[#1B2A38] text-white border-[#1B2A38] shadow-[0_2px_0_#0F172A]'
+                        ? 'bg-slate-900 text-white border-slate-900 shadow-[0_2.5px_0_#0F172A] -translate-y-0.5'
                         : 'bg-white text-stone-600 border-stone-200 hover:text-stone-900 shadow-[0_2px_0_#E5E7EB]'
                     }`}
                   >
@@ -2187,10 +2214,10 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                           className={`px-3 py-1.5 rounded-xl text-xs font-black whitespace-nowrap transition-all cursor-pointer border-2 flex items-center gap-1.5 shrink-0 ${
                             isCurrent
                               ? isStage5
-                                ? 'bg-[#FF9600] text-white border-[#FF9600] shadow-[0_2px_0_#CC7A00]'
+                                ? 'bg-[#FF9600] text-white border-[#FF9600] shadow-[0_2px_0_#CC7A00] -translate-y-0.5'
                                 : isStage4
-                                ? 'bg-[#CE82FF] text-white border-[#CE82FF] shadow-[0_2px_0_#A855F7]'
-                                : 'bg-[#58CC02] text-white border-[#58CC02] shadow-[0_2px_0_#388E00]'
+                                ? 'bg-[#CE82FF] text-white border-[#CE82FF] shadow-[0_2px_0_#A855F7] -translate-y-0.5'
+                                : 'bg-[#58CC02] text-white border-[#58CC02] shadow-[0_2px_0_#388E00] -translate-y-0.5'
                               : 'bg-white text-stone-700 border-stone-200 hover:border-emerald-300 shadow-[0_2px_0_#E5E7EB]'
                           }`}
                         >
@@ -2216,20 +2243,20 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                   const currentStage = TEXTBOOK_STAGES.find((s) => s.range === lessonRange);
                   if (lessonRange === 'all') {
                     return (
-                      <div className="bg-white/80 px-2 py-1 rounded-lg border border-[#EDE7DC] text-[10px] text-[#756D63] flex items-center justify-between">
-                        <span className="font-bold text-[#1B2A38]">全35課一覧</span>
-                        <span className="truncate">入門ハングルから中級複文・使役受身まで完全網羅</span>
+                      <div className="bg-stone-50 px-2.5 py-1.5 rounded-xl border border-stone-200 text-xs text-stone-600 flex items-center justify-between">
+                        <span className="font-black text-slate-900">全課一覧</span>
+                        <span className="truncate text-[11px]">入門ハングルから中級複文・使役受身まで完全網羅</span>
                       </div>
                     );
                   }
                   if (currentStage) {
                     const isStage4 = currentStage.id === 'stage-4';
                     return (
-                      <div className="bg-white/80 px-2 py-1 rounded-lg border border-[#EDE7DC] text-[10px] flex items-center justify-between gap-1">
-                        <span className={`font-bold shrink-0 ${isStage4 ? 'text-[#1E3A5F]' : 'text-[#B84E34]'}`}>
+                      <div className="bg-stone-50 px-2.5 py-1.5 rounded-xl border border-stone-200 text-xs flex items-center justify-between gap-2">
+                        <span className={`font-black shrink-0 ${isStage4 ? 'text-purple-700' : 'text-emerald-700'}`}>
                           {currentStage.title}
                         </span>
-                        <span className="text-[#756D63] truncate">
+                        <span className="text-stone-500 truncate text-[11px]">
                           {currentStage.desc}
                         </span>
                       </div>
@@ -2616,12 +2643,12 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                             </div>
 
                             {/* タイトルとサブタイトル */}
-                            <div className="min-w-0 flex-1 space-y-0.5">
+                            <div className="min-w-0 flex-1 space-y-1">
                               <div className="flex items-center gap-2 flex-wrap">
-                                <h2 className="font-black text-[#1B2A38] group-hover:text-emerald-700 transition-colors text-sm sm:text-base leading-snug truncate">
+                                <h2 className="font-black text-[#1B2A38] group-hover:text-emerald-700 transition-colors text-sm sm:text-base leading-snug">
                                   {lesson.title}
                                 </h2>
-                                <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded-md border ${
+                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${
                                   lesson.number <= 30
                                     ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
                                     : lesson.number <= 35
@@ -2631,7 +2658,7 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                                   {lesson.number <= 30 ? '初級' : lesson.number <= 35 ? '中級' : '上級'}
                                 </span>
                               </div>
-                              <p className="text-xs text-stone-500 font-medium truncate">
+                              <p className="text-xs text-stone-600 font-medium leading-relaxed">
                                 {lesson.subtitle}
                               </p>
                             </div>
@@ -2707,44 +2734,57 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
         {/* ------------------------------------------------------------- */}
         {activeTab === 'reference' && (
           <div className="space-y-2.5">
-            {/* 💡 参考書 カテゴリーバー（収納式：タップで展開/折りたたみ） */}
-            <div className="bg-white border border-[#E8E2D5] rounded-xl shadow-2xs overflow-hidden transition-all">
-              {/* 普段表示される極薄1行バー */}
-              <div className="p-2 sm:px-3 flex items-center justify-between gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowRefNav(!showRefNav)}
-                  aria-expanded={showRefNav}
-                  className="flex items-center gap-1.5 text-xs font-bold text-[#1B2A38] hover:text-[#B84E34] transition-colors cursor-pointer min-w-0"
-                  title="タップしてカテゴリーやサブタブを切り替える"
-                >
-                  <span className="text-[10px] px-1.5 py-0.2 rounded font-bold bg-[#FAF0EC] text-[#B84E34] shrink-0">
-                    {refSubTab === 'pairs' ? '使い分け' : refSubTab === 'qa' ? 'Q&A' : refSubTab === 'columns' ? 'コラム' : refSubTab === 'hanja' ? '四字熟語' : '論述・統計'}
-                  </span>
-                  <span className="truncate text-xs font-serif">
-                    {refSubTab === 'pairs'
-                      ? `使い分け · ${CONFUSING_PARTS.find((p) => p.id === confusingCategory)?.label || 'すべて'}`
-                      : refSubTab === 'qa'
-                      ? `よくある質問 (${QA_DATA.length}選)`
-                      : refSubTab === 'columns'
-                      ? `コラム講義 (${COLUMNS_DATA.length}選)`
-                      : refSubTab === 'hanja'
-                      ? `四字熟語 (${HANJA_IDIOMS_DATA.length}選)`
-                      : `時事論述・統計表現 (${ADVANCED_WRITING_DATA.length}選)`}
-                  </span>
-                  {showRefNav ? (
-                    <ChevronUp className="w-3.5 h-3.5 text-[#B84E34] shrink-0" />
-                  ) : (
-                    <ChevronDown className="w-3.5 h-3.5 text-[#948C82] shrink-0" />
-                  )}
-                </button>
+            {/* 💡 参考書 カテゴリーバー（Duolingo 3Dキャンディタブ） */}
+            <div className="bg-white border-2 border-stone-200/90 rounded-3xl p-2.5 sm:p-3 shadow-[0_3px_0_#E5E7EB] space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                {/* サブタブ切り替え */}
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 flex-1">
+                  {[
+                    { id: 'pairs' as const, label: `使い分け (${CONFUSING_PAIRS_DATA.length})`, icon: '⚖️', color: '#FF9600', shadow: '#CC7A00' },
+                    { id: 'qa' as const, label: `疑問Q&A (${QA_DATA.length})`, icon: '❓', color: '#1CB0F6', shadow: '#1899D6' },
+                    { id: 'columns' as const, label: `深掘りコラム (${COLUMNS_DATA.length})`, icon: '📰', color: '#58CC02', shadow: '#388E00' },
+                    ...(levelMode === 'advanced' ? [
+                      { id: 'hanja' as const, label: `四字熟語 (${HANJA_IDIOMS_DATA.length})`, icon: '👑', color: '#CE82FF', shadow: '#A855F7' },
+                      { id: 'writing' as const, label: `時事論述 (${ADVANCED_WRITING_DATA.length})`, icon: '✍️', color: '#FF4B4B', shadow: '#D32F2F' },
+                    ] : []),
+                  ].map((tab) => {
+                    const isActive = refSubTab === tab.id;
+                    return (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => {
+                          sound.playTap();
+                          setRefSubTab(tab.id);
+                        }}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-black whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
+                          isActive
+                            ? 'text-white -translate-y-0.5'
+                            : 'bg-white border-2 border-stone-200 text-stone-600 hover:bg-stone-50 shadow-[0_2px_0_#E5E7EB]'
+                        }`}
+                        style={
+                          isActive
+                            ? {
+                                backgroundColor: tab.color,
+                                boxShadow: `0 2.5px 0 ${tab.shadow}`,
+                              }
+                            : undefined
+                        }
+                      >
+                        <span>{tab.icon}</span>
+                        <span>{tab.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
 
-                <div className="flex items-center gap-1 shrink-0">
+                {/* すべて開く/閉じる */}
+                <div className="shrink-0">
                   {refSubTab === 'pairs' && (
                     <button
                       type="button"
                       onClick={handleToggleExpandAllPairs}
-                      className="px-2 py-0.5 rounded-lg text-xs font-bold text-[#756D63] hover:text-[#B84E34] cursor-pointer whitespace-nowrap"
+                      className="px-2.5 py-1 rounded-xl text-xs font-black text-emerald-700 hover:bg-emerald-50 cursor-pointer whitespace-nowrap border-2 border-emerald-200 bg-white shadow-[0_2px_0_#A7F3D0] active:translate-y-0.5"
                     >
                       {expandAllPairs ? 'すべて閉じる' : 'すべて開く'}
                     </button>
@@ -2759,7 +2799,7 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                         HANJA_IDIOMS_DATA.forEach((h) => { m[h.id] = next; });
                         setOpenHanjas(m);
                       }}
-                      className="px-2 py-0.5 rounded-lg text-xs font-bold text-[#756D63] hover:text-[#B84E34] cursor-pointer whitespace-nowrap"
+                      className="px-2.5 py-1 rounded-xl text-xs font-black text-emerald-700 hover:bg-emerald-50 cursor-pointer whitespace-nowrap border-2 border-emerald-200 bg-white shadow-[0_2px_0_#A7F3D0] active:translate-y-0.5"
                     >
                       {expandAllHanjas ? 'すべて閉じる' : 'すべて開く'}
                     </button>
@@ -2774,7 +2814,7 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                         ADVANCED_WRITING_DATA.forEach((w) => { m[w.id] = next; });
                         setOpenWritings(m);
                       }}
-                      className="px-2 py-0.5 rounded-lg text-xs font-bold text-[#756D63] hover:text-[#B84E34] cursor-pointer whitespace-nowrap"
+                      className="px-2.5 py-1 rounded-xl text-xs font-black text-emerald-700 hover:bg-emerald-50 cursor-pointer whitespace-nowrap border-2 border-emerald-200 bg-white shadow-[0_2px_0_#A7F3D0] active:translate-y-0.5"
                     >
                       {expandAllWritings ? 'すべて閉じる' : 'すべて開く'}
                     </button>
@@ -2782,331 +2822,263 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                 </div>
               </div>
 
-              {/* タップ時のみ展開される収納エリア（サブタブ3種または5種 ＆ 品詞ピル） */}
-              <div className={`${showRefNav ? 'block border-t border-[#F0EBE1] p-2 bg-[#FAF7F2]/60 space-y-2' : 'hidden'}`}>
-                {/* 分割セグメントサブタブ */}
-                <div className={`grid ${levelMode === 'advanced' ? 'grid-cols-2 sm:grid-cols-5' : 'grid-cols-3'} gap-1 bg-[#F2ECE1] p-1 rounded-xl text-[11px] sm:text-xs font-bold`}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setRefSubTab('pairs');
-                      setShowRefNav(false);
-                    }}
-                    className={`py-2 px-1 rounded-lg transition-all cursor-pointer text-center whitespace-nowrap tracking-tighter sm:tracking-normal ${
-                      refSubTab === 'pairs'
-                        ? 'bg-white text-[#B84E34] shadow-xs'
-                        : 'text-[#6B635B] hover:text-[#1B2A38]'
-                    }`}
-                  >
-                    💡 使い分け ({CONFUSING_PAIRS_DATA.length}選)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setRefSubTab('qa');
-                      setShowRefNav(false);
-                    }}
-                    className={`py-2 px-1 rounded-lg transition-all cursor-pointer text-center whitespace-nowrap tracking-tighter sm:tracking-normal ${
-                      refSubTab === 'qa'
-                        ? 'bg-white text-[#B84E34] shadow-xs'
-                        : 'text-[#6B635B] hover:text-[#1B2A38]'
-                    }`}
-                  >
-                    ❓ 疑問Q&A ({QA_DATA.length}選)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setRefSubTab('columns');
-                      setShowRefNav(false);
-                    }}
-                    className={`py-2 px-1 rounded-lg transition-all cursor-pointer text-center whitespace-nowrap tracking-tighter sm:tracking-normal ${
-                      refSubTab === 'columns'
-                        ? 'bg-white text-[#B84E34] shadow-xs'
-                        : 'text-[#6B635B] hover:text-[#1B2A38]'
-                    }`}
-                  >
-                    📰 特別コラム ({COLUMNS_DATA.length}選)
-                  </button>
-                  {levelMode === 'advanced' && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setRefSubTab('hanja');
-                        setShowRefNav(false);
-                      }}
-                      className={`py-2 px-1 rounded-lg transition-all cursor-pointer text-center whitespace-nowrap tracking-tighter sm:tracking-normal flex items-center justify-center gap-1 ${
-                        refSubTab === 'hanja'
-                          ? 'bg-gradient-to-r from-amber-600 to-amber-700 text-white shadow-xs'
-                          : 'text-[#6B635B] hover:text-[#1B2A38]'
-                      }`}
-                    >
-                      <span className="text-[9px] px-1 py-0.2 rounded font-bold bg-amber-100 text-amber-900">上級</span>
-                      <span>👑 四字熟語 ({HANJA_IDIOMS_DATA.length}選)</span>
-                    </button>
-                  )}
-                  {levelMode === 'advanced' && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setRefSubTab('writing');
-                        setShowRefNav(false);
-                      }}
-                      className={`py-2 px-1 rounded-lg transition-all cursor-pointer text-center whitespace-nowrap tracking-tighter sm:tracking-normal flex items-center justify-center gap-1 ${
-                        refSubTab === 'writing'
-                          ? 'bg-gradient-to-r from-amber-600 to-amber-700 text-white shadow-xs'
-                          : 'text-[#6B635B] hover:text-[#1B2A38]'
-                      }`}
-                    >
-                      <span className="text-[9px] px-1 py-0.2 rounded font-bold bg-amber-100 text-amber-900">上級</span>
-                      <span>✍️ 時事論述・統計 ({ADVANCED_WRITING_DATA.length}選)</span>
-                    </button>
-                  )}
+              {/* 品詞ピル（使い分けタブの場合） */}
+              {refSubTab === 'pairs' && (
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1 border-t border-stone-100">
+                  <span className="text-[11px] font-black text-stone-500 shrink-0">品詞絞り込み:</span>
+                  {CONFUSING_PARTS.map((p) => {
+                    const isCurrent = confusingCategory === p.id;
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => {
+                          sound.playTap();
+                          setConfusingCategory(p.id);
+                        }}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-black transition-all cursor-pointer whitespace-nowrap border ${
+                          isCurrent
+                            ? 'bg-[#FF9600] text-white border-[#FF9600] shadow-[0_2px_0_#CC7A00] -translate-y-0.5'
+                            : 'bg-white text-stone-600 border-stone-200 hover:bg-stone-50 shadow-[0_1.5px_0_#E5E7EB]'
+                        }`}
+                      >
+                        {p.label}
+                      </button>
+                    );
+                  })}
                 </div>
-
-                {/* 品詞ピル（使い分けタブの場合） */}
-                {refSubTab === 'pairs' && (
-                  <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-0.5">
-                    <span className="text-[10px] font-bold text-[#8A8075] shrink-0">品詞絞り込み:</span>
-                    {CONFUSING_PARTS.map((p) => {
-                      const isCurrent = confusingCategory === p.id;
-                      return (
-                        <button
-                          key={p.id}
-                          type="button"
-                          onClick={() => {
-                            setConfusingCategory(p.id);
-                            setShowRefNav(false);
-                          }}
-                          className={`px-2 py-0.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-                            isCurrent
-                              ? 'bg-[#B84E34] text-white shadow-xs'
-                              : 'bg-white text-[#756D63] hover:text-[#1B2A38] border border-[#E8E2D5]'
-                          }`}
-                        >
-                          {p.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
+              )}
             </div>
 
             {/* ① 💡 似ていて紛らわしい表現・単語 60選 */}
             {refSubTab === 'pairs' && (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {/* 検索バー */}
                 <div className="relative">
-                  <Search className="w-3.5 h-3.5 text-[#948C82] absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <Search className="w-3.5 h-3.5 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
                     type="text"
                     value={confusingSearch}
                     onChange={(e) => setConfusingSearch(e.target.value)}
                     placeholder="表現・テーマ・単語を検索..."
-                    className="w-full pl-8 pr-7 py-1.5 rounded-xl bg-white border border-[#E2DDD2] focus:border-[#B84E34] focus:outline-none text-xs text-[#1B2A38] placeholder-[#948C82] transition-colors"
+                    className="w-full pl-9 pr-8 py-2 rounded-2xl bg-white border-2 border-stone-200 focus:border-amber-400 focus:outline-none text-xs text-slate-900 placeholder-stone-400 transition-colors shadow-2xs"
                   />
                   {confusingSearch && (
                     <button
                       type="button"
                       onClick={() => setConfusingSearch('')}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-[#948C82] hover:text-[#1B2A38] p-0.5 cursor-pointer"
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 p-0.5 cursor-pointer"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
                   )}
                 </div>
 
-              {/* 36ペア 授業ノート風の1枚シートリスト */}
-              <div className="bg-white border border-[#E8E2D5] rounded-2xl shadow-2xs divide-y divide-[#F0EBE1] overflow-hidden">
-                {filteredConfusingPairs.map((pair) => {
-                  const isOpen = !!openPairs[pair.id];
-                  return (
-                    <div
-                      key={pair.id}
-                      id={pair.id}
-                      className="scroll-mt-28 transition-all"
-                    >
-                      {/* シンプルな2行リスト行 */}
+                {/* 36ペア Duolingo 3Dカードリスト */}
+                <div className="space-y-3">
+                  {filteredConfusingPairs.map((pair) => {
+                    const isOpen = !!openPairs[pair.id];
+                    return (
                       <div
-                        onClick={() => togglePair(pair.id)}
-                        className="p-3 sm:px-4 flex items-center justify-between gap-2 cursor-pointer select-none hover:bg-[#FAF7F2]/60 transition-colors group"
+                        key={pair.id}
+                        id={pair.id}
+                        className="scroll-mt-28 bg-white border-2 border-stone-200/90 hover:border-amber-300 rounded-2xl sm:rounded-3xl shadow-[0_3px_0_#E5E7EB] overflow-hidden transition-all"
                       >
-                        <div className="flex items-baseline gap-2 min-w-0 flex-1">
-                          <span className="text-[11px] font-sans font-bold text-[#948C82] w-5 text-right shrink-0">
-                            {pair.no}.
-                          </span>
-                          <div className="min-w-0 flex-1 space-y-0.5">
-                            <h3 className={`font-bold text-[#1B2A38] group-hover:text-[#B84E34] leading-snug ${isLargeFont ? 'text-base sm:text-lg' : 'text-sm sm:text-base'}`}>
-                              {pair.pairTitle}
-                            </h3>
-                            <div className="text-xs text-[#6B635B] font-sans truncate">
-                              {pair.theme}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-0.5 shrink-0">
-                          {renderItemStatusBadgeAndPin(pair.id)}
-                          <span className="text-[#948C82] p-1">
-                            {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* アコーディオン開いた詳細エリア */}
-                      {isOpen && (
-                        <div className="p-4 sm:p-5 pt-3 border-t border-[#F2ECE1] space-y-4 bg-white">
-                          {/* ① 🎯 核心ニュアンスの違い */}
-                          <div className="p-3 sm:p-3.5 bg-[#FAF7F2] rounded-xl border border-[#E8E2D5] space-y-1">
-                            <div className="flex items-center gap-1.5 text-xs font-bold text-[#B84E34]">
-                              <span>🎯 核心ニュアンスの違い</span>
-                            </div>
-                            <p className={`text-[#3A332C] leading-relaxed ${isLargeFont ? 'text-base' : 'text-xs sm:text-sm'}`}>
-                              {pair.coreDifference}
-                            </p>
-                          </div>
-
-                          {/* ② ⚠️ 日本人が陥る罠 */}
-                          <div className="p-3 sm:p-3.5 bg-[#FFF9F5] rounded-xl border border-[#F2D7CE] space-y-1">
-                            <div className="flex items-center gap-1.5 text-xs font-bold text-[#C04828]">
-                              <span>⚠️ 日本人が陥る罠・勘違い</span>
-                            </div>
-                            <p className={`text-[#5A3A31] leading-relaxed ${isLargeFont ? 'text-sm sm:text-base' : 'text-xs'}`}>
-                              {pair.trap}
-                            </p>
-                          </div>
-
-                          {/* ③ 例文比較（A vs B） */}
-                          <div className="space-y-2">
-                            <span className="text-xs font-bold text-[#1B2A38] block">
-                              📝 リアル使い分け例文
+                        {/* ヘッダー行 */}
+                        <div
+                          onClick={() => {
+                            sound.playTap();
+                            togglePair(pair.id);
+                          }}
+                          className="p-3.5 sm:px-4 flex items-center justify-between gap-3 cursor-pointer select-none hover:bg-stone-50/80 transition-colors group"
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                            <span className="w-8 h-8 rounded-xl bg-amber-100 text-amber-900 border border-amber-300 flex items-center justify-center font-black text-xs shrink-0 shadow-2xs">
+                              {pair.no}
                             </span>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-                              {/* 例文A */}
-                              <div className="p-3 bg-[#FAF7F2] rounded-xl border border-[#E8E2D5] space-y-1.5 flex flex-col justify-between">
-                                <div>
-                                  <div className="flex items-center justify-between gap-2">
-                                    <span className="text-[10px] font-bold text-[#B84E34] uppercase tracking-wider">
-                                      表現 A
-                                    </span>
-                                    <button
-                                      type="button"
-                                      onClick={() => speechService.speak(pair.exA.ko)}
-                                      className="p-1 rounded-md text-[#B84E34] hover:bg-[#FAF0EC] transition-colors cursor-pointer"
-                                      title="発音を聞く"
-                                    >
-                                      <Volume2 className="w-3.5 h-3.5" />
-                                    </button>
-                                  </div>
-                                  <div className={`font-bold text-[#1B2A38] ${isLargeFont ? 'text-base sm:text-lg' : 'text-sm sm:text-base'}`}>
-                                    {pair.exA.ko}
-                                  </div>
-                                  {showPronunciation && pair.exA.reading && (
-                                    <div className="text-[11px] text-[#8A8075] font-mono">
-                                      [{pair.exA.reading}]
-                                    </div>
-                                  )}
-                                </div>
-                                <div className={`text-[#544D45] pt-1 border-t border-[#E8E2D5]/60 ${isLargeFont ? 'text-sm' : 'text-xs'}`}>
-                                  {pair.exA.ja}
-                                </div>
-                              </div>
-
-                              {/* 例文B */}
-                              <div className="p-3 bg-[#FAF7F2] rounded-xl border border-[#E8E2D5] space-y-1.5 flex flex-col justify-between">
-                                <div>
-                                  <div className="flex items-center justify-between gap-2">
-                                    <span className="text-[10px] font-bold text-[#1B2A38] uppercase tracking-wider">
-                                      表現 B
-                                    </span>
-                                    <button
-                                      type="button"
-                                      onClick={() => speechService.speak(pair.exB.ko)}
-                                      className="p-1 rounded-md text-[#B84E34] hover:bg-[#FAF0EC] transition-colors cursor-pointer"
-                                      title="発音を聞く"
-                                    >
-                                      <Volume2 className="w-3.5 h-3.5" />
-                                    </button>
-                                  </div>
-                                  <div className={`font-bold text-[#1B2A38] ${isLargeFont ? 'text-base sm:text-lg' : 'text-sm sm:text-base'}`}>
-                                    {pair.exB.ko}
-                                  </div>
-                                  {showPronunciation && pair.exB.reading && (
-                                    <div className="text-[11px] text-[#8A8075] font-mono">
-                                      [{pair.exB.reading}]
-                                    </div>
-                                  )}
-                                </div>
-                                <div className={`text-[#544D45] pt-1 border-t border-[#E8E2D5]/60 ${isLargeFont ? 'text-sm' : 'text-xs'}`}>
-                                  {pair.exB.ja}
-                                </div>
+                            <div className="min-w-0 flex-1 space-y-0.5">
+                              <h3 className={`font-black text-slate-900 group-hover:text-amber-700 leading-snug ${isLargeFont ? 'text-base sm:text-lg' : 'text-sm sm:text-base'}`}>
+                                {pair.pairTitle}
+                              </h3>
+                              <div className="text-xs text-stone-500 font-bold truncate">
+                                {pair.theme}
                               </div>
                             </div>
                           </div>
 
-                          {/* ④ ❌ よくあるNG例 */}
-                          <div className="p-3 sm:p-3.5 bg-[#FFF5F5] rounded-xl border border-[#F8D2D2] space-y-1.5">
-                            <div className="flex items-center gap-1.5 text-xs font-bold text-[#D32F2F]">
-                              <span>❌ やってしまいがちなNG例</span>
-                            </div>
-                            <div className="space-y-1 text-xs">
-                              <div className="font-bold text-[#B71C1C] flex items-center gap-1">
-                                <span className="line-through">{pair.ngExample.wrong}</span>
-                              </div>
-                              <div className="text-[#6D2828] text-[11px] leading-relaxed">
-                                {pair.ngExample.description}
-                              </div>
-                              <div className="text-[#2E7D32] font-bold bg-white/80 p-1.5 rounded-lg border border-[#C8E6C9] mt-1 flex items-center gap-1">
-                                <span>⭕ 正しい表現:</span>
-                                <span>{pair.ngExample.correct}</span>
-                              </div>
-                            </div>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            {renderItemStatusBadgeAndPin(pair.id)}
+                            <span className="text-stone-400 p-1">
+                              {isOpen ? <ChevronDown className="w-4 h-4 stroke-[2.5]" /> : <ChevronRight className="w-4 h-4 stroke-[2.5]" />}
+                            </span>
                           </div>
-
-                          {/* ⑤ 💡 1秒で迷わないコツ */}
-                          <div className="p-3 sm:p-3.5 bg-linear-to-r from-[#FAF0EC] to-[#FAF7F2] rounded-xl border border-[#F0D5CD] space-y-1">
-                            <div className="flex items-center gap-1 text-xs font-bold text-[#B84E34]">
-                              <span>💡 1秒で迷わないコツ</span>
-                            </div>
-                            <p className={`font-bold text-[#1B2A38] leading-relaxed ${isLargeFont ? 'text-sm sm:text-base' : 'text-xs sm:text-sm'}`}>
-                              {pair.tip}
-                            </p>
-                          </div>
-
-                          {/* ⑥ 🎯次回ミッション・🟢実戦クリア・＋1秒めくり追加・📖授業実例 */}
-                          {renderActionAndMyAlbum(pair.id, {
-                            expression: pair.exA.ko,
-                            meaning: pair.exA.ja,
-                            reading: pair.exA.reading,
-                          })}
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
 
-          {/* ② 初級の疑問 Q&A */}
+                        {/* アコーディオン開いた詳細エリア */}
+                        {isOpen && (
+                          <div className="p-4 sm:p-5 pt-3 border-t-2 border-stone-100 space-y-4 bg-stone-50/40">
+                            {/* ① 🎯 核心ニュアンスの違い */}
+                            <div className="p-3.5 sm:p-4 bg-white rounded-2xl border-2 border-amber-200/90 shadow-[0_2px_0_#FDE68A] space-y-1.5">
+                              <div className="flex items-center gap-2 text-xs font-black text-amber-900">
+                                <span className="p-1 rounded-lg bg-amber-500 text-white shadow-2xs">
+                                  <Target className="w-3.5 h-3.5 stroke-[2.5]" />
+                                </span>
+                                <span>核心ニュアンスの違い</span>
+                              </div>
+                              <p className={`text-slate-800 leading-relaxed font-medium pl-1 ${isLargeFont ? 'text-base' : 'text-xs sm:text-sm'}`}>
+                                {pair.coreDifference}
+                              </p>
+                            </div>
+
+                            {/* ② ⚠️ 日本人が陥る罠 */}
+                            <div className="p-3.5 sm:p-4 bg-rose-50/70 rounded-2xl border-2 border-rose-200 shadow-[0_2px_0_#FECDD3] space-y-1.5">
+                              <div className="flex items-center gap-2 text-xs font-black text-rose-900">
+                                <span className="p-1 rounded-lg bg-rose-500 text-white shadow-2xs">
+                                  <AlertCircle className="w-3.5 h-3.5 stroke-[2.5]" />
+                                </span>
+                                <span>日本人が陥る罠・勘違い</span>
+                              </div>
+                              <p className={`text-rose-950/90 leading-relaxed font-medium pl-1 ${isLargeFont ? 'text-sm sm:text-base' : 'text-xs'}`}>
+                                {pair.trap}
+                              </p>
+                            </div>
+
+                            {/* ③ 例文比較（A vs B） */}
+                            <div className="space-y-2">
+                              <span className="text-xs font-black text-slate-800 block">
+                                📝 リアル使い分け例文（タップで発音）
+                              </span>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                {/* 例文A */}
+                                <div className="p-3.5 bg-white rounded-2xl border-2 border-stone-200 shadow-[0_2.5px_0_#E5E7EB] space-y-2 flex flex-col justify-between">
+                                  <div>
+                                    <div className="flex items-center justify-between gap-2">
+                                      <span className="text-[10px] font-black text-sky-800 bg-sky-50 px-2 py-0.5 rounded-lg border border-sky-200 uppercase tracking-wider">
+                                        表現 A
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          sound.playTap();
+                                          speechService.speak(pair.exA.ko);
+                                        }}
+                                        className="w-8 h-8 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 flex items-center justify-center transition-colors cursor-pointer"
+                                        title="発音を聞く"
+                                      >
+                                        <Volume2 className="w-4 h-4 stroke-[2.5]" />
+                                      </button>
+                                    </div>
+                                    <div className={`font-black text-slate-900 mt-1 ${isLargeFont ? 'text-base sm:text-lg' : 'text-sm sm:text-base'}`}>
+                                      {pair.exA.ko}
+                                    </div>
+                                    {showPronunciation && pair.exA.reading && (
+                                      <div className="text-xs text-stone-500 font-mono mt-0.5">
+                                        [{pair.exA.reading}]
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className={`text-slate-700 font-bold pt-2 border-t border-stone-100 ${isLargeFont ? 'text-sm' : 'text-xs'}`}>
+                                    {pair.exA.ja}
+                                  </div>
+                                </div>
+
+                                {/* 例文B */}
+                                <div className="p-3.5 bg-white rounded-2xl border-2 border-stone-200 shadow-[0_2.5px_0_#E5E7EB] space-y-2 flex flex-col justify-between">
+                                  <div>
+                                    <div className="flex items-center justify-between gap-2">
+                                      <span className="text-[10px] font-black text-amber-800 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200 uppercase tracking-wider">
+                                        表現 B
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          sound.playTap();
+                                          speechService.speak(pair.exB.ko);
+                                        }}
+                                        className="w-8 h-8 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 flex items-center justify-center transition-colors cursor-pointer"
+                                        title="発音を聞く"
+                                      >
+                                        <Volume2 className="w-4 h-4 stroke-[2.5]" />
+                                      </button>
+                                    </div>
+                                    <div className={`font-black text-slate-900 mt-1 ${isLargeFont ? 'text-base sm:text-lg' : 'text-sm sm:text-base'}`}>
+                                      {pair.exB.ko}
+                                    </div>
+                                    {showPronunciation && pair.exB.reading && (
+                                      <div className="text-xs text-stone-500 font-mono mt-0.5">
+                                        [{pair.exB.reading}]
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className={`text-slate-700 font-bold pt-2 border-t border-stone-100 ${isLargeFont ? 'text-sm' : 'text-xs'}`}>
+                                    {pair.exB.ja}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* ④ ❌ よくあるNG例 */}
+                            <div className="p-3.5 sm:p-4 bg-white rounded-2xl border-2 border-rose-200 shadow-[0_2px_0_#FECDD3] space-y-2">
+                              <div className="flex items-center gap-1.5 text-xs font-black text-rose-700">
+                                <span>❌ やってしまいがちなNG例</span>
+                              </div>
+                              <div className="space-y-1.5 text-xs">
+                                <div className="font-bold text-rose-700 flex items-center gap-1">
+                                  <span className="line-through">{pair.ngExample.wrong}</span>
+                                </div>
+                                <div className="text-slate-600 text-xs leading-relaxed">
+                                  {pair.ngExample.description}
+                                </div>
+                                <div className="text-emerald-800 font-black bg-emerald-50 p-2 rounded-xl border border-emerald-200 mt-1 flex items-center gap-1.5">
+                                  <span>⭕ 正しい表現:</span>
+                                  <span>{pair.ngExample.correct}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* ⑤ 💡 1秒で迷わないコツ */}
+                            <div className="p-3.5 sm:p-4 bg-emerald-50/70 rounded-2xl border-2 border-emerald-200 shadow-[0_2px_0_#A7F3D0] space-y-1.5">
+                              <div className="flex items-center gap-1.5 text-xs font-black text-emerald-800">
+                                <span>💡 1秒で迷わないコツ</span>
+                              </div>
+                              <p className={`font-black text-slate-900 leading-relaxed ${isLargeFont ? 'text-sm sm:text-base' : 'text-xs sm:text-sm'}`}>
+                                {pair.tip}
+                              </p>
+                            </div>
+
+                            {/* ⑥ 🎯次回ミッション・🟢実戦クリア・＋1秒めくり追加・📖授業実例 */}
+                            {renderActionAndMyAlbum(pair.id, {
+                              expression: pair.exA.ko,
+                              meaning: pair.exA.ja,
+                              reading: pair.exA.reading,
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+          {/* ② 初級の疑問 Q&A（Duolingo 3Dスタイル） */}
           {refSubTab === 'qa' && (
-            <div className="space-y-2.5">
+            <div className="space-y-3">
               {/* Q&A 検索バー */}
               <div className="relative">
-                <Search className="w-3.5 h-3.5 text-[#948C82] absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <Search className="w-3.5 h-3.5 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   type="text"
                   value={qaSearch}
                   onChange={(e) => setQaSearch(e.target.value)}
                   placeholder="質問・回答・キーワードを検索..."
-                  className="w-full pl-8 pr-7 py-1.5 rounded-xl bg-white border border-[#E2DDD2] focus:border-[#B84E34] focus:outline-none text-xs text-[#1B2A38] placeholder-[#948C82] transition-colors"
+                  className="w-full pl-9 pr-8 py-2 rounded-2xl bg-white border-2 border-stone-200 focus:border-sky-400 focus:outline-none text-xs text-slate-900 placeholder-stone-400 transition-colors shadow-2xs"
                 />
                 {qaSearch && (
                   <button
                     type="button"
                     onClick={() => setQaSearch('')}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-[#948C82] hover:text-[#1B2A38] p-0.5 cursor-pointer"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 p-0.5 cursor-pointer"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -3124,16 +3096,19 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                     <button
                       key={cat.id}
                       type="button"
-                      onClick={() => setQaCategory(cat.id)}
-                      className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-1 ${
+                      onClick={() => {
+                        sound.playTap();
+                        setQaCategory(cat.id);
+                      }}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-1.5 border-2 ${
                         isCurrent
-                          ? 'bg-[#B84E34] text-white shadow-xs'
-                          : 'bg-white text-[#756D63] hover:text-[#1B2A38] border border-[#E8E2D5]'
+                          ? 'bg-[#1CB0F6] text-white border-[#1CB0F6] shadow-[0_2.5px_0_#1899D6] -translate-y-0.5'
+                          : 'bg-white text-stone-600 border-stone-200 hover:bg-stone-50 shadow-[0_2px_0_#E5E7EB]'
                       }`}
                     >
                       <span>{cat.label}</span>
-                      <span className={`text-[10px] px-1 py-0.2 rounded-full ${
-                        isCurrent ? 'bg-white/20 text-white' : 'bg-[#FAF0EC] text-[#B84E34]'
+                      <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                        isCurrent ? 'bg-white/20 text-white' : 'bg-sky-100 text-sky-800'
                       }`}>
                         {count}
                       </span>
@@ -3143,17 +3118,17 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
               </div>
 
               {/* ヘッダー＆一括開閉バー */}
-              <div className="flex items-center justify-between text-xs px-1 text-[#756D63]">
+              <div className="flex items-center justify-between text-xs px-1 text-stone-500 font-bold">
                 <div className="flex items-center gap-1.5">
-                  <HelpCircle className="w-3.5 h-3.5 text-[#B84E34]" />
-                  <span className="font-bold text-[#1B2A38]">
-                    初級の疑問 Q&A（全{QA_DATA.length}選 · {filteredQAs.length}件表示）
+                  <HelpCircle className="w-4 h-4 text-[#1CB0F6] stroke-[2.5]" />
+                  <span className="font-black text-slate-800">
+                    疑問 Q&A（全{QA_DATA.length}選 · {filteredQAs.length}件表示）
                   </span>
                 </div>
                 <button
                   type="button"
                   onClick={handleToggleExpandAllQAs}
-                  className="px-2 py-0.5 rounded-lg text-xs font-bold text-[#756D63] hover:text-[#B84E34] cursor-pointer whitespace-nowrap bg-white border border-[#E8E2D5] shadow-2xs"
+                  className="px-2.5 py-1 rounded-xl text-xs font-black text-sky-700 hover:bg-sky-50 cursor-pointer whitespace-nowrap border-2 border-sky-200 bg-white shadow-[0_2px_0_#BAE6FD] active:translate-y-0.5"
                 >
                   {expandAllQAs ? 'すべて閉じる' : 'すべて開く'}
                 </button>
@@ -3161,11 +3136,11 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
 
               {/* Q&A リスト */}
               {filteredQAs.length === 0 ? (
-                <div className="bg-white rounded-2xl border border-[#E8E2D5] p-8 text-center text-xs text-[#8A8075]">
+                <div className="bg-white rounded-3xl border-2 border-stone-200 p-8 text-center text-xs text-stone-500 font-bold shadow-2xs">
                   一致するQ&Aが見つかりませんでした。別のキーワードをお試しください。
                 </div>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {filteredQAs.map((qa) => {
                     const isOpen = !!openQAs[qa.id];
                     const catLabel = QA_CATEGORIES.find((c) => c.id === getQACategory(qa.id))?.label.replace(/^[^\s]+\s*/, '') || '文法';
@@ -3173,17 +3148,20 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                       <div
                         key={qa.id}
                         id={qa.id}
-                        className="scroll-mt-28 bg-white border border-[#E8E2D5] rounded-2xl shadow-2xs overflow-hidden transition-all"
+                        className="scroll-mt-28 bg-white border-2 border-stone-200/90 hover:border-sky-300 rounded-2xl sm:rounded-3xl shadow-[0_3px_0_#E5E7EB] overflow-hidden transition-all"
                       >
                         <div
-                          onClick={() => toggleQA(qa.id)}
-                          className="p-3 sm:px-4 flex items-center justify-between gap-3 cursor-pointer select-none hover:bg-[#FAF7F2]/60 transition-colors"
+                          onClick={() => {
+                            sound.playTap();
+                            toggleQA(qa.id);
+                          }}
+                          className="p-3.5 sm:px-4 flex items-center justify-between gap-3 cursor-pointer select-none hover:bg-stone-50/80 transition-colors"
                         >
-                          <div className="flex items-baseline gap-2 min-w-0 flex-1">
-                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#FAF0EC] text-[#B84E34] shrink-0">
+                          <div className="flex items-baseline gap-2.5 min-w-0 flex-1">
+                            <span className="text-[10px] font-black px-2 py-0.5 rounded-lg bg-sky-50 text-sky-800 border border-sky-200 shrink-0">
                               {catLabel}
                             </span>
-                            <h3 className={`font-serif font-bold text-[#1B2A38] hover:text-[#B84E34] flex-1 leading-snug ${isLargeFont ? 'text-base sm:text-lg' : 'text-xs sm:text-sm'}`}>
+                            <h3 className={`font-black text-slate-900 group-hover:text-sky-700 flex-1 leading-snug ${isLargeFont ? 'text-base sm:text-lg' : 'text-xs sm:text-sm'}`}>
                               {qa.q}
                             </h3>
                           </div>
@@ -3194,38 +3172,58 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                                 e.stopPropagation();
                                 scrollTo(qa.linkLesson.id, 'textbook');
                               }}
-                              className="hidden sm:flex items-center gap-1 text-[11px] font-bold text-[#B84E34] bg-[#FAF0EC] hover:bg-[#F5E6DF] px-2 py-0.5 rounded-lg transition-colors cursor-pointer"
+                              className="hidden sm:flex items-center gap-1 text-[11px] font-black text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200 px-2.5 py-1 rounded-xl transition-colors cursor-pointer"
                             >
                               <span>{qa.linkLesson.label}</span>
                               <ExternalLink className="w-3 h-3" />
                             </button>
-                            <span className="text-[#948C82] p-1">
-                              {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                            <span className="text-stone-400 p-1">
+                              {isOpen ? <ChevronDown className="w-4 h-4 stroke-[2.5]" /> : <ChevronRight className="w-4 h-4 stroke-[2.5]" />}
                             </span>
                           </div>
                         </div>
 
                         {isOpen && (
-                          <div className="p-3.5 sm:p-5 pt-1 border-t border-[#F2ECE1] space-y-3 bg-[#FAF7F2]/20">
+                          <div className="p-4 sm:p-5 pt-1 border-t-2 border-stone-100 space-y-3 bg-stone-50/40">
                             <div className="sm:hidden">
                               <button
                                 type="button"
                                 onClick={() => scrollTo(qa.linkLesson.id, 'textbook')}
-                                className="flex items-center gap-1 text-xs font-bold text-[#B84E34] bg-[#FAF0EC] px-2.5 py-1 rounded-lg"
+                                className="flex items-center gap-1.5 text-xs font-black text-sky-800 bg-sky-50 border border-sky-200 px-3 py-1 rounded-xl"
                               >
                                 <span>💡 {qa.linkLesson.label}</span>
                                 <ExternalLink className="w-3 h-3" />
                               </button>
                             </div>
 
-                            <div className="p-3 sm:p-3.5 bg-[#FAF7F2] rounded-xl text-[#3A332C] leading-relaxed border border-[#E8E2D5] space-y-1">
-                              <div className={`font-bold text-[#B84E34] ${isLargeFont ? 'text-sm' : 'text-xs'}`}>💡 氷解アンサー:</div>
-                              <p className={`whitespace-pre-line text-[#2E2822] ${isLargeFont ? 'text-sm sm:text-base' : 'text-xs sm:text-sm'}`}>{qa.a}</p>
+                            <div className="p-4 bg-white rounded-2xl text-slate-800 leading-relaxed border-2 border-sky-200 shadow-[0_2px_0_#BAE6FD] space-y-2">
+                              <div className={`font-black text-sky-900 flex items-center gap-1.5 ${isLargeFont ? 'text-sm sm:text-base' : 'text-xs sm:text-sm'}`}>
+                                <Sparkles className="w-4 h-4 text-sky-600 stroke-[2.5]" />
+                                <span>氷解アンサー:</span>
+                              </div>
+                              <p className={`whitespace-pre-line text-slate-800 font-medium pl-1 ${isLargeFont ? 'text-sm sm:text-base' : 'text-xs sm:text-sm'}`}>{qa.a}</p>
                             </div>
 
-                            <div className={`space-y-1 bg-white p-3 rounded-xl border border-[#EDE7DC] font-mono text-xs ${isLargeFont ? 'text-sm' : 'text-[11px] sm:text-xs'}`}>
-                              <div className="text-[#1B2A38]">・{qa.ex1}</div>
-                              <div className="text-[#1B2A38]">・{qa.ex2}</div>
+                            <div className="space-y-2 bg-white p-3.5 rounded-2xl border-2 border-stone-200 shadow-2xs">
+                              <span className="text-[11px] font-black text-stone-500 block">リアル例文（タップで発音）:</span>
+                              {[qa.ex1, qa.ex2].filter(Boolean).map((ex, exIdx) => (
+                                <div key={exIdx} className="flex items-center justify-between gap-2 p-2 rounded-xl bg-stone-50 hover:bg-sky-50/50 transition-colors">
+                                  <span className={`font-bold text-slate-900 ${isLargeFont ? 'text-sm' : 'text-xs'}`}>
+                                    {ex}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      sound.playTap();
+                                      speechService.speak(ex.replace(/^[・\s]+/, ''));
+                                    }}
+                                    className="p-1 rounded-lg text-sky-600 hover:bg-sky-100 transition-colors cursor-pointer shrink-0"
+                                    title="発音を聞く"
+                                  >
+                                    <Volume2 className="w-3.5 h-3.5 stroke-[2.5]" />
+                                  </button>
+                                </div>
+                              ))}
                             </div>
                           </div>
                         )}
@@ -3237,67 +3235,70 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
             </div>
           )}
 
-          {/* ③ 特別コラム集（目次型アコーディオン収納） */}
+          {/* ③ 特別コラム集（Duolingo 3Dスタイル） */}
           {refSubTab === 'columns' && (
-            <div className="space-y-2.5">
-              <div className="flex items-center justify-between text-xs px-1 text-[#756D63]">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-xs px-1 text-stone-500 font-bold">
                 <div className="flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-[#B84E34]" />
-                  <h3 className="font-bold text-[#1B2A38]">
+                  <Sparkles className="w-4 h-4 text-[#58CC02] stroke-[2.5]" />
+                  <h3 className="font-black text-slate-800">
                     特別コラム（初級から中級へ羽ばたくブースター）全{COLUMNS_DATA.length}講義
                   </h3>
                 </div>
                 <button
                   type="button"
                   onClick={handleToggleExpandAllColumns}
-                  className="px-2 py-0.5 rounded-lg text-xs font-bold text-[#756D63] hover:text-[#B84E34] cursor-pointer whitespace-nowrap bg-white border border-[#E8E2D5] shadow-2xs"
+                  className="px-2.5 py-1 rounded-xl text-xs font-black text-emerald-700 hover:bg-emerald-50 cursor-pointer whitespace-nowrap border-2 border-emerald-200 bg-white shadow-[0_2px_0_#A7F3D0] active:translate-y-0.5"
                 >
                   {expandAllColumns ? 'すべて閉じる' : 'すべて開く'}
                 </button>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {COLUMNS_DATA.map((col) => {
                   const isOpen = !!openColumns[col.id];
                   return (
                     <div
                       key={col.id}
                       id={col.id}
-                      className="scroll-mt-28 bg-white border border-[#E8E2D5] rounded-2xl shadow-2xs overflow-hidden transition-all"
+                      className="scroll-mt-28 bg-white border-2 border-stone-200/90 hover:border-emerald-300 rounded-2xl sm:rounded-3xl shadow-[0_3px_0_#E5E7EB] overflow-hidden transition-all"
                     >
                       <div
-                        onClick={() => toggleColumn(col.id)}
-                        className="p-3 sm:px-4 flex items-center justify-between gap-3 cursor-pointer select-none hover:bg-[#FAF7F2]/60 transition-colors"
+                        onClick={() => {
+                          sound.playTap();
+                          toggleColumn(col.id);
+                        }}
+                        className="p-3.5 sm:px-4 flex items-center justify-between gap-3 cursor-pointer select-none hover:bg-stone-50/80 transition-colors"
                       >
                         <div className="min-w-0 flex-1 space-y-0.5">
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <h4 className={`font-serif font-bold text-[#1B2A38] hover:text-[#B84E34] ${isLargeFont ? 'text-base sm:text-lg' : 'text-xs sm:text-sm'}`}>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className={`font-black text-slate-900 group-hover:text-emerald-700 ${isLargeFont ? 'text-base sm:text-lg' : 'text-xs sm:text-sm'}`}>
                               {col.title}
                             </h4>
-                            <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-[#FAF0EC] text-[#B84E34] shrink-0">
+                            <span className="text-[10px] font-black px-2 py-0.2 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0">
                               カード{col.cards.length}枚
                             </span>
                           </div>
-                          <p className="text-[11px] text-[#756D63] truncate">
+                          <p className="text-xs text-stone-500 font-bold truncate">
                             {col.description}
                           </p>
                         </div>
-                        <span className="text-[#948C82] p-1 shrink-0">
-                          {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                        <span className="text-stone-400 p-1 shrink-0">
+                          {isOpen ? <ChevronDown className="w-4 h-4 stroke-[2.5]" /> : <ChevronRight className="w-4 h-4 stroke-[2.5]" />}
                         </span>
                       </div>
 
                       {isOpen && (
-                        <div className="p-3.5 sm:p-4 pt-1 border-t border-[#F2ECE1] space-y-3 bg-[#FAF7F2]/30">
-                          <p className={`text-[#544D45] leading-relaxed ${isLargeFont ? 'text-sm' : 'text-xs'}`}>
+                        <div className="p-4 sm:p-5 pt-1 border-t-2 border-stone-100 space-y-3 bg-stone-50/40">
+                          <p className={`text-slate-700 font-medium leading-relaxed ${isLargeFont ? 'text-sm' : 'text-xs'}`}>
                             {col.description}
                           </p>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                             {col.cards.map((card, cIdx) => (
-                              <div key={cIdx} className="p-2.5 bg-white rounded-xl border border-[#E8E2D5] space-y-1 shadow-2xs">
-                                <strong className={`text-[#1B2A38] block ${isLargeFont ? 'text-sm' : 'text-xs'}`}>{card.label}</strong>
-                                <div className={`text-[#423B33] leading-relaxed ${isLargeFont ? 'text-sm' : 'text-xs'}`}>{card.content}</div>
-                                {card.sub && <div className={`text-[#756D63] mt-0.5 ${isLargeFont ? 'text-xs' : 'text-[10.5px]'}`}>{card.sub}</div>}
+                              <div key={cIdx} className="p-3 bg-white rounded-2xl border-2 border-stone-200 space-y-1 shadow-[0_2px_0_#E5E7EB]">
+                                <strong className={`text-slate-900 font-black block ${isLargeFont ? 'text-sm' : 'text-xs'}`}>{card.label}</strong>
+                                <div className={`text-slate-700 font-medium leading-relaxed ${isLargeFont ? 'text-sm' : 'text-xs'}`}>{card.content}</div>
+                                {card.sub && <div className={`text-stone-500 font-medium mt-0.5 ${isLargeFont ? 'text-xs' : 'text-[11px]'}`}>{card.sub}</div>}
                               </div>
                             ))}
                           </div>
@@ -3823,29 +3824,8 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
             {/* ① 文法逆引き辞書 (180選) */}
             {dictSubTab === 'grammar' && (
               <div className="space-y-2.5">
-                {/* 文法 検索バー */}
-                <div className="relative">
-                  <Search className="w-3.5 h-3.5 text-[#948C82] absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                  <input
-                    type="text"
-                    value={grammarSearch}
-                    onChange={(e) => setGrammarSearch(e.target.value)}
-                    placeholder="文法名・意味・接続ルールを検索..."
-                    className="w-full pl-8 pr-7 py-1.5 rounded-xl bg-white border border-[#E2DDD2] focus:border-[#B84E34] focus:outline-none text-xs text-[#1B2A38] placeholder-[#948C82] transition-colors"
-                  />
-                  {grammarSearch && (
-                    <button
-                      type="button"
-                      onClick={() => setGrammarSearch('')}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-[#948C82] hover:text-[#1B2A38] p-0.5 cursor-pointer"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  )}
-                </div>
-
-                {/* 目的・意味別 絞り込みピル */}
-                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+                {/* 目的・意味別 絞り込みピル（Duolingo 3Dピル） */}
+                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
                   {GRAMMAR_CATEGORIES.map((cat) => {
                     const isCurrent = grammarCategory === cat.id;
                     const count = cat.id === 'all'
@@ -3856,15 +3836,15 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                         key={cat.id}
                         type="button"
                         onClick={() => setGrammarCategory(cat.id)}
-                        className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-1 ${
+                        className={`px-3 py-1.5 rounded-2xl text-xs font-black transition-all cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
                           isCurrent
-                            ? 'bg-[#B84E34] text-white shadow-xs'
-                            : 'bg-white text-[#756D63] hover:text-[#1B2A38] border border-[#E8E2D5]'
+                            ? 'bg-[#1CB0F6] text-white shadow-[0_3px_0_#1899D6] -translate-y-0.5'
+                            : 'bg-white text-stone-600 hover:text-stone-900 border-2 border-stone-200 shadow-[0_2px_0_#E5E7EB] hover:bg-stone-50'
                         }`}
                       >
                         <span>{cat.label}</span>
-                        <span className={`text-[10px] px-1 py-0.2 rounded-full ${
-                          isCurrent ? 'bg-white/20 text-white' : 'bg-[#FAF0EC] text-[#B84E34]'
+                        <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                          isCurrent ? 'bg-white/20 text-white' : 'bg-sky-50 text-sky-800 border border-sky-200'
                         }`}>
                           {count}
                         </span>
@@ -3874,117 +3854,79 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                 </div>
 
                 {/* 件数表示 ＆ リセットバー */}
-                <div className="flex items-center justify-between text-xs px-1 text-[#756D63]">
+                <div className="flex items-center justify-between text-xs px-1 text-stone-500 font-bold">
                   <div className="flex items-center gap-1.5">
-                    <span className="font-bold text-[#1B2A38]">
-                      {grammarCategory !== 'all' || grammarSearch.trim()
+                    <span className="font-black text-stone-800">
+                      {grammarCategory !== 'all' || searchQuery.trim()
                         ? `絞り込み結果: ${displayedDicts.length}項目`
                         : dictRange === 'all'
                         ? `全${GRAMMAR_DICT_DATA.length}項目を表示中`
                         : `${DICT_BLOCKS.find((b) => b.range === dictRange)?.label || ''} (${displayedDicts.length}項目)`}
                     </span>
                   </div>
-                  {(grammarCategory !== 'all' || grammarSearch.trim()) && (
+                  {(grammarCategory !== 'all' || searchQuery.trim()) && (
                     <button
                       type="button"
                       onClick={() => {
                         setGrammarCategory('all');
-                        setGrammarSearch('');
+                        setSearchQuery('');
                       }}
-                      className="text-[#B84E34] hover:underline font-bold text-[11px] cursor-pointer"
+                      className="text-sky-700 hover:underline font-black text-xs cursor-pointer"
                     >
                       条件をクリア
                     </button>
                   )}
                 </div>
 
-                {/* 辞書 授業ノート風の1枚シートリスト */}
+                {/* Duolingo風 3D文法カードリスト */}
                 {displayedDicts.length === 0 ? (
-                  <div className="bg-white rounded-2xl border border-[#E8E2D5] p-8 text-center text-xs text-[#8A8075]">
+                  <div className="bg-white rounded-3xl border-2 border-stone-200 p-8 text-center text-xs text-stone-500 font-medium">
                     一致する文法が見つかりませんでした。別のキーワードをお試しください。
                   </div>
                 ) : (
-                  <div className="bg-white border border-[#E8E2D5] rounded-2xl shadow-2xs divide-y divide-[#F0EBE1] overflow-hidden">
-                  {displayedDicts.map((item) => {
-                    const isOpen = !!openDicts[item.id];
-                    return (
-                      <div key={item.id} id={item.id} className="scroll-mt-24">
-                        <div
-                          onClick={() => setBottomSheetItem({ type: 'dict', id: item.id })}
-                          className="p-3 sm:px-4 flex items-center justify-between gap-2 hover:bg-[#FAF7F2]/60 transition-colors cursor-pointer select-none group"
-                        >
-                          <div className="flex items-baseline gap-2 flex-1 min-w-0">
-                            <span className="text-[11px] font-sans font-bold text-[#948C82] w-6 text-right shrink-0">
-                              {item.no}.
-                            </span>
-                            <div className="min-w-0 flex-1 space-y-0.5">
-                              <h3 className={`font-bold text-[#1B2A38] group-hover:text-[#B84E34] transition-colors leading-snug ${isLargeFont ? 'text-base sm:text-lg' : 'text-sm sm:text-base'}`}>
-                                {item.grammar}
-                              </h3>
-                              <div className={`text-[#6B635B] font-sans leading-snug ${isLargeFont ? 'text-sm' : 'text-xs'}`}>
-                                {item.meaning}
-                              </div>
-                            </div>
+                  <div className="space-y-2.5">
+                    {displayedDicts.map((item) => (
+                      <div
+                        key={item.id}
+                        id={item.id}
+                        onClick={() => setBottomSheetItem({ type: 'dict', id: item.id })}
+                        className="bg-white border-2 border-stone-200/90 hover:border-sky-400 rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 shadow-[0_3px_0_#E5E7EB] hover:shadow-[0_4px_0_#38BDF8] transition-all cursor-pointer select-none group flex items-center justify-between gap-3"
+                      >
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-sky-50 text-sky-800 border-2 border-sky-200 font-mono font-black text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                            {item.no}
                           </div>
-
-                          <div className="flex items-center gap-0.5 shrink-0">
-                            {renderItemStatusBadgeAndPin(item.id)}
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setBottomSheetItem({ type: 'dict', id: item.id });
-                              }}
-                              className="p-1 text-[#948C82] group-hover:text-[#B84E34] rounded transition-colors cursor-pointer"
-                              aria-label="詳細"
-                              title="詳細を見る"
-                            >
-                              <ChevronRight className="w-4 h-4" />
-                            </button>
+                          <div className="min-w-0 flex-1 space-y-0.5">
+                            <h3 className="font-black text-[#1B2A38] group-hover:text-sky-700 transition-colors text-sm sm:text-base leading-snug">
+                              {item.grammar}
+                            </h3>
+                            <p className="text-xs text-stone-600 font-medium leading-relaxed">
+                              {item.meaning}
+                            </p>
                           </div>
                         </div>
 
-                        {isOpen && (
-                          <div className="p-3.5 sm:p-4 pt-2 border-t border-[#F0EBE1] space-y-2.5 bg-[#FAF7F2]/30">
-                            {item.linkTextbook && (
-                              <div className="sm:hidden">
-                                <button
-                                  type="button"
-                                  onClick={() => scrollTo(item.linkTextbook!.id, 'textbook')}
-                                  className="flex items-center gap-1 text-xs font-bold text-[#B84E34] bg-[#FAF0EC] px-2.5 py-1 rounded-lg"
-                                >
-                                  <span>💡 {item.linkTextbook.label}</span>
-                                  <ExternalLink className="w-3 h-3" />
-                                </button>
-                              </div>
-                            )}
-
-                            <div className={`text-[#423B33] ${isLargeFont ? 'text-sm sm:text-base' : 'text-xs sm:text-sm'}`}>
-                              <strong>接続:</strong> <span className="font-mono text-[#B84E34] font-medium">{item.connection}</span>
-                            </div>
-
-                            <div className={`p-3 bg-white rounded-xl font-mono text-emerald-950 border border-[#E2DDD2] leading-relaxed ${isLargeFont ? 'text-base sm:text-lg' : 'text-sm sm:text-base'}`}>
-                              {item.example}
-                            </div>
-
-                            <div className={`text-[#544D45] leading-relaxed pt-0.5 ${isLargeFont ? 'text-sm sm:text-base' : 'text-xs sm:text-sm'}`}>
-                              💡 <strong>ポイント:</strong> {item.tip}
-                            </div>
-
-                            {renderActionAndMyAlbum(item.id, {
-                              expression: item.grammar,
-                              meaning: item.meaning,
-                              exampleSentence: item.example,
-                            })}
-                          </div>
-                        )}
+                        <div className="flex items-center gap-2 shrink-0">
+                          {renderItemStatusBadgeAndPin(item.id)}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setBottomSheetItem({ type: 'dict', id: item.id });
+                            }}
+                            className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-[#1CB0F6] hover:bg-[#1899D6] active:translate-y-0.5 active:shadow-[0_1px_0_#1480B3] text-white font-black text-xs shadow-[0_2.5px_0_#1480B3] transition-all flex items-center gap-1 cursor-pointer"
+                            aria-label="解説を見る"
+                          >
+                            <span>解説</span>
+                            <ChevronRight className="w-3.5 h-3.5 stroke-[2.5]" />
+                          </button>
+                        </div>
                       </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          )}
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* ② 重要単語 (300選：動詞・形容詞・名詞カテゴリー別) */}
             {dictSubTab === 'vocab' && (
@@ -4156,300 +4098,152 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
         {/* ===================== 会話タブ（直感フレーズ ＆ 実践チャンク ＆ スラング） ===================== */}
         {activeTab === 'chunks' && (
           <div className="space-y-2.5">
-            {/* 💬 会話 カテゴリーバー（収納式：タップで展開/折りたたみ） */}
-            <div className="bg-white border border-[#E8E2D5] rounded-xl shadow-2xs overflow-hidden transition-all">
-              {/* 普段表示される極薄1行バー */}
-              <div className="p-2 sm:px-3 flex items-center justify-between gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowConversationNav(!showConversationNav)}
-                  aria-expanded={showConversationNav}
-                  className="flex items-center gap-1.5 text-xs font-bold text-[#1B2A38] hover:text-[#B84E34] transition-colors cursor-pointer min-w-0"
-                  title="タップして会話カテゴリーやサブタブを切り替える"
-                >
-                  <span className="text-[10px] px-1.5 py-0.2 rounded font-bold bg-[#FAF0EC] text-[#B84E34] shrink-0">
-                    {conversationSubTab === 'phrases' ? '直感' : conversationSubTab === 'chunks' ? 'チャンク' : conversationSubTab === 'idioms' ? '慣用句' : 'スラング'}
-                  </span>
-                  <span className="truncate text-xs font-serif">
-                    {conversationSubTab === 'phrases'
-                      ? `キラーフレーズ (${KILLER_PHRASE_CATEGORIES.find((c) => c.id === selectedPhraseCategory)?.label || 'すべて'})`
-                      : conversationSubTab === 'chunks'
-                      ? `口語チャンク (${selectedChunkCategory === 'all' ? 'すべて' : selectedChunkCategory})`
-                      : conversationSubTab === 'idioms'
-                      ? `慣用句・ことわざ (${idiomType === 'all' ? 'すべて' : idiomType === 'idiom' ? '身体慣用句' : 'ことわざ'})`
-                      : `最新スラング (${SLANG_CATEGORIES.find((c) => c.id === selectedSlangCategory)?.label || 'すべて'})`}
-                  </span>
-                  {showConversationNav ? (
-                    <ChevronUp className="w-3.5 h-3.5 text-[#B84E34] shrink-0" />
-                  ) : (
-                    <ChevronDown className="w-3.5 h-3.5 text-[#948C82] shrink-0" />
-                  )}
-                </button>
+            {/* 💬 会話 カテゴリーバー（Duolingo 3Dキャンディタブ） */}
+            <div className="bg-white border-2 border-stone-200/90 rounded-3xl p-2.5 sm:p-3 shadow-[0_3px_0_#E5E7EB] space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                {/* サブタブ切り替え */}
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 flex-1">
+                  {[
+                    { id: 'phrases' as const, label: `直感フレーズ (${KILLER_PHRASES_DATA.length})`, icon: '🗣️', color: '#CE82FF', shadow: '#A855F7' },
+                    { id: 'chunks' as const, label: `口語チャンク (${CONVERSATION_CHUNKS_DATA.length})`, icon: '💬', color: '#1CB0F6', shadow: '#1899D6' },
+                    ...(levelMode !== 'beginner' ? [
+                      { id: 'idioms' as const, label: `身体慣用句 (${IDIOMS_PROVERBS_DATA.length})`, icon: '📖', color: '#FF9600', shadow: '#CC7A00' },
+                      { id: 'slang' as const, label: `最新スラング (${SLANG_DATA.length})`, icon: '🔥', color: '#FF4B4B', shadow: '#D32F2F' },
+                    ] : []),
+                  ].map((tab) => {
+                    const isActive = conversationSubTab === tab.id;
+                    return (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => {
+                          sound.playTap();
+                          setConversationSubTab(tab.id);
+                        }}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-black whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
+                          isActive
+                            ? 'text-white -translate-y-0.5'
+                            : 'bg-white border-2 border-stone-200 text-stone-600 hover:bg-stone-50 shadow-[0_2px_0_#E5E7EB]'
+                        }`}
+                        style={
+                          isActive
+                            ? {
+                                backgroundColor: tab.color,
+                                boxShadow: `0 2.5px 0 ${tab.shadow}`,
+                              }
+                            : undefined
+                        }
+                      >
+                        <span>{tab.icon}</span>
+                        <span>{tab.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
 
+                {/* 逆翻訳モード ＆ すべて開く/閉じる */}
                 <div className="flex items-center gap-1.5 shrink-0">
                   {conversationSubTab === 'phrases' && (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => setIsReverseMode(!isReverseMode)}
-                        className={`px-2 py-0.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap border ${
-                          isReverseMode
-                            ? 'bg-[#1B2A38] text-white border-[#1B2A38]'
-                            : 'bg-white text-[#B84E34] hover:bg-[#FAF0EC] border-[#E8E2D5]'
-                        }`}
-                      >
-                        {isReverseMode ? '🎴 逆翻訳モード中' : '🎴 逆翻訳モード'}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleToggleExpandAllPhrases}
-                        className="px-2 py-0.5 rounded-lg text-xs font-bold text-[#756D63] hover:text-[#B84E34] cursor-pointer whitespace-nowrap"
-                      >
-                        {expandAllPhrases ? 'すべて閉じる' : 'すべて開く'}
-                      </button>
-                    </>
-                  )}
-                  {conversationSubTab === 'chunks' && (
-                    <button
-                      type="button"
-                      onClick={handleToggleExpandAllChunks}
-                      className="px-2 py-0.5 rounded-lg text-xs font-bold text-[#756D63] hover:text-[#B84E34] cursor-pointer whitespace-nowrap"
-                    >
-                      {expandAllChunks ? 'すべて閉じる' : 'すべて開く'}
-                    </button>
-                  )}
-                  {conversationSubTab === 'idioms' && (
                     <button
                       type="button"
                       onClick={() => {
+                        sound.playTap();
+                        setIsReverseMode(!isReverseMode);
+                      }}
+                      className={`px-2.5 py-1 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap border-2 ${
+                        isReverseMode
+                          ? 'bg-purple-600 text-white border-purple-600 shadow-[0_2px_0_#7E22CE]'
+                          : 'bg-white text-purple-700 hover:bg-purple-50 border-purple-200 shadow-[0_2px_0_#E9D5FF]'
+                      }`}
+                    >
+                      {isReverseMode ? '🎴 逆翻訳モード中' : '🎴 逆翻訳モード'}
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (conversationSubTab === 'phrases') handleToggleExpandAllPhrases();
+                      else if (conversationSubTab === 'chunks') handleToggleExpandAllChunks();
+                      else if (conversationSubTab === 'idioms') {
                         const next = !expandAllIdioms;
                         setExpandAllIdioms(next);
                         const m: Record<string, boolean> = {};
                         IDIOMS_PROVERBS_DATA.forEach((i) => { m[i.id] = next; });
                         setOpenIdioms(m);
-                      }}
-                      className="px-2 py-0.5 rounded-lg text-xs font-bold text-[#756D63] hover:text-[#B84E34] cursor-pointer whitespace-nowrap"
-                    >
-                      {expandAllIdioms ? 'すべて閉じる' : 'すべて開く'}
-                    </button>
-                  )}
-                  {conversationSubTab === 'slang' && (
-                    <button
-                      type="button"
-                      onClick={handleToggleExpandAllSlangs}
-                      className="px-2 py-0.5 rounded-lg text-xs font-bold text-[#756D63] hover:text-[#B84E34] cursor-pointer whitespace-nowrap"
-                    >
-                      {expandAllSlangs ? 'すべて閉じる' : 'すべて開く'}
-                    </button>
-                  )}
+                      } else if (conversationSubTab === 'slang') handleToggleExpandAllSlangs();
+                    }}
+                    className="px-2.5 py-1 rounded-xl text-xs font-black text-purple-700 hover:bg-purple-50 cursor-pointer whitespace-nowrap border-2 border-purple-200 bg-white shadow-[0_2px_0_#E9D5FF] active:translate-y-0.5"
+                  >
+                    {conversationSubTab === 'phrases'
+                      ? expandAllPhrases ? 'すべて閉じる' : 'すべて開く'
+                      : conversationSubTab === 'chunks'
+                      ? expandAllChunks ? 'すべて閉じる' : 'すべて開く'
+                      : conversationSubTab === 'idioms'
+                      ? expandAllIdioms ? 'すべて閉じる' : 'すべて開く'
+                      : expandAllSlangs ? 'すべて閉じる' : 'すべて開く'}
+                  </button>
                 </div>
               </div>
 
-              {/* タップ時のみ展開される収納エリア（サブタブ ＆ 各カテゴリーピル） */}
-              <div className={`${showConversationNav ? 'block border-t border-[#F0EBE1] p-2 bg-[#FAF7F2]/60 space-y-2' : 'hidden'}`}>
-                {/* セグメントサブタブ（初級時は2つ、中級・上級時は4つ） */}
-                <div className={`grid ${levelMode === 'beginner' ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-4'} gap-1 bg-[#F2ECE1] p-1 rounded-xl text-[11px] sm:text-xs font-bold`}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setConversationSubTab('phrases');
-                      setShowConversationNav(false);
-                    }}
-                    className={`py-2 px-0.5 sm:px-2 rounded-lg transition-all cursor-pointer text-center whitespace-nowrap tracking-tighter sm:tracking-normal flex items-center justify-center gap-1 ${
-                      conversationSubTab === 'phrases'
-                        ? 'bg-white text-[#B84E34] shadow-xs'
-                        : 'text-[#6B635B] hover:text-[#1B2A38]'
-                    }`}
-                  >
-                    <span className="text-[9px] px-1 py-0.2 rounded font-bold bg-[#FAF0EC] text-[#B84E34]">初級</span>
-                    <span>🗣️ 直感フレーズ ({KILLER_PHRASES_DATA.length}選)</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setConversationSubTab('chunks');
-                      setShowConversationNav(false);
-                    }}
-                    className={`py-2 px-0.5 sm:px-2 rounded-lg transition-all cursor-pointer text-center whitespace-nowrap tracking-tighter sm:tracking-normal flex items-center justify-center gap-1 ${
-                      conversationSubTab === 'chunks'
-                        ? 'bg-white text-[#B84E34] shadow-xs'
-                        : 'text-[#6B635B] hover:text-[#1B2A38]'
-                    }`}
-                  >
-                    <span className="text-[9px] px-1 py-0.2 rounded font-bold bg-[#FAF0EC] text-[#B84E34]">初級</span>
-                    <span>💬 実践チャンク ({CONVERSATION_CHUNKS_DATA.length}選)</span>
-                  </button>
-                  {levelMode !== 'beginner' && (
+              {/* カテゴリー絞り込みピル */}
+              {conversationSubTab === 'phrases' && (
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1 border-t border-stone-100">
+                  <span className="text-[11px] font-black text-stone-500 shrink-0">カテゴリー:</span>
+                  {KILLER_PHRASE_CATEGORIES.map((cat) => (
                     <button
+                      key={cat.id}
                       type="button"
                       onClick={() => {
-                        setConversationSubTab('idioms');
-                        setShowConversationNav(false);
+                        sound.playTap();
+                        setSelectedPhraseCategory(cat.id);
                       }}
-                      className={`py-2 px-0.5 sm:px-2 rounded-lg transition-all cursor-pointer text-center whitespace-nowrap tracking-tighter sm:tracking-normal flex items-center justify-center gap-1 ${
-                        conversationSubTab === 'idioms'
-                          ? 'bg-[#1E3A5F] text-white shadow-xs'
-                          : 'text-[#6B635B] hover:text-[#1B2A38]'
+                      className={`px-2.5 py-1 rounded-lg text-xs font-black transition-all cursor-pointer whitespace-nowrap border ${
+                        selectedPhraseCategory === cat.id
+                          ? 'bg-[#CE82FF] text-white border-[#CE82FF] shadow-[0_2px_0_#A855F7] -translate-y-0.5'
+                          : 'bg-white text-stone-600 border-stone-200 hover:bg-stone-50 shadow-[0_1.5px_0_#E5E7EB]'
                       }`}
                     >
-                      <span className={`text-[9px] px-1 py-0.2 rounded font-bold ${
-                        conversationSubTab === 'idioms' ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-900'
-                      }`}>中級</span>
-                      <span>💡 慣用句 ({IDIOMS_PROVERBS_DATA.length}選)</span>
+                      {cat.label}
                     </button>
-                  )}
-                  {levelMode !== 'beginner' && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setConversationSubTab('slang');
-                        setShowConversationNav(false);
-                      }}
-                      className={`py-2 px-0.5 sm:px-2 rounded-lg transition-all cursor-pointer text-center whitespace-nowrap tracking-tighter sm:tracking-normal flex items-center justify-center gap-1 ${
-                        conversationSubTab === 'slang'
-                          ? 'bg-[#1E3A5F] text-white shadow-xs'
-                          : 'text-[#6B635B] hover:text-[#1B2A38]'
-                      }`}
-                    >
-                      <span className={`text-[9px] px-1 py-0.2 rounded font-bold ${
-                        conversationSubTab === 'slang' ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-900'
-                      }`}>中級</span>
-                      <span>🔥 スラング ({SLANG_DATA.length}選)</span>
-                    </button>
-                  )}
+                  ))}
                 </div>
-
-                {/* 慣用句・ことわざの場合のカテゴリーピル */}
-                {conversationSubTab === 'idioms' && (
-                  <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-0.5">
-                    <span className="text-[10px] font-bold text-[#8A8075] shrink-0">種別:</span>
-                    {[
-                      { id: 'all', label: `すべて (${IDIOMS_PROVERBS_DATA.length})` },
-                      { id: 'idiom', label: `身体慣用句 (25)` },
-                      { id: 'proverb', label: `重要ことわざ (15)` },
-                    ].map((tab) => (
-                      <button
-                        key={tab.id}
-                        type="button"
-                        onClick={() => {
-                          setIdiomType(tab.id as any);
-                          setShowConversationNav(false);
-                        }}
-                        className={`px-2 py-0.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-                          idiomType === tab.id
-                            ? 'bg-[#1E3A5F] text-white shadow-xs'
-                            : 'bg-white text-[#756D63] hover:text-[#1B2A38] border border-[#E8E2D5]'
-                        }`}
-                      >
-                        {tab.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {/* 直感フレーズの場合のカテゴリーピル */}
-                {conversationSubTab === 'phrases' && (
-                  <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-0.5">
-                    <span className="text-[10px] font-bold text-[#8A8075] shrink-0">カテゴリー:</span>
-                    {KILLER_PHRASE_CATEGORIES.map((cat) => (
-                      <button
-                        key={cat.id}
-                        type="button"
-                        onClick={() => {
-                          setSelectedPhraseCategory(cat.id);
-                          setShowConversationNav(false);
-                        }}
-                        className={`px-2 py-0.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-                          selectedPhraseCategory === cat.id
-                            ? 'bg-[#B84E34] text-white shadow-xs'
-                            : 'bg-white text-[#756D63] hover:text-[#1B2A38] border border-[#E8E2D5]'
-                        }`}
-                      >
-                        {cat.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {/* 実践チャンクの場合のカテゴリーピル */}
-                {conversationSubTab === 'chunks' && (
-                  <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-0.5">
-                    <span className="text-[10px] font-bold text-[#8A8075] shrink-0">カテゴリー:</span>
+              )}
+              {conversationSubTab === 'chunks' && (
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1 border-t border-stone-100">
+                  <span className="text-[11px] font-black text-stone-500 shrink-0">カテゴリー:</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sound.playTap();
+                      setSelectedChunkCategory('all');
+                    }}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-black transition-all cursor-pointer whitespace-nowrap border ${
+                      selectedChunkCategory === 'all'
+                        ? 'bg-[#1CB0F6] text-white border-[#1CB0F6] shadow-[0_2px_0_#1899D6] -translate-y-0.5'
+                        : 'bg-white text-stone-600 border-stone-200 hover:bg-stone-50 shadow-[0_1.5px_0_#E5E7EB]'
+                    }`}
+                  >
+                    すべて ({CONVERSATION_CHUNKS_DATA.length})
+                  </button>
+                  {CONVERSATION_CATEGORIES.map((cat) => (
                     <button
+                      key={cat}
                       type="button"
                       onClick={() => {
-                        setSelectedChunkCategory('all');
-                        setShowConversationNav(false);
+                        sound.playTap();
+                        setSelectedChunkCategory(cat);
                       }}
-                      className={`px-2 py-0.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-                        selectedChunkCategory === 'all'
-                          ? 'bg-[#B84E34] text-white shadow-xs'
-                          : 'bg-white text-[#756D63] hover:text-[#1B2A38] border border-[#E8E2D5]'
+                      className={`px-2.5 py-1 rounded-lg text-xs font-black transition-all cursor-pointer whitespace-nowrap border ${
+                        selectedChunkCategory === cat
+                          ? 'bg-[#1CB0F6] text-white border-[#1CB0F6] shadow-[0_2px_0_#1899D6] -translate-y-0.5'
+                          : 'bg-white text-stone-600 border-stone-200 hover:bg-stone-50 shadow-[0_1.5px_0_#E5E7EB]'
                       }`}
                     >
-                      全カテゴリー ({CONVERSATION_CHUNKS_DATA.length})
+                      {cat}
                     </button>
-                    {CONVERSATION_CATEGORIES.map((cat) => {
-                      const count = CONVERSATION_CHUNKS_DATA.filter((c) => c.category === cat).length;
-                      return (
-                        <button
-                          key={cat}
-                          type="button"
-                          onClick={() => {
-                            setSelectedChunkCategory(cat);
-                            setShowConversationNav(false);
-                          }}
-                          className={`px-2 py-0.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-                            selectedChunkCategory === cat
-                              ? 'bg-[#B84E34] text-white shadow-xs'
-                              : 'bg-white text-[#756D63] hover:text-[#1B2A38] border border-[#E8E2D5]'
-                          }`}
-                        >
-                          {cat} ({count})
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {/* 若者スラングの場合のカテゴリーピル */}
-                {conversationSubTab === 'slang' && (
-                  <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-0.5">
-                    <span className="text-[10px] font-bold text-[#8A8075] shrink-0">カテゴリー:</span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedSlangCategory('all');
-                        setShowConversationNav(false);
-                      }}
-                      className={`px-2 py-0.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-                        selectedSlangCategory === 'all'
-                          ? 'bg-[#1E3A5F] text-white shadow-xs'
-                          : 'bg-white text-[#756D63] hover:text-[#1B2A38] border border-[#E8E2D5]'
-                      }`}
-                    >
-                      全カテゴリー ({SLANG_DATA.length})
-                    </button>
-                    {SLANG_CATEGORIES.map((cat) => (
-                      <button
-                        key={cat.id}
-                        type="button"
-                        onClick={() => {
-                          setSelectedSlangCategory(cat.id);
-                          setShowConversationNav(false);
-                        }}
-                        className={`px-2 py-0.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-                          selectedSlangCategory === cat.id
-                            ? 'bg-[#1E3A5F] text-white shadow-xs'
-                            : 'bg-white text-[#756D63] hover:text-[#1B2A38] border border-[#E8E2D5]'
-                        }`}
-                      >
-                        {cat.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* ① 🗣️ 直感キラーフレーズ 80選（感覚先行 ＆ 逆翻訳モード） */}
@@ -5259,20 +5053,20 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
         </nav>
       )}
 
-      {/* ===================== ボトムシート詳細モーダル（辞書・会話・助詞） ===================== */}
+      {/* ===================== ボトムシート詳細モーダル（辞書・会話・助詞：Duolingo 3Dスタイル） ===================== */}
       {currentBottomSheetData && (
         <div
-          className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-2xs transition-all"
+          className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/50 backdrop-blur-xs transition-all"
           onClick={() => setBottomSheetItem(null)}
         >
           <div
-            className="w-full sm:max-w-lg bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl max-h-[85vh] sm:max-h-[80vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom-4 duration-200"
+            className="w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl max-h-[85vh] sm:max-h-[80vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom-4 duration-200 border-t-2 sm:border-2 border-stone-200"
             onClick={(e) => e.stopPropagation()}
           >
             {/* ボトムシートヘッダー */}
-            <div className="p-3.5 sm:p-4 border-b border-[#F2ECE1] flex items-center justify-between gap-2 bg-[#FAF7F2]">
-              <div className="flex items-center gap-2 min-w-0">
-                <span className="w-7 h-7 rounded-lg bg-[#FAF0EC] text-[#B84E34] flex items-center justify-center text-xs font-bold font-mono shrink-0">
+            <div className="p-3.5 sm:p-4 border-b-2 border-stone-100 flex items-center justify-between gap-2 bg-stone-50/80">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="w-8 h-8 rounded-xl bg-[#58CC02] text-white shadow-[0_2px_0_#388E00] flex items-center justify-center text-xs font-black font-mono shrink-0">
                   {currentBottomSheetData.type === 'dict'
                     ? currentBottomSheetData.item.no
                     : currentBottomSheetData.type === 'chunk'
@@ -5280,16 +5074,16 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                     : currentBottomSheetData.item.no}
                 </span>
                 <div className="min-w-0">
-                  <span className="text-[10px] font-bold text-[#B84E34] uppercase tracking-wider block">
+                  <span className="text-[10px] font-black text-stone-500 uppercase tracking-wider block">
                     {currentBottomSheetData.type === 'dict'
-                      ? '文法逆引き辞書'
+                      ? '文法逆引き辞典'
                       : currentBottomSheetData.type === 'chunk'
-                      ? `会話チャンク・${currentBottomSheetData.item.category}`
+                      ? `会話チャンク · ${currentBottomSheetData.item.category}`
                       : currentBottomSheetData.type === 'colo'
-                      ? `助詞コロケーション・${currentBottomSheetData.item.category}`
-                      : `重要単語・${currentBottomSheetData.item.categoryLabel}`}
+                      ? `助詞コロケーション · ${currentBottomSheetData.item.category}`
+                      : `重要単語 · ${currentBottomSheetData.item.categoryLabel}`}
                   </span>
-                  <h3 className="font-bold text-sm sm:text-base text-[#1B2A38] truncate">
+                  <h3 className="font-black text-base sm:text-lg text-slate-900 truncate">
                     {currentBottomSheetData.type === 'dict'
                       ? currentBottomSheetData.item.grammar
                       : currentBottomSheetData.type === 'vocab'
@@ -5302,10 +5096,10 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
               <button
                 type="button"
                 onClick={() => setBottomSheetItem(null)}
-                className="w-8 h-8 rounded-full bg-white hover:bg-[#EDE7DC] flex items-center justify-center text-[#756D63] hover:text-[#1B2A38] transition-colors cursor-pointer shrink-0 border border-[#E8E2D5]"
+                className="w-8 h-8 rounded-xl bg-white hover:bg-stone-100 flex items-center justify-center text-stone-500 hover:text-slate-900 transition-colors cursor-pointer shrink-0 border border-stone-200 shadow-2xs"
                 title="閉じる"
               >
-                <X className="w-4 h-4" />
+                <X className="w-4 h-4 stroke-[2.5]" />
               </button>
             </div>
 
@@ -5313,25 +5107,38 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
             <div className="p-4 sm:p-5 overflow-y-auto space-y-3.5 flex-1">
               {currentBottomSheetData.type === 'dict' && (
                 <>
-                  <div className="p-3 bg-[#FAF0EC]/60 border border-[#F0D5CD] rounded-xl text-[#B84E34] font-bold text-sm sm:text-base">
+                  <div className="p-3.5 bg-sky-50 border-2 border-sky-200/90 rounded-2xl text-sky-950 font-black text-sm sm:text-base shadow-[0_2px_0_#BAE6FD]">
                     意味: {currentBottomSheetData.item.meaning}
                   </div>
 
-                  <div className="text-xs sm:text-sm text-[#423B33] bg-[#FAF7F2] p-3 rounded-xl border border-[#EDE7DC]">
-                    <strong className="text-[#1B2A38]">接続ルール:</strong>
-                    <div className="font-mono text-[#B84E34] font-bold mt-1">
+                  <div className="text-xs sm:text-sm text-slate-800 bg-stone-50 p-3.5 rounded-2xl border-2 border-stone-200 shadow-2xs">
+                    <strong className="text-slate-900 font-black">接続ルール:</strong>
+                    <div className="font-mono text-emerald-800 font-black mt-1">
                       {currentBottomSheetData.item.connection}
                     </div>
                   </div>
 
-                  <div className="p-3.5 bg-white rounded-xl border border-[#E8E2D5] space-y-1">
-                    <div className="text-xs text-[#756D63] font-bold">リアル例文:</div>
-                    <div className="font-mono text-emerald-950 font-bold text-sm sm:text-base leading-relaxed">
+                  <div className="p-3.5 sm:p-4 bg-white rounded-2xl border-2 border-stone-200 shadow-[0_2.5px_0_#E5E7EB] space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="text-xs text-stone-500 font-black">リアル例文:</div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          sound.playTap();
+                          speechService.speak(currentBottomSheetData.item.example);
+                        }}
+                        className="w-8 h-8 rounded-xl bg-[#58CC02] hover:bg-[#46A302] text-white flex items-center justify-center shadow-[0_2px_0_#388E00] cursor-pointer"
+                        title="発音を聞く"
+                      >
+                        <Volume2 className="w-4 h-4 stroke-[2.5]" />
+                      </button>
+                    </div>
+                    <div className="font-black text-slate-900 text-sm sm:text-base leading-relaxed">
                       {currentBottomSheetData.item.example}
                     </div>
                   </div>
 
-                  <div className="p-3 bg-amber-50/70 border border-amber-200 rounded-xl text-xs sm:text-sm text-amber-950 leading-relaxed">
+                  <div className="p-3.5 bg-amber-50 rounded-2xl border-2 border-amber-300 text-xs sm:text-sm text-amber-950 leading-relaxed shadow-[0_2px_0_#FDE68A]">
                     💡 <strong>ポイント:</strong> {currentBottomSheetData.item.tip}
                   </div>
 
@@ -5343,7 +5150,7 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                         setBottomSheetItem(null);
                         scrollTo(link.id, 'textbook');
                       }}
-                      className="w-full py-2.5 px-3 rounded-xl bg-[#FAF0EC] hover:bg-[#F5E6DF] text-[#B84E34] font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                      className="w-full py-3 px-4 rounded-2xl bg-[#58CC02] hover:bg-[#46A302] text-white font-black text-xs flex items-center justify-center gap-1.5 transition-all shadow-[0_2.5px_0_#388E00] active:translate-y-0.5 cursor-pointer"
                     >
                       <span>💡 {currentBottomSheetData.item.linkTextbook.label} で教科書の詳細解説を読む</span>
                       <ExternalLink className="w-3.5 h-3.5" />
@@ -5354,43 +5161,54 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
 
               {currentBottomSheetData.type === 'chunk' && (
                 <>
-                  <div className="flex flex-wrap items-center justify-between gap-2 bg-[#FAF7F2] p-2.5 rounded-xl border border-[#EDE7DC]">
-                    <div className="text-xs text-[#B84E34] font-medium">
+                  <div className="flex flex-wrap items-center justify-between gap-2 bg-stone-50 p-3 rounded-2xl border-2 border-stone-200">
+                    <div className="text-xs text-purple-800 font-bold">
                       発音: <strong>{currentBottomSheetData.item.pronunciation}</strong>
                     </div>
-                    <div className="text-xs text-[#544D45]">
-                      丁寧度: <strong className="text-[#1B2A38]">{currentBottomSheetData.item.politeness}</strong>
+                    <div className="text-xs text-slate-700">
+                      丁寧度: <strong className="text-slate-900 font-black">{currentBottomSheetData.item.politeness}</strong>
                     </div>
                   </div>
 
-                  <div className="p-3 bg-[#FAF0EC]/60 border border-[#F0D5CD] rounded-xl text-[#B84E34] font-bold text-sm sm:text-base">
+                  <div className="p-3.5 bg-purple-50 border-2 border-purple-200 rounded-2xl text-purple-950 font-black text-sm sm:text-base shadow-[0_2px_0_#E9D5FF]">
                     意味: {currentBottomSheetData.item.meaning}
                   </div>
 
-                  <div className="p-3 bg-white rounded-xl border border-[#E8E2D5] text-[#3A332C] text-xs sm:text-sm leading-relaxed">
-                    <strong className="text-[#1B2A38] mr-1.5">💡 実践ニュアンス:</strong>
+                  <div className="p-3.5 bg-white rounded-2xl border-2 border-stone-200 text-slate-800 text-xs sm:text-sm leading-relaxed shadow-[0_2px_0_#E5E7EB]">
+                    <strong className="text-slate-900 font-black mr-1.5">💡 実践ニュアンス:</strong>
                     {currentBottomSheetData.item.usage}
                   </div>
 
-                  {/* 2往復ミニ会話 */}
-                  <div className="space-y-2 bg-[#FCFAF7] p-3.5 rounded-xl border border-[#EDE7DC]">
-                    <div className="text-xs font-bold text-[#756D63]">🗣️ AとBのリアルな2往復ミニ会話:</div>
+                  {/* 2往復ミニ会話（Duolingo式 音声付き会話バブル） */}
+                  <div className="space-y-2.5 bg-stone-50/70 p-3.5 rounded-2xl border-2 border-stone-200">
+                    <div className="text-xs font-black text-stone-600">🗣️ AとBのリアルな2往復ミニ会話:</div>
                     {currentBottomSheetData.item.dialogue.map((line, idx) => (
-                      <div key={idx} className="flex items-start gap-2.5">
+                      <div key={idx} className="flex items-start gap-2.5 bg-white p-2.5 rounded-xl border border-stone-200/80 shadow-2xs">
                         <span
-                          className={`shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                            line.speaker === 'A' ? 'bg-[#1B2A38] text-white' : 'bg-[#B84E34] text-white'
+                          className={`shrink-0 w-6 h-6 rounded-lg flex items-center justify-center text-xs font-black ${
+                            line.speaker === 'A' ? 'bg-slate-900 text-white' : 'bg-[#58CC02] text-white'
                           }`}
                         >
                           {line.speaker}
                         </span>
-                        <div className="flex-1 space-y-0.5">
-                          <div className="font-bold text-[#1B2A38] text-sm sm:text-base">{line.ko}</div>
+                        <div className="flex-1 space-y-0.5 min-w-0">
+                          <div className="font-black text-slate-900 text-sm">{line.ko}</div>
                           {showPronunciation && (
-                            <div className="text-[#8A8075] font-mono text-xs">{line.reading}</div>
+                            <div className="text-stone-500 font-mono text-[11px]">[{line.reading}]</div>
                           )}
-                          <div className="text-[#423B33] text-xs sm:text-sm">{line.ja}</div>
+                          <div className="text-slate-700 font-medium text-xs">{line.ja}</div>
                         </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            sound.playTap();
+                            speechService.speak(line.ko);
+                          }}
+                          className="w-7 h-7 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-600 flex items-center justify-center cursor-pointer shrink-0"
+                          title="発音を聞く"
+                        >
+                          <Volume2 className="w-3.5 h-3.5 stroke-[2.5]" />
+                        </button>
                       </div>
                     ))}
                   </div>
@@ -5399,92 +5217,108 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
 
               {currentBottomSheetData.type === 'colo' && (
                 <>
-                  <div className="p-3 bg-[#FAF0EC]/60 border border-[#F0D5CD] rounded-xl text-[#B84E34] font-bold text-sm sm:text-base">
+                  <div className="p-3.5 bg-sky-50 border-2 border-sky-200 rounded-2xl text-sky-950 font-black text-sm sm:text-base shadow-[0_2px_0_#BAE6FD]">
                     意味: {currentBottomSheetData.item.meaning}
                   </div>
 
-                  <div className="text-xs text-[#8A8075] bg-[#FAF7F2] p-2.5 rounded-xl border border-[#EDE7DC]">
-                    発音: <strong className="font-mono text-[#B84E34]">［{currentBottomSheetData.item.pronunciation}］</strong>
+                  <div className="text-xs text-stone-600 bg-stone-50 p-3 rounded-2xl border-2 border-stone-200">
+                    発音: <strong className="font-mono text-sky-700 font-bold">［{currentBottomSheetData.item.pronunciation}］</strong>
                   </div>
 
-                  <div className="p-3.5 bg-amber-50/70 border border-amber-200 rounded-xl text-xs sm:text-sm text-amber-950 space-y-1">
-                    <strong className="text-amber-900 block">⚠️ 日本人がハマる直訳の罠:</strong>
-                    <p className="leading-relaxed">{currentBottomSheetData.item.trap}</p>
+                  <div className="p-3.5 bg-amber-50 border-2 border-amber-200 rounded-2xl text-xs sm:text-sm text-amber-950 space-y-1 shadow-[0_2px_0_#FDE68A]">
+                    <strong className="text-amber-900 block font-black">⚠️ 日本人がハマる直訳の罠:</strong>
+                    <p className="leading-relaxed font-medium">{currentBottomSheetData.item.trap}</p>
                   </div>
 
-                  <div className="p-3.5 bg-white rounded-xl border border-[#E8E2D5] space-y-1">
-                    <div className="text-xs text-[#756D63] font-bold">リアル例文:</div>
-                    <div className="font-bold text-[#1B2A38] text-sm sm:text-base">
+                  <div className="p-3.5 sm:p-4 bg-white rounded-2xl border-2 border-stone-200 space-y-2 shadow-[0_2.5px_0_#E5E7EB]">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="text-xs text-stone-500 font-black">リアル例文:</div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          sound.playTap();
+                          speechService.speak(currentBottomSheetData.item.exampleKo);
+                        }}
+                        className="w-8 h-8 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 flex items-center justify-center cursor-pointer shrink-0"
+                        title="発音を聞く"
+                      >
+                        <Volume2 className="w-4 h-4 stroke-[2.5]" />
+                      </button>
+                    </div>
+                    <div className="font-black text-slate-900 text-sm sm:text-base">
                       {currentBottomSheetData.item.exampleKo}
                     </div>
                     {showPronunciation && (
-                      <div className="text-xs font-mono text-[#8A8075]">
-                        {currentBottomSheetData.item.exampleReading}
+                      <div className="text-xs font-mono text-stone-500">
+                        [{currentBottomSheetData.item.exampleReading}]
                       </div>
                     )}
-                    <div className="text-xs sm:text-sm text-[#423B33]">
+                    <div className="text-xs sm:text-sm text-slate-700 font-medium">
                       {currentBottomSheetData.item.exampleJa}
                     </div>
                   </div>
 
-                  <div className="p-3 bg-white rounded-xl border border-[#EDE7DC] text-xs sm:text-sm text-[#544D45] leading-relaxed">
-                    💡 <strong>使い方のコツ:</strong> {currentBottomSheetData.item.tip}
+                  <div className="p-3.5 bg-white rounded-2xl border-2 border-stone-200 text-xs sm:text-sm text-slate-700 leading-relaxed shadow-2xs">
+                    💡 <strong className="text-slate-900 font-black">使い方のコツ:</strong> {currentBottomSheetData.item.tip}
                   </div>
                 </>
               )}
 
               {currentBottomSheetData.type === 'vocab' && (
                 <>
-                  <div className="flex flex-wrap items-center justify-between gap-2 p-3 bg-[#FAF0EC]/70 border border-[#F0D5CD] rounded-xl">
-                    <div className="text-xs text-[#B84E34] font-medium">
+                  <div className="flex flex-wrap items-center justify-between gap-2 p-3 bg-emerald-50 border-2 border-emerald-200 rounded-2xl shadow-[0_2px_0_#A7F3D0]">
+                    <div className="text-xs text-emerald-900 font-bold">
                       発音: <strong>［{currentBottomSheetData.item.pronunciation}］</strong>
                     </div>
-                    <div className="text-xs text-[#544D45]">
-                      品詞: <strong className="text-[#1B2A38] bg-white px-2 py-0.5 rounded border border-[#EDE7DC]">{currentBottomSheetData.item.pos}</strong>
+                    <div className="text-xs text-slate-700">
+                      品詞: <strong className="text-slate-900 bg-white px-2 py-0.5 rounded-lg border border-stone-200">{currentBottomSheetData.item.pos}</strong>
                     </div>
                   </div>
 
-                  <div className="p-3 bg-white border border-[#E8E2D5] rounded-xl text-[#1B2A38] font-bold text-sm sm:text-base">
+                  <div className="p-3.5 bg-white border-2 border-stone-200 rounded-2xl text-slate-900 font-black text-sm sm:text-base shadow-[0_2px_0_#E5E7EB]">
                     意味: {currentBottomSheetData.item.meaning}
                   </div>
 
                   {/* 活用形（現在ヘヨ体・過去ヘヨ体） */}
                   {(currentBottomSheetData.item.presentForm || currentBottomSheetData.item.pastForm) && (
-                    <div className="grid grid-cols-2 gap-2 bg-[#FAF7F2] p-3 rounded-xl border border-[#EDE7DC]">
+                    <div className="grid grid-cols-2 gap-2 bg-stone-50 p-3.5 rounded-2xl border-2 border-stone-200">
                       <div className="space-y-0.5">
-                        <span className="text-[10px] text-[#756D63] font-bold block">現在ヘヨ体</span>
-                        <span className="font-bold text-[#B84E34] text-sm sm:text-base">{currentBottomSheetData.item.presentForm || '—'}</span>
+                        <span className="text-[10px] text-stone-500 font-black block">現在ヘヨ体</span>
+                        <span className="font-black text-emerald-700 text-sm sm:text-base">{currentBottomSheetData.item.presentForm || '—'}</span>
                       </div>
                       <div className="space-y-0.5">
-                        <span className="text-[10px] text-[#756D63] font-bold block">過去ヘヨ体</span>
-                        <span className="font-bold text-[#1B2A38] text-sm sm:text-base">{currentBottomSheetData.item.pastForm || '—'}</span>
+                        <span className="text-[10px] text-stone-500 font-black block">過去ヘヨ体</span>
+                        <span className="font-black text-slate-900 text-sm sm:text-base">{currentBottomSheetData.item.pastForm || '—'}</span>
                       </div>
                     </div>
                   )}
 
                   {/* 例文 */}
                   {currentBottomSheetData.item.example && (
-                    <div className="p-3.5 bg-white rounded-xl border border-[#E8E2D5] space-y-1">
+                    <div className="p-3.5 sm:p-4 bg-white rounded-2xl border-2 border-stone-200 space-y-2 shadow-[0_2.5px_0_#E5E7EB]">
                       <div className="flex items-center justify-between gap-2">
-                        <div className="text-xs text-[#756D63] font-bold">例文:</div>
+                        <div className="text-xs text-stone-500 font-black">例文:</div>
                         <button
                           type="button"
-                          onClick={() => speechService.speak(currentBottomSheetData.item.example!.ko)}
-                          className="p-1 rounded-full bg-white text-[#B84E34] border border-[#E8E2D5] hover:bg-[#B84E34] hover:text-white transition cursor-pointer shrink-0"
+                          onClick={() => {
+                            sound.playTap();
+                            speechService.speak(currentBottomSheetData.item.example!.ko);
+                          }}
+                          className="w-8 h-8 rounded-xl bg-[#58CC02] hover:bg-[#46A302] text-white flex items-center justify-center shadow-[0_2px_0_#388E00] transition cursor-pointer shrink-0"
                           title="例文を音声で聞く"
                         >
-                          <Volume2 className="w-3.5 h-3.5" />
+                          <Volume2 className="w-4 h-4 stroke-[2.5]" />
                         </button>
                       </div>
-                      <div className="font-bold text-[#1B2A38] text-sm sm:text-base">
+                      <div className="font-black text-slate-900 text-sm sm:text-base">
                         {currentBottomSheetData.item.example.ko}
                       </div>
                       {showPronunciation && currentBottomSheetData.item.example.reading && (
-                        <div className="text-xs text-[#8C8379] font-medium">
+                        <div className="text-xs text-stone-500 font-medium">
                           [{currentBottomSheetData.item.example.reading}]
                         </div>
                       )}
-                      <div className="text-xs sm:text-sm text-[#544D45]">
+                      <div className="text-xs sm:text-sm text-slate-700 font-medium">
                         {currentBottomSheetData.item.example.ja}
                       </div>
                     </div>
@@ -5492,16 +5326,16 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
 
                   {/* 反対語・関連語 */}
                   {currentBottomSheetData.item.relatedWord && (
-                    <div className="p-3 bg-emerald-50/70 border border-emerald-200 rounded-xl text-xs sm:text-sm text-emerald-950">
+                    <div className="p-3.5 bg-emerald-50 border-2 border-emerald-200 rounded-2xl text-xs sm:text-sm text-emerald-950 shadow-[0_2px_0_#A7F3D0]">
                       🔄 <strong>反対語・関連語:</strong> {currentBottomSheetData.item.relatedWord}
                     </div>
                   )}
 
                   {/* コロケーション */}
                   {currentBottomSheetData.item.collocation && (
-                    <div className="p-3.5 bg-white rounded-xl border border-[#E8E2D5] space-y-1">
-                      <div className="text-xs text-[#756D63] font-bold">よく使う組み合わせ:</div>
-                      <div className="font-bold text-[#B84E34] text-sm sm:text-base">
+                    <div className="p-3.5 bg-white rounded-2xl border-2 border-stone-200 space-y-1 shadow-2xs">
+                      <div className="text-xs text-stone-500 font-black">よく使う組み合わせ:</div>
+                      <div className="font-black text-emerald-700 text-sm sm:text-base">
                         {currentBottomSheetData.item.collocation}
                       </div>
                     </div>
@@ -5509,7 +5343,7 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
 
                   {/* ワンポイント解説 */}
                   {currentBottomSheetData.item.tip && (
-                    <div className="p-3 bg-amber-50/80 border border-amber-200 rounded-xl text-xs sm:text-sm text-amber-950 leading-relaxed">
+                    <div className="p-3.5 bg-amber-50 border-2 border-amber-300 rounded-2xl text-xs sm:text-sm text-amber-950 leading-relaxed shadow-[0_2px_0_#FDE68A]">
                       💡 <strong>ワンポイント:</strong> {currentBottomSheetData.item.tip}
                     </div>
                   )}

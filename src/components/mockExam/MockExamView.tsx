@@ -28,6 +28,7 @@ import {
   X,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { HorangiMascot } from '../mascot/HorangiMascot';
 import { speechService } from '../../utils/speech';
 import {
   getInitialGamificationState,
@@ -399,60 +400,60 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
     return (
       <div className="w-full space-y-6 sm:space-y-8">
         {/* ホランイのトロフィー模試アリーナ ヘッダー */}
-        <div className="max-w-3xl mx-auto space-y-4">
+        <div className="max-w-3xl mx-auto space-y-3 sm:space-y-4">
           <div className="bg-gradient-to-r from-amber-400/20 via-orange-400/15 to-emerald-400/15 border-2 border-amber-300 rounded-3xl p-4 sm:p-5 flex flex-col sm:flex-row items-center gap-3 sm:gap-4 shadow-xs text-left">
-            <div className="w-14 h-14 rounded-2xl bg-amber-400/30 border-2 border-amber-400/50 text-3xl flex items-center justify-center shrink-0 shadow-xs">
-              🐯
+            <div className="p-1 rounded-2xl bg-amber-400/20 border-2 border-amber-300/60 shrink-0 shadow-xs">
+              <HorangiMascot size="sm" mood="cheering" showMessage={false} interactive={true} />
             </div>
             <div className="flex-1 min-w-0 text-center sm:text-left">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-400 text-amber-950 text-[11px] font-black uppercase tracking-wider mb-1">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-400 text-amber-950 text-[11px] font-black uppercase tracking-wider mb-1 shadow-2xs">
                 <Trophy className="w-3.5 h-3.5" /> 公式実戦トロフィー模試アリーナ
               </div>
               <h2 className="text-base sm:text-lg font-black text-stone-900 leading-snug">
                 ホランイと一緒に検定試験にチャレンジ！
               </h2>
               <p className="text-xs sm:text-sm text-stone-600 font-medium mt-0.5">
-                過去問の出題傾向に完全準拠！合格ライン（60点）を突破してトロフィーと大量XPをGETしよう ⚡
+                過去問の出題傾向に完全準拠！合格ライン（60点）突破でトロフィーと大量XPをGETしよう ⚡
               </p>
             </div>
           </div>
 
-          {/* カテゴリ切り替えフィルター（Duolingo 3Dピル） */}
-          <div className="flex items-center justify-center gap-2 pt-1 flex-wrap">
+          {/* カテゴリ切り替えフィルター（Duolingo 3Dピル・モバイル1行スクロール） */}
+          <div className="flex items-center justify-start sm:justify-center gap-2 pt-1 overflow-x-auto no-scrollbar py-1">
             <button
               type="button"
               onClick={() => setCategoryFilter('all')}
-              className={`px-4 py-2 rounded-2xl text-xs font-black transition-all cursor-pointer ${
+              className={`px-3.5 sm:px-4 py-2 rounded-2xl text-xs font-black transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                 categoryFilter === 'all'
                   ? 'bg-[#58CC02] text-white shadow-[0_3px_0_#388E00] -translate-y-0.5'
                   : 'bg-white border-2 border-stone-200 text-stone-600 shadow-[0_2px_0_#E5E7EB] hover:bg-stone-50'
               }`}
             >
-              🏅 すべて（全6試験）
+              🏅 すべて (6)
             </button>
             <button
               type="button"
               onClick={() => setCategoryFilter('hanken')}
-              className={`px-4 py-2 rounded-2xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+              className={`px-3.5 sm:px-4 py-2 rounded-2xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
                 categoryFilter === 'hanken'
                   ? 'bg-[#FF9600] text-white shadow-[0_3px_0_#CC7A00] -translate-y-0.5'
                   : 'bg-white border-2 border-stone-200 text-stone-600 shadow-[0_2px_0_#E5E7EB] hover:bg-stone-50'
               }`}
             >
               <Award className="w-3.5 h-3.5" />
-              <span>ハングル能力検定（4試験）</span>
+              <span>ハン検 (4)</span>
             </button>
             <button
               type="button"
               onClick={() => setCategoryFilter('topik')}
-              className={`px-4 py-2 rounded-2xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 ${
+              className={`px-3.5 sm:px-4 py-2 rounded-2xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
                 categoryFilter === 'topik'
                   ? 'bg-[#1CB0F6] text-white shadow-[0_3px_0_#1899D6] -translate-y-0.5'
                   : 'bg-white border-2 border-stone-200 text-stone-600 shadow-[0_2px_0_#E5E7EB] hover:bg-stone-50'
               }`}
             >
               <GraduationCap className="w-3.5 h-3.5" />
-              <span>TOPIK（2試験）</span>
+              <span>TOPIK (2)</span>
             </button>
           </div>
         </div>
@@ -520,7 +521,7 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
                     <div className="bg-[#FAF7F2] rounded-2xl p-4 border border-[#E8E2D5] space-y-2">
                       <div className="text-xs font-black text-stone-800 flex items-center gap-1.5">
                         <Target className="w-4 h-4 text-[#58CC02]" />
-                        <span>🎯 この級でクリアできること</span>
+                        <span>この級でクリアできること</span>
                       </div>
                       <ul className="space-y-1.5">
                         {exam.canDoList.slice(0, 3).map((canDo, idx) => (
@@ -613,7 +614,7 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
                     <div className="bg-[#FAF7F2] rounded-2xl p-4 border border-[#E8E2D5] space-y-2">
                       <div className="text-xs font-black text-stone-800 flex items-center gap-1.5">
                         <Target className="w-4 h-4 text-[#1CB0F6]" />
-                        <span>🎯 この級でクリアできること</span>
+                        <span>この級でクリアできること</span>
                       </div>
                       <ul className="space-y-1.5">
                         {exam.canDoList.slice(0, 3).map((canDo, idx) => (

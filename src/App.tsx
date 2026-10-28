@@ -21,6 +21,7 @@ import {
   saveGamificationState,
   calculateLevelInfo,
 } from './utils/gamification';
+import { sound } from './utils/audioSynth';
 
 type MainTab = 'dashboard' | 'roadmap' | 'exam' | 'library' | 'quiz';
 
@@ -95,45 +96,76 @@ export const App: React.FC = () => {
               <span className="text-[10px] text-slate-600 font-mono">Lv.{Math.floor(gameState.xp / 300) + 1}</span>
             </div>
 
-            {/* ナビゲーションアイコン */}
-            {activeTab !== 'roadmap' ? (
+            {/* デスクトップ用 ナビゲーションアイコン（Duolingo風 3Dピル） */}
+            <div className="hidden sm:flex items-center gap-1.5 shrink-0">
               <button
                 type="button"
-                onClick={() => setActiveTab('roadmap')}
-                className="h-8 px-2.5 rounded-xl bg-[#B84E34] hover:bg-[#a2432c] text-white text-xs font-black shadow-xs transition-all flex items-center gap-1 cursor-pointer"
+                onClick={() => {
+                  sound.playTap();
+                  setActiveTab('roadmap');
+                }}
+                className={`h-8 px-2.5 rounded-xl font-black text-xs flex items-center gap-1 cursor-pointer transition-all ${
+                  activeTab === 'roadmap'
+                    ? 'bg-[#58CC02] text-white shadow-[0_2.5px_0_#388E00] -translate-y-0.5'
+                    : 'bg-white border-2 border-stone-200 text-stone-700 hover:bg-stone-50 shadow-[0_2px_0_#E5E7EB]'
+                }`}
               >
-                <Compass className="w-3.5 h-3.5" />
-                <span className="hidden xs:inline">マップ</span>
+                <Compass className="w-3.5 h-3.5 stroke-[2.5]" />
+                <span>クエスト</span>
               </button>
-            ) : (
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  title="模擬試験一覧"
-                  onClick={() => setActiveTab('exam')}
-                  className="w-8 h-8 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 flex items-center justify-center cursor-pointer shadow-2xs transition-all"
-                >
-                  <GraduationCap className="w-4 h-4 text-slate-600" />
-                </button>
-                <button
-                  type="button"
-                  title="文法大辞典・参考書ライブラリ"
-                  onClick={() => {
-                    setLibrarySubTab('textbook');
-                    setActiveTab('library');
-                  }}
-                  className="w-8 h-8 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 flex items-center justify-center cursor-pointer shadow-2xs transition-all"
-                >
-                  <BookOpen className="w-4 h-4 text-slate-600" />
-                </button>
-              </div>
-            )}
+              <button
+                type="button"
+                onClick={() => {
+                  sound.playTap();
+                  setActiveTab('exam');
+                }}
+                className={`h-8 px-2.5 rounded-xl font-black text-xs flex items-center gap-1 cursor-pointer transition-all ${
+                  activeTab === 'exam'
+                    ? 'bg-[#FF9600] text-white shadow-[0_2.5px_0_#CC7A00] -translate-y-0.5'
+                    : 'bg-white border-2 border-stone-200 text-stone-700 hover:bg-stone-50 shadow-[0_2px_0_#E5E7EB]'
+                }`}
+              >
+                <GraduationCap className="w-3.5 h-3.5 stroke-[2.5]" />
+                <span>模試</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  sound.playTap();
+                  setLibrarySubTab('textbook');
+                  setActiveTab('library');
+                }}
+                className={`h-8 px-2.5 rounded-xl font-black text-xs flex items-center gap-1 cursor-pointer transition-all ${
+                  activeTab === 'library'
+                    ? 'bg-[#1CB0F6] text-white shadow-[0_2.5px_0_#1899D6] -translate-y-0.5'
+                    : 'bg-white border-2 border-stone-200 text-stone-700 hover:bg-stone-50 shadow-[0_2px_0_#E5E7EB]'
+                }`}
+              >
+                <BookOpen className="w-3.5 h-3.5 stroke-[2.5]" />
+                <span>教科書</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  sound.playTap();
+                  setActiveTab('quiz');
+                }}
+                className={`h-8 px-2.5 rounded-xl font-black text-xs flex items-center gap-1 cursor-pointer transition-all ${
+                  activeTab === 'quiz'
+                    ? 'bg-[#CE82FF] text-white shadow-[0_2.5px_0_#A855F7] -translate-y-0.5'
+                    : 'bg-white border-2 border-stone-200 text-stone-700 hover:bg-stone-50 shadow-[0_2px_0_#E5E7EB]'
+                }`}
+              >
+                <Zap className="w-3.5 h-3.5 stroke-[2.5]" />
+                <span>特訓</span>
+              </button>
+            </div>
           </div>
         </div>
       </header>
 
       {/* メインコンテンツ */}
-      <main className="flex-1 pb-6">
+      <main className="flex-1 pb-24 sm:pb-8">
         {activeTab === 'dashboard' ? (
           <div className="max-w-6xl mx-auto px-3 sm:px-6 py-4 sm:py-8">
             {/* 🐯 Duolingo風 ウェルカムバナー */}
@@ -325,6 +357,61 @@ export const App: React.FC = () => {
           </div>
         ) : null}
       </main>
+
+      {/* 📱 Duolingo風 モバイル下部固定ナビゲーションバー（親指で届く快適タブ） */}
+      <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t-2 border-stone-200/90 py-1.5 px-3 flex items-center justify-around shadow-[0_-4px_16px_rgba(0,0,0,0.06)] pb-[env(safe-area-inset-bottom)]">
+        {[
+          { id: 'roadmap' as const, label: 'クエスト', icon: Compass, color: '#58CC02', shadow: '#388E00' },
+          { id: 'exam' as const, label: '模試', icon: GraduationCap, color: '#FF9600', shadow: '#CC7A00' },
+          { id: 'library' as const, label: '教科書', icon: BookOpen, color: '#1CB0F6', shadow: '#1899D6' },
+          { id: 'quiz' as const, label: '特訓', icon: Zap, color: '#CE82FF', shadow: '#A855F7' },
+        ].map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => {
+                sound.playTap();
+                if (tab.id === 'library') {
+                  setLibrarySubTab('textbook');
+                }
+                setActiveTab(tab.id);
+              }}
+              className={`flex flex-col items-center justify-center py-1 px-3 rounded-2xl transition-all cursor-pointer select-none active:scale-95 ${
+                isActive ? '-translate-y-1' : 'hover:bg-stone-50'
+              }`}
+            >
+              <div
+                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
+                  isActive
+                    ? 'text-white shadow-sm'
+                    : 'bg-transparent text-stone-600'
+                }`}
+                style={
+                  isActive
+                    ? {
+                        backgroundColor: tab.color,
+                        boxShadow: `0 3px 0 ${tab.shadow}`,
+                      }
+                    : undefined
+                }
+              >
+                <Icon className={`w-5 h-5 ${isActive ? 'stroke-[2.5]' : 'stroke-2'}`} />
+              </div>
+              <span
+                className={`text-[10px] mt-0.5 tracking-tight ${
+                  isActive ? 'font-black' : 'font-bold text-stone-600'
+                }`}
+                style={isActive ? { color: tab.color } : undefined}
+              >
+                {tab.label}
+              </span>
+            </button>
+          );
+        })}
+      </nav>
     </div>
   );
 };

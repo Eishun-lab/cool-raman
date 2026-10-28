@@ -78,6 +78,14 @@ export const TrailPathCanvas: React.FC<TrailPathCanvasProps> = ({
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   // Duolingo風：ノードタップ時に下からスッと開く特訓開始シート
   const [previewTaskIdx, setPreviewTaskIdx] = useState<number | null>(null);
+  const [tigerQuoteIdx, setTigerQuoteIdx] = useState(0);
+  const TIGER_QUOTES = [
+    '화이팅! 🐯',
+    '오늘도 힘내자! ⚡',
+    '넌 할 수 있어! ✨',
+    '달려보자! 🐾',
+    '대단해! 🌟',
+  ];
 
   const isChestOpened = !!completedQuests[`chest_s${step.step}`];
 
@@ -132,16 +140,118 @@ export const TrailPathCanvas: React.FC<TrailPathCanvasProps> = ({
           <circle cx="80" cy="530" r="5" fill="#CBD5E1" opacity="0.6" />
           <circle cx="280" cy="670" r="6" fill="#CBD5E1" opacity="0.6" />
 
-          {/* 漢江の水面さざ波＆ピクニックシート（Step 3など） */}
+          {/* 🏙️ ソウル8大エリア固有の風景イラスト・ランドマークデカール */}
+          {step.step === 1 && (
+            /* Area 1: 弘大・延南洞（バスキング・カフェ・アート） */
+            <g opacity="0.6">
+              {/* ギターシルエット */}
+              <circle cx="55" cy="220" r="14" fill="#E2E8F0" />
+              <rect x="52" y="185" width="6" height="25" rx="2" fill="#CBD5E1" />
+              {/* 音符 */}
+              <text x="75" y="195" fontSize="16" fill="#A855F7" opacity="0.7 font-bold">♪</text>
+              <text x="88" y="215" fontSize="13" fill="#EC4899" opacity="0.6">♫</text>
+              {/* テイクアウトコーヒー */}
+              <rect x="290" y="525" width="20" height="26" rx="4" fill="#F8FAFC" stroke="#CBD5E1" strokeWidth="1.5" />
+              <rect x="287" y="521" width="26" height="5" rx="2" fill="#F97316" opacity="0.8" />
+              <path d="M 297, 514 Q 295, 508 299, 504" stroke="#94A3B8" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+            </g>
+          )}
+
+          {step.step === 2 && (
+            /* Area 2: 聖水洞（レンガカフェ・フォトブース） */
+            <g opacity="0.6">
+              {/* 赤レンガ倉庫の壁面 */}
+              <rect x="35" y="200" width="45" height="35" rx="3" fill="#E2E8F0" />
+              <rect x="42" y="208" width="12" height="18" rx="2" fill="#94A3B8" />
+              <rect x="60" y="208" width="12" height="18" rx="2" fill="#94A3B8" />
+              {/* カメラアイコン */}
+              <rect x="285" y="520" width="30" height="22" rx="4" fill="#334155" />
+              <circle cx="300" cy="531" r="6" fill="#94A3B8" />
+              <circle cx="308" cy="524" r="2" fill="#38BDF8" />
+            </g>
+          )}
+
           {step.step === 3 && (
-            <g opacity="0.5" stroke="#38BDF8" strokeWidth="2.5" strokeLinecap="round">
-              <path d="M 35, 215 Q 50, 210 65, 215 T 95, 215" />
-              <path d="M 45, 230 Q 60, 225 75, 230" />
-              <path d="M 275, 515 Q 290, 510 305, 515 T 335, 515" />
-              <path d="M 285, 530 Q 300, 525 315, 530" />
+            /* Area 3: 汝矣島・漢江（水面さざ波・ピクニック・ラーメン） */
+            <g opacity="0.6">
+              <g stroke="#38BDF8" strokeWidth="2.5" strokeLinecap="round">
+                <path d="M 35, 215 Q 50, 210 65, 215 T 95, 215" />
+                <path d="M 45, 230 Q 60, 225 75, 230" />
+                <path d="M 275, 515 Q 290, 510 305, 515 T 335, 515" />
+                <path d="M 285, 530 Q 300, 525 315, 530" />
+              </g>
               {/* ピクニックシート */}
-              <rect x="25" y="440" width="28" height="18" rx="3" fill="#FDE047" opacity="0.75" transform="rotate(-8 25 440)" />
-              <rect x="28" y="443" width="22" height="12" rx="2" fill="#FEF08A" opacity="0.9" transform="rotate(-8 25 440)" />
+              <rect x="25" y="440" width="30" height="20" rx="3" fill="#FDE047" opacity="0.85" transform="rotate(-8 25 440)" />
+              <rect x="28" y="443" width="24" height="14" rx="2" fill="#FEF08A" opacity="0.95" transform="rotate(-8 25 440)" />
+              {/* 漢江ラーメン鍋 */}
+              <ellipse cx="40" cy="450" rx="6" ry="4" fill="#EA580C" />
+            </g>
+          )}
+
+          {step.step === 4 && (
+            /* Area 4: 仁寺洞・益善洞（韓屋の瓦屋根・伝統茶・青紗一籠） */
+            <g opacity="0.6">
+              {/* 韓屋の瓦屋根シルエット */}
+              <path d="M 25, 225 Q 55, 205 85, 225 L 80, 230 Q 55, 215 30, 230 Z" fill="#475569" />
+              <rect x="35" y="230" width="40" height="20" fill="#E2E8F0" />
+              {/* 伝統提灯 */}
+              <rect x="295" y="520" width="16" height="12" rx="3" fill="#EF4444" />
+              <rect x="295" y="532" width="16" height="12" rx="3" fill="#3B82F6" />
+              <line x1="303" y1="512" x2="303" y2="520" stroke="#64748B" strokeWidth="2" />
+            </g>
+          )}
+
+          {step.step === 5 && (
+            /* Area 5: 明洞・南山（Nソウルタワー・屋台グルメ） */
+            <g opacity="0.6">
+              {/* Nソウルタワーシルエット */}
+              <path d="M 50, 240 L 53, 175 L 48, 175 L 53, 150 L 54, 150 L 59, 175 L 54, 175 L 57, 240 Z" fill="#64748B" />
+              <rect x="47" y="180" width="13" height="8" rx="2" fill="#0284C7" />
+              {/* 屋台風トッポッキ串 */}
+              <line x1="285" y1="535" x2="315" y2="515" stroke="#D97706" strokeWidth="2.5" strokeLinecap="round" />
+              <circle cx="295" cy="528" r="4.5" fill="#EF4444" />
+              <circle cx="305" cy="522" r="4.5" fill="#EF4444" />
+            </g>
+          )}
+
+          {step.step === 6 && (
+            /* Area 6: 梨泰院・漢南洞（ヘッドフォン・ネオン） */
+            <g opacity="0.6">
+              {/* ヘッドフォン */}
+              <path d="M 40, 220 A 18 18 0 0 1 72, 220" stroke="#334155" strokeWidth="3" fill="none" />
+              <rect x="36" y="215" width="8" height="14" rx="3" fill="#06B6D4" />
+              <rect x="68" y="215" width="8" height="14" rx="3" fill="#06B6D4" />
+              {/* ルーフトップカクテル */}
+              <polygon points="290,520 310,520 300,535" fill="#EC4899" opacity="0.8" />
+              <line x1="300" y1="535" x2="300" y2="548" stroke="#64748B" strokeWidth="2" />
+              <line x1="294" y1="548" x2="306" y2="548" stroke="#64748B" strokeWidth="2" strokeLinecap="round" />
+            </g>
+          )}
+
+          {step.step === 7 && (
+            /* Area 7: 江南・狎鴎亭（高層ビル・サングラス・2号線） */
+            <g opacity="0.6">
+              {/* 高層ビルのシルエット群 */}
+              <rect x="35" y="195" width="20" height="45" fill="#94A3B8" rx="2" />
+              <rect x="58" y="175" width="22" height="65" fill="#64748B" rx="2" />
+              {/* 地下鉄2号線のグリーンの丸 */}
+              <circle cx="300" cy="530" r="14" fill="#10B981" />
+              <text x="296" y="535" fontSize="13" fill="#FFFFFF" fontWeight="900">2</text>
+            </g>
+          )}
+
+          {step.step === 8 && (
+            /* Area 8: 蚕室・ロッテワールド（お城・観覧車・バルーン） */
+            <g opacity="0.6">
+              {/* ロッテワールド城の尖塔 */}
+              <path d="M 40, 240 L 40, 210 L 48, 190 L 56, 210 L 56, 240 Z" fill="#6366F1" />
+              <path d="M 58, 240 L 58, 200 L 68, 180 L 78, 200 L 78, 240 Z" fill="#4F46E5" />
+              <circle cx="48" cy="189" r="2.5" fill="#F59E0B" />
+              <circle cx="68" cy="179" r="2.5" fill="#F59E0B" />
+              {/* カラフル風船 */}
+              <circle cx="295" cy="520" r="8" fill="#EC4899" />
+              <circle cx="308" cy="515" r="9" fill="#3B82F6" />
+              <circle cx="302" cy="527" r="7" fill="#F59E0B" />
             </g>
           )}
 
@@ -207,13 +317,22 @@ export const TrailPathCanvas: React.FC<TrailPathCanvasProps> = ({
                     <div className="w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[5px] border-t-slate-900 -mt-0.5" />
                   </div>
 
-                  {/* ホランイ（マスコット）がトレイル脇の地面に立ってフキダシで応援 */}
-                  <div className="absolute -left-16 sm:-left-20 top-0 z-30 flex flex-col items-center pointer-events-none select-none">
-                    <div className="relative mb-1 px-2.5 py-0.5 bg-white rounded-xl shadow-md border border-slate-200/90 text-[11px] font-black text-slate-800 whitespace-nowrap">
-                      <span>화이팅! 🐯</span>
+                  {/* ホランイ（マスコット）がトレイル脇の地面に立ってフキダシで応援（タップで喋る！） */}
+                  <div
+                    onClick={() => {
+                      sound.playCorrect();
+                      setTigerQuoteIdx((prev) => (prev + 1) % TIGER_QUOTES.length);
+                    }}
+                    className="absolute -left-16 sm:-left-20 top-0 z-30 flex flex-col items-center cursor-pointer select-none group"
+                    title="ホランイをタップして応援を聞く！"
+                  >
+                    <div className="relative mb-1 px-2.5 py-1 bg-white rounded-2xl shadow-md border-2 border-amber-300 text-[11px] font-black text-slate-800 whitespace-nowrap animate-bounce-subtle">
+                      <span>{TIGER_QUOTES[tigerQuoteIdx]}</span>
                       <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[4px] border-t-white" />
                     </div>
-                    <HorangiMascot size="sm" mood="cheering" showMessage={false} interactive={false} />
+                    <div className="transition-transform group-hover:scale-110 active:scale-95 animate-bounce-subtle">
+                      <HorangiMascot size="sm" mood="cheering" showMessage={false} interactive={false} />
+                    </div>
                     <div className="w-10 h-2 bg-slate-900/15 rounded-full blur-[1px] -mt-1" />
                   </div>
                 </>
@@ -221,6 +340,11 @@ export const TrailPathCanvas: React.FC<TrailPathCanvasProps> = ({
 
               {/* 🌟 Duolingo本家 3D円形コイン（完全な円・8pxシリンダー沈み込み） */}
               <div className="relative flex items-center justify-center">
+                {/* 脈動するレーダー光彩（アクティブノードへの没入感） */}
+                {isCurrent && (
+                  <div className="absolute -inset-2.5 rounded-full bg-orange-400/40 animate-ping pointer-events-none -z-10" />
+                )}
+
                 {/* 外周プログレスリング（現在のアクティブノードに太い円弧ゲージ） */}
                 {isCurrent && (
                   <svg className="absolute -inset-2.5 w-[calc(100%+20px)] h-[calc(100%+20px)] -rotate-90 pointer-events-none">
