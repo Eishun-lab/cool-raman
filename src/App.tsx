@@ -3,6 +3,7 @@ import { SpeakHomeScreen } from './components/speak/SpeakHomeScreen';
 import { SpeakLessonModal } from './components/speak/SpeakLessonModal';
 import { SpeakFreeTalkView } from './components/speak/SpeakFreeTalkView';
 import { SpeakPracticeView } from './components/speak/SpeakPracticeView';
+import { SpeakChallengeView } from './components/speak/SpeakChallengeView';
 import { SpeakProfileView } from './components/speak/SpeakProfileView';
 import { SpeakBottomNav, SpeakTabType } from './components/speak/SpeakBottomNav';
 import { ModernDrillSession } from './components/roadmap/ModernDrillSession';
@@ -58,7 +59,7 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#0A0D14] text-white font-sans antialiased selection:bg-blue-600 selection:text-white">
-      {/* メイン画面ルーティング */}
+      {/* メイン画面ルーティング（Speak 5大タブ完全対応） */}
       {activeTab === 'home' && (
         <SpeakHomeScreen
           currentStreak={studyProgress.streakDays}
@@ -68,7 +69,7 @@ export const App: React.FC = () => {
       )}
 
       {activeTab === 'freetalk' && (
-        <SpeakFreeTalkView onBackToHome={() => setActiveTab('home')} />
+        <SpeakFreeTalkView />
       )}
 
       {activeTab === 'practice' && (
@@ -76,7 +77,7 @@ export const App: React.FC = () => {
       )}
 
       {activeTab === 'challenge' && (
-        <SpeakPracticeView onStartDrill={handleStartTodayDrill} />
+        <SpeakChallengeView userXp={studyProgress.xp} />
       )}
 
       {activeTab === 'profile' && (
