@@ -105,6 +105,7 @@ export interface LessonData {
       rows: string[][];
     };
   };
+  vocabList?: { ko: string; reading: string; ja: string; tip?: string }[];
   examples: LessonExample[];
   pitfall: {
     title: string;

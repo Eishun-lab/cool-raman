@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import {
-  Home,
-  BookOpen,
-  Award,
   Flame,
   Zap,
+  ArrowLeft,
 } from 'lucide-react';
 import { HankenHomeScreen } from './components/home/HankenHomeScreen';
 import { HankenTextbookView } from './components/textbook/HankenTextbookView';
@@ -25,10 +23,10 @@ import {
   getTodayQuickDrill,
 } from './services/drillGeneratorService';
 
-type MainTab = 'home' | 'textbook' | 'exam';
+type MainView = 'home' | 'textbook' | 'exam';
 
 export const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<MainTab>('home');
+  const [activeView, setActiveView] = useState<MainView>('home');
   const [targetExamId, setTargetExamId] = useState<ExamType>('hanken_5');
   const [selectedLessonId, setSelectedLessonId] = useState<string | undefined>(undefined);
 
@@ -78,7 +76,7 @@ export const App: React.FC = () => {
     if (lessonId) {
       handleSelectLesson(lessonId);
     }
-    setActiveTab('textbook');
+    setActiveView('textbook');
   };
 
   // 課の特訓開始
@@ -96,177 +94,115 @@ export const App: React.FC = () => {
   };
 
   // 模試開始
-  const handleStartMockExam = (examId: 'hanken_5' | 'hanken_4' | 'hanken_3') => {
+  const handleStartMockExam = (examId: 'hanken_5') => {
     setTargetExamId(examId);
-    setActiveTab('exam');
+    setActiveView('exam');
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF9F6] text-stone-900 font-sans flex flex-col antialiased selection:bg-amber-100 selection:text-amber-900">
-      {/* 🌟 ハン検特化 洗練されたミニマル・ヘッダー */}
-      <header className="sticky top-0 z-40 bg-[#FAF9F6]/95 backdrop-blur-md border-b border-[#EAE8E3] px-3 sm:px-6 h-13 sm:h-14 flex items-center">
-        <div className="max-w-4xl mx-auto w-full flex items-center justify-between gap-2">
-          {/* ロゴ ＆ バッジ */}
-          <div
-            onClick={() => {
-              sound.playTap();
-              setActiveTab('home');
-            }}
-            className="flex items-center gap-2.5 cursor-pointer group shrink-0 select-none"
-          >
-            <div className="w-8 h-8 rounded-xl overflow-hidden border border-[#EAE8E3] shadow-2xs group-hover:scale-105 transition-all shrink-0 bg-white">
-              <img
-                src={hanmoaLogo}
-                alt="HanMoa Logo"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="font-bold text-base sm:text-lg tracking-tight text-stone-900 whitespace-nowrap">
-                HanMoa
-              </span>
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/80 whitespace-nowrap">
-                🇰🇷 ハン検 5級・4級・3級
-              </span>
+    <div className="min-h-screen bg-[#FAF7F2] text-[#2A2421] font-sans flex flex-col antialiased selection:bg-[#FAF0EC] selection:text-[#B84E34]">
+      {/* 🌟 アイコンの伝統・温かみに調和した上質ヘッダー */}
+      <header className="sticky top-0 z-40 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#EAE4DA] px-3.5 sm:px-6 h-14 flex items-center">
+        <div className="max-w-xl mx-auto w-full flex items-center justify-between gap-2">
+          {/* 左側：ロゴ ＆ アプリ名 ＆ 5級チャレンジバッジ（または戻るボタン） */}
+          <div className="flex items-center gap-2.5 select-none">
+            {activeView !== 'home' ? (
+              <button
+                type="button"
+                onClick={() => {
+                  sound.playTap();
+                  setActiveView('home');
+                }}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white border border-[#EAE4DA] text-xs font-bold text-stone-700 hover:text-[#B84E34] transition-all cursor-pointer shadow-2xs"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>戻る</span>
+              </button>
+            ) : null}
+
+            <div
+              onClick={() => {
+                sound.playTap();
+                setActiveView('home');
+              }}
+              className="flex items-center gap-2 cursor-pointer group"
+            >
+              <div className="w-8 h-8 rounded-xl overflow-hidden border border-[#EAE4DA] shadow-2xs group-hover:scale-105 transition-all shrink-0 bg-white">
+                <img
+                  src={hanmoaLogo}
+                  alt="HanMoa Logo"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="font-bold text-base sm:text-lg tracking-tight text-[#2A2421]">
+                  HanMoa
+                </span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD]">
+                  5級 チャレンジ
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* 右側：ステータス（ストリーク ＆ XP） ＆ デスクトップナビ */}
-          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+          {/* 右側：ストリーク（炎） ＆ XP（稲妻） */}
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 select-none">
             {/* ストリーク（炎） */}
             <div
-              className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white border border-[#EAE8E3] text-stone-800 font-bold text-xs shadow-2xs"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white border border-[#EAE4DA] text-stone-800 font-bold text-xs shadow-2xs"
               title={`${studyProgress.streakDays}日連続学習中！`}
             >
-              <Flame className="w-3.5 h-3.5 text-orange-500 fill-orange-500" />
-              <span>{studyProgress.streakDays}日</span>
+              <Flame className="w-3.5 h-3.5 text-[#B84E34] fill-[#B84E34]" />
+              <span className="font-mono">{studyProgress.streakDays}日</span>
             </div>
 
             {/* XP（稲妻） */}
             <div
-              className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white border border-[#EAE8E3] text-stone-800 font-bold text-xs shadow-2xs"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white border border-[#EAE4DA] text-stone-800 font-bold text-xs shadow-2xs"
               title={`累計獲得経験値: ${studyProgress.xp} XP`}
             >
               <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-              <span>{studyProgress.xp} XP</span>
+              <span className="font-mono">{studyProgress.xp} XP</span>
             </div>
-
-            {/* デスクトップ用 ナビゲーション（3タブ セグメントコントロール） */}
-            <nav className="hidden sm:flex items-center p-0.5 rounded-xl bg-stone-200/50 border border-[#EAE8E3] shadow-2xs shrink-0 ml-1">
-              {[
-                { id: 'home' as const, label: 'ホーム', icon: Home },
-                { id: 'textbook' as const, label: '要点教科書', icon: BookOpen },
-                { id: 'exam' as const, label: '本番模試', icon: Award },
-              ].map((tab) => {
-                const Icon = tab.icon;
-                const isActive = activeTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => {
-                      sound.playTap();
-                      setActiveTab(tab.id);
-                    }}
-                    className={`h-7 px-3 rounded-lg font-bold text-xs flex items-center gap-1.5 cursor-pointer transition-all ${
-                      isActive
-                        ? 'bg-white text-stone-900 shadow-2xs'
-                        : 'text-stone-500 hover:text-stone-900 hover:bg-stone-200/50'
-                    }`}
-                  >
-                    <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-stone-900 stroke-[2.2]' : 'stroke-2'}`} />
-                    <span>{tab.label}</span>
-                  </button>
-                );
-              })}
-            </nav>
           </div>
         </div>
       </header>
 
-      {/* メインコンテンツ */}
-      <main className="flex-1 pb-24 sm:pb-12">
-        {activeTab === 'home' && (
-          <div className="w-full max-w-4xl mx-auto px-3 sm:px-6 py-4 sm:py-7">
-            <HankenHomeScreen
-              progressState={studyProgress}
-              onOpenTextbook={handleOpenTextbook}
-              onStartDrillForLesson={handleStartDrillForLesson}
-              onStartTodayDrill={handleStartTodayDrill}
-              onStartMockExam={handleStartMockExam}
-            />
-          </div>
+      {/* メインコンテンツ（下部メニューバー全廃・ユーザーの1点集中体験） */}
+      <main className="flex-1 w-full max-w-xl mx-auto px-3.5 sm:px-6 py-4 sm:py-6">
+        {activeView === 'home' && (
+          <HankenHomeScreen
+            progressState={studyProgress}
+            onOpenTextbook={handleOpenTextbook}
+            onStartDrillForLesson={handleStartDrillForLesson}
+            onStartTodayDrill={handleStartTodayDrill}
+            onStartMockExam={handleStartMockExam}
+          />
         )}
 
-        {activeTab === 'textbook' && (
-          <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 py-2 sm:py-6">
-            <HankenTextbookView
-              initialLessonId={selectedLessonId || studyProgress.lastReadLessonId || undefined}
-              onSelectLesson={handleSelectLesson}
-              onStartDrillForLesson={handleStartDrillForLesson}
-              onBackToHome={() => setActiveTab('home')}
-            />
-          </div>
+        {activeView === 'textbook' && (
+          <HankenTextbookView
+            initialLessonId={selectedLessonId || studyProgress.lastReadLessonId || undefined}
+            onSelectLesson={handleSelectLesson}
+            onStartDrillForLesson={handleStartDrillForLesson}
+            onBackToHome={() => setActiveView('home')}
+          />
         )}
 
-        {activeTab === 'exam' && (
-          <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 py-2 sm:py-6">
-            <MockExamView
-              initialExamId={targetExamId}
-              onNavigateToTextbookLesson={(lessonId) => {
-                handleOpenTextbook(lessonId);
-              }}
-              onNavigateToDictionary={(dictId) => {
-                handleOpenTextbook(dictId);
-              }}
-              onBackToDashboard={() => setActiveTab('home')}
-              onNavigateToRoadmap={() => setActiveTab('home')}
-            />
-          </div>
+        {activeView === 'exam' && (
+          <MockExamView
+            initialExamId={targetExamId}
+            onNavigateToTextbookLesson={(lessonId) => {
+              handleOpenTextbook(lessonId);
+            }}
+            onNavigateToDictionary={(dictId) => {
+              handleOpenTextbook(dictId);
+            }}
+            onBackToDashboard={() => setActiveView('home')}
+            onNavigateToRoadmap={() => setActiveView('home')}
+          />
         )}
       </main>
-
-      {/* 📱 モバイル下部固定ナビゲーションバー（3タブ ミニマルフロストバー） */}
-      <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#FAF9F6]/95 backdrop-blur-md border-t border-[#EAE8E3] py-1.5 px-6 flex items-center justify-around shadow-[0_-2px_12px_rgba(0,0,0,0.03)] pb-[env(safe-area-inset-bottom)]">
-        {[
-          { id: 'home' as const, label: 'ホーム', icon: Home },
-          { id: 'textbook' as const, label: '要点教科書', icon: BookOpen },
-          { id: 'exam' as const, label: '本番模試', icon: Award },
-        ].map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => {
-                sound.playTap();
-                setActiveTab(tab.id);
-              }}
-              className={`flex flex-col items-center justify-center py-1 px-4 rounded-2xl transition-all cursor-pointer select-none active:scale-95 ${
-                isActive ? 'text-stone-900' : 'text-stone-400 hover:text-stone-700'
-              }`}
-            >
-              <div
-                className={`w-9 h-7 rounded-xl flex items-center justify-center transition-all ${
-                  isActive
-                    ? 'bg-stone-200/70 text-stone-900 font-bold'
-                    : 'bg-transparent text-stone-400'
-                }`}
-              >
-                <Icon className={`w-4 h-4 ${isActive ? 'stroke-[2.2]' : 'stroke-2'}`} />
-              </div>
-              <span
-                className={`text-[10px] mt-0.5 tracking-tight ${
-                  isActive ? 'font-bold text-stone-900' : 'font-medium text-stone-500'
-                }`}
-              >
-                {tab.label}
-              </span>
-            </button>
-          );
-        })}
-      </nav>
 
       {/* ⚡ 実戦特訓ドリル モーダルセッション */}
       {activeDrill && (

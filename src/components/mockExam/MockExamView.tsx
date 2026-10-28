@@ -394,124 +394,131 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
   const hankenExams = ALL_MOCK_EXAMS;
 
   // ==========================================================================
-  // ① 模擬試験 選択画面（トップ一覧：ハン検5級・4級・3級 公式模試センター）
+  // ① 模擬試験 選択画面（5級 合格チャレンジ特化）
   // ==========================================================================
   if (viewState === 'list') {
+    const exam5 = ALL_MOCK_EXAMS.find((e) => e.id === 'hanken_5') || ALL_MOCK_EXAMS[0];
+
     return (
-      <div className="w-full space-y-6 sm:space-y-8 animate-fadeIn font-sans">
-        {/* CBT公式模擬試験センター ヘッダー */}
-        <div className="max-w-3xl mx-auto space-y-3 sm:space-y-4">
-          <div className="bg-slate-900 text-white border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="space-y-1.5 flex-1 min-w-0">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-950/80 text-emerald-400 border border-emerald-800/60 text-[11px] font-bold tracking-wide">
-                <Trophy className="w-3.5 h-3.5 text-emerald-400" /> ハングル検定 公式CBT模擬試験
-              </div>
-              <h2 className="text-lg sm:text-xl font-bold text-white leading-snug">
-                ハン検 5級・4級・3級 本番模擬試験
-              </h2>
-              <p className="text-xs text-slate-300 font-normal leading-relaxed">
-                本番同様の配点（筆記・聞き取り100点満点）と制限時間（60分）に完全準拠。60点合格ラインの合否判定とCan-Do診断カルテを即時発行します。
-              </p>
-            </div>
-            <div className="flex sm:flex-col items-center gap-2 shrink-0 self-stretch sm:self-auto justify-between sm:justify-center border-t sm:border-t-0 sm:border-l border-slate-800 pt-3 sm:pt-0 sm:pl-5">
-              <div className="text-center sm:text-right">
-                <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">収録試験</div>
-                <div className="text-xl sm:text-2xl font-bold text-white font-mono">3 <span className="text-xs text-slate-400 font-normal">階級</span></div>
-              </div>
-            </div>
-          </div>
+      <div className="w-full max-w-xl mx-auto space-y-5 animate-fadeIn font-sans pb-16">
+        {/* トップナビゲーション（戻るボタン） */}
+        <div className="flex items-center justify-between px-1">
+          <button
+            type="button"
+            onClick={() => {
+              sound.playTap();
+              onBackToDashboard?.();
+            }}
+            className="px-3 py-1.5 rounded-xl bg-white border border-[#EAE4DA] text-stone-700 hover:text-[#B84E34] text-xs font-bold transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>5級ホームに戻る</span>
+          </button>
+          <span className="text-[11px] font-bold text-[#B84E34] bg-[#FAF0EC] px-2.5 py-0.5 rounded-full border border-[#F0D5CD]">
+            5級 チャレンジ
+          </span>
         </div>
 
-        {/* ================================================================== */}
-        {/* ハングル能力検定試験（5級・4級・3級）カード一覧 */}
-        {/* ================================================================== */}
-        <section className="space-y-4 max-w-3xl mx-auto">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-200">
-            <div className="flex items-center gap-2.5">
-              <span className="w-8 h-8 rounded-xl bg-slate-100 text-slate-800 border border-slate-200 flex items-center justify-center font-bold">
-                <Award className="w-4 h-4 text-slate-800" />
-              </span>
-              <div>
-                <h2 className="text-base sm:text-lg font-bold text-slate-900">
-                  ハングル能力検定試験（ハン検）
-                </h2>
-                <p className="text-[11px] sm:text-xs text-slate-500 font-normal">
-                  5級（入門）・4級（初級）・3級（実戦）の完全対策模試
-                </p>
-              </div>
-            </div>
-            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
-              5級・4級・3級 特化
+        {/* 5級 本番模試カード（ユーザーが迷わない1つの主選択肢） */}
+        <section className="bg-white border border-[#EAE4DA] rounded-3xl p-5 sm:p-6 shadow-[0_2px_12px_rgba(42,36,33,0.04)] space-y-4">
+          <div className="flex items-center justify-between gap-2">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD]">
+              5級 入門・基礎
+            </span>
+            <span className="text-xs font-bold text-stone-600 font-mono">
+              合格ライン: 60点 / 100点
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {hankenExams.map((exam) => (
-              <div
-                key={exam.id}
-                className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs hover:shadow-xs hover:border-slate-300 transition-all flex flex-col justify-between group"
-              >
-                <div className="space-y-3">
-                  {/* バッジ行 */}
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="px-2.5 py-0.5 rounded-md text-xs font-bold tracking-wide bg-slate-100 text-slate-800 border border-slate-200 font-mono">
-                      {exam.badge}
-                    </span>
-                    <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200">
-                      合格ライン: {exam.passScore}点
-                    </span>
-                  </div>
+          <div className="space-y-1">
+            <h2 className="text-xl sm:text-2xl font-black text-[#2A2421] tracking-tight">
+              {exam5.title}
+            </h2>
+            <p className="text-xs text-stone-500 font-normal">
+              文字・発音・基本助詞・用言現在形・聞き取り（全25問・各4点）
+            </p>
+          </div>
 
-                  {/* タイトルとサブタイトル */}
-                  <div>
-                    <h3 className="text-base font-bold text-slate-900 group-hover:text-emerald-800 transition-colors mb-0.5">
-                      {exam.title}
-                    </h3>
-                    <p className="text-xs text-slate-500 font-normal">{exam.subtitle}</p>
-                  </div>
+          <div className="flex items-center gap-3 text-xs text-stone-500 font-mono py-1 border-y border-[#EAE4DA]/60">
+            <div className="flex items-center gap-1">
+              <Clock className="w-3.5 h-3.5 text-stone-400" />
+              <span>制限時間 20分</span>
+            </div>
+            <span>•</span>
+            <div>出題数 25問</div>
+            <span>•</span>
+            <div>配点 100点</div>
+          </div>
 
-                  <div className="flex items-center gap-1 text-xs text-slate-400 font-medium font-mono pt-1">
-                    <Clock className="w-3.5 h-3.5" />
-                    <span>{Math.round(exam.timeLimitSeconds / 60)}分 / {exam.questionCount}問</span>
-                  </div>
+          {/* 到達Can-Do目標 */}
+          <div className="bg-[#FAF7F2] rounded-2xl p-3.5 border border-[#EAE4DA] space-y-1.5">
+            <div className="text-[11px] font-bold text-[#2A2421] flex items-center gap-1">
+              <Target className="w-3.5 h-3.5 text-[#B84E34]" />
+              <span>この模試で測定できること</span>
+            </div>
+            <ul className="space-y-1">
+              <li className="text-[11px] text-stone-600 flex items-start gap-1.5">
+                <span className="text-[#B84E34] font-bold">✓</span>
+                <span>ハングルの母音・子音・パッチム・連音化を正しく聞き分けられる</span>
+              </li>
+              <li className="text-[11px] text-stone-600 flex items-start gap-1.5">
+                <span className="text-[#B84E34] font-bold">✓</span>
+                <span>基本助詞とヘヨ体・ハムニダ体の日常会話を即答できる</span>
+              </li>
+            </ul>
+          </div>
 
-                  <p className="text-xs text-slate-600 leading-relaxed font-normal pt-1">
-                    {exam.overview}
-                  </p>
+          {/* 受験開始ボタン（テラコッタ） */}
+          <div className="pt-2">
+            <button
+              type="button"
+              onClick={() => {
+                sound.playTap();
+                startExam(exam5.id);
+              }}
+              className="w-full py-4 rounded-2xl bg-[#B84E34] hover:bg-[#9E3B21] text-white font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
+            >
+              <Award className="w-4 h-4" />
+              <span>5級 模擬試験を開始する</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        </section>
 
-                  {/* 🎯 この級でクリアできること */}
-                  <div className="bg-slate-50 rounded-xl p-3 border border-slate-200/80 space-y-1">
-                    <div className="text-[11px] font-bold text-slate-800 flex items-center gap-1">
-                      <Target className="w-3 h-3 text-emerald-600" />
-                      <span>到達Can-Do目標</span>
-                    </div>
-                    <ul className="space-y-0.5">
-                      {exam.canDoList.slice(0, 2).map((canDo, idx) => (
-                        <li key={idx} className="text-[10px] text-slate-600 font-normal flex items-start gap-1">
-                          <span className="text-emerald-600 font-bold shrink-0">✓</span>
-                          <span className="line-clamp-1">{canDo}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
+        {/* ロック中の級（4級・3級） */}
+        <section className="space-y-2 pt-2 border-t border-[#EAE4DA]">
+          <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider px-1">
+            次の試験（ロック中）
+          </div>
 
-                {/* 受験開始ボタン */}
-                <div className="pt-4">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      sound.playTap();
-                      startExam(exam.id);
-                    }}
-                    className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-2xs transition-all flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <span>模試に挑戦する</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
+          <div className="p-4 rounded-2xl bg-stone-100/60 border border-dashed border-stone-300 flex items-center justify-between opacity-75">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-stone-200 flex items-center justify-center text-stone-400">
+                <Lock className="w-4 h-4" />
               </div>
-            ))}
+              <div>
+                <div className="text-xs font-bold text-stone-700">ハングル検定 4級 模擬試験</div>
+                <div className="text-[10px] text-stone-400">不規則活用・過去形 • 5級合格後に解放</div>
+              </div>
+            </div>
+            <span className="text-[10px] font-mono font-bold text-stone-400 bg-white px-2 py-0.5 rounded border border-stone-200">
+              🔒 5級合格でアンロック
+            </span>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-stone-100/40 border border-dashed border-stone-200 flex items-center justify-between opacity-50">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-stone-200 flex items-center justify-center text-stone-400">
+                <Lock className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="text-xs font-bold text-stone-600">ハングル検定 3級 模擬試験</div>
+                <div className="text-[10px] text-stone-400">実戦・長文読解 • 4級合格後に解放</div>
+              </div>
+            </div>
+            <span className="text-[10px] font-mono font-bold text-stone-400 bg-white px-2 py-0.5 rounded border border-stone-200">
+              🔒 4級合格でアンロック
+            </span>
           </div>
         </section>
       </div>
@@ -525,16 +532,16 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
     const isAnswered = userAnswers[currentQuestion.id] !== undefined;
 
     return (
-      <div className="min-h-screen bg-[#F8FAFC] pb-24">
+      <div className="min-h-screen bg-[#FAF7F2] pb-24">
         {/* 固定上部コントロールバー */}
-        <header className="sticky top-14 z-30 bg-[#F8FAFC]/95 backdrop-blur-md border-b border-[#E2E8F0] px-3 sm:px-6 py-2.5">
+        <header className="sticky top-14 z-30 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#EAE4DA] px-3 sm:px-6 py-2.5">
           <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
             {/* 試験タイトルと進捗 */}
             <div className="flex items-center gap-2 min-w-0">
-              <span className="text-xs font-bold px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0 font-mono">
+              <span className="text-xs font-bold px-2 py-0.5 rounded-lg bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD] shrink-0 font-mono">
                 {activeExam.badge}
               </span>
-              <span className="text-xs sm:text-sm font-bold text-slate-900 truncate">
+              <span className="text-xs sm:text-sm font-bold text-[#2A2421] truncate">
                 第 {currentQuestionIndex + 1} / {activeExam.questionCount} 問
               </span>
             </div>
@@ -544,10 +551,10 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
               className={`flex items-center gap-1.5 px-3 py-1 rounded-xl font-mono font-bold text-sm transition-colors ${
                 timeLeftSeconds <= 180
                   ? 'bg-rose-100 text-rose-700 animate-pulse'
-                  : 'bg-white border border-slate-200 text-slate-800'
+                  : 'bg-white border border-[#EAE4DA] text-stone-800'
               }`}
             >
-              <Clock className="w-3.5 h-3.5 text-slate-500" />
+              <Clock className="w-3.5 h-3.5 text-stone-500" />
               <span>{formatTime(timeLeftSeconds)}</span>
             </div>
 
@@ -555,7 +562,7 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
             <button
               type="button"
               onClick={() => setShowFinishConfirm(true)}
-              className="text-xs font-bold px-3 py-1.5 rounded-xl bg-slate-900 text-white hover:bg-slate-800 shadow-2xs transition-all cursor-pointer shrink-0"
+              className="text-xs font-bold px-3 py-1.5 rounded-xl bg-[#B84E34] hover:bg-[#9E3B21] text-white shadow-2xs transition-all cursor-pointer shrink-0"
             >
               採点する
             </button>
@@ -564,46 +571,46 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
 
         {/* メイン問題カード領域 */}
         <main className="max-w-3xl mx-auto px-3 sm:px-6 pt-4 sm:pt-6">
-          <div className="bg-white border border-slate-200/90 rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-xs space-y-6">
+          <div className="bg-white border border-[#EAE4DA] rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-[0_2px_12px_rgba(42,36,33,0.04)] space-y-6">
             {/* 問題ヘッダー */}
-            <div className="flex items-center justify-between gap-2 pb-3 border-b border-slate-100">
+            <div className="flex items-center justify-between gap-2 pb-3 border-b border-[#EAE4DA]/60">
               <div className="flex items-center gap-2">
-                <span className="w-7 h-7 rounded-xl bg-slate-100 text-slate-800 font-bold text-xs flex items-center justify-center font-mono">
+                <span className="w-7 h-7 rounded-xl bg-[#FAF7F2] text-[#2A2421] font-bold text-xs flex items-center justify-center font-mono border border-[#EAE4DA]">
                   Q{currentQuestionIndex + 1}
                 </span>
-                <span className="text-xs font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                <span className="text-xs font-bold text-[#B84E34] bg-[#FAF0EC] px-2 py-0.5 rounded-md border border-[#F0D5CD]">
                   {currentQuestion.sectionLabel}
                 </span>
               </div>
-              <span className="text-xs text-slate-400 font-medium">配点: {currentQuestion.score}点</span>
+              <span className="text-xs text-stone-400 font-medium font-mono">配点: {currentQuestion.score}点</span>
             </div>
 
             {/* 指示文 */}
-            <h2 className="text-sm sm:text-base font-bold text-slate-900 leading-relaxed">
+            <h2 className="text-sm sm:text-base font-bold text-[#2A2421] leading-relaxed">
               {currentQuestion.instruction}
             </h2>
 
             {/* リスニング音声再生ボタン（音声問題の場合） */}
             {currentQuestion.audioText && (
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center justify-between gap-3">
+              <div className="bg-[#FAF7F2] border border-[#EAE4DA] rounded-xl p-4 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
                     onClick={() => playAudio(currentQuestion.audioText)}
                     className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-2xs transition-all cursor-pointer ${
                       isAudioPlaying
-                        ? 'bg-emerald-600 text-white animate-pulse'
-                        : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-100'
+                        ? 'bg-[#B84E34] text-white animate-pulse'
+                        : 'bg-white text-stone-700 border border-[#EAE4DA] hover:bg-stone-50'
                     }`}
                     title="音声を再生"
                   >
                     <Volume2 className="w-5 h-5" />
                   </button>
                   <div>
-                    <div className="text-xs font-bold text-slate-800">
+                    <div className="text-xs font-bold text-[#2A2421]">
                       {isAudioPlaying ? '音声再生中...' : 'リスニング音声を再生'}
                     </div>
-                    <div className="text-[10px] text-slate-500">
+                    <div className="text-[10px] text-stone-500">
                       ボタンをタップすると韓国語ネイティブ音声が流れます
                     </div>
                   </div>
@@ -613,14 +620,14 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
 
             {/* パッセージ・対話文・案内文（ある場合） */}
             {currentQuestion.passage && (
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 sm:p-5 text-xs sm:text-sm text-slate-800 font-sans leading-relaxed whitespace-pre-wrap select-none font-normal">
+              <div className="bg-[#FAF7F2] border border-[#EAE4DA] rounded-xl p-4 sm:p-5 text-xs sm:text-sm text-stone-800 font-sans leading-relaxed whitespace-pre-wrap select-none font-normal">
                 {currentQuestion.passage}
               </div>
             )}
 
             {/* 個別の問い（ある場合） */}
             {currentQuestion.questionText && (
-              <p className="text-xs sm:text-sm font-bold text-slate-800 pt-1">
+              <p className="text-xs sm:text-sm font-bold text-[#2A2421] pt-1">
                 {currentQuestion.questionText}
               </p>
             )}
@@ -638,15 +645,15 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
                     onClick={() => handleSelectOption(currentQuestion.id, optIdx)}
                     className={`w-full text-left p-3.5 sm:p-4 rounded-xl border transition-all flex items-start gap-3 cursor-pointer group active:scale-[0.99] ${
                       isSelected
-                        ? 'bg-emerald-50/80 border-emerald-500 text-emerald-950 shadow-2xs'
-                        : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                        ? 'bg-[#FAF0EC] border-[#B84E34] text-[#2A2421] shadow-2xs font-bold'
+                        : 'bg-white border-[#EAE4DA] text-stone-700 hover:bg-[#FAF7F2]'
                     }`}
                   >
                     <span
                       className={`w-6 h-6 rounded-lg text-xs font-bold flex items-center justify-center shrink-0 transition-colors ${
                         isSelected
-                          ? 'bg-emerald-600 text-white'
-                          : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
+                          ? 'bg-[#B84E34] text-white'
+                          : 'bg-stone-100 text-stone-600 group-hover:bg-stone-200'
                       }`}
                     >
                       {circleNumber}
@@ -669,7 +676,7 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
                 setCurrentQuestionIndex((prev) => Math.max(0, prev - 1));
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-30 disabled:pointer-events-none transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+              className="px-4 py-2.5 rounded-xl border border-[#EAE4DA] bg-white text-xs font-bold text-stone-700 hover:bg-stone-50 disabled:opacity-30 disabled:pointer-events-none transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>前の問題</span>
@@ -682,7 +689,7 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
                   setCurrentQuestionIndex((prev) => prev + 1);
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className="px-5 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+                className="px-5 py-2.5 rounded-xl bg-[#2A2421] text-white text-xs font-bold hover:bg-stone-800 shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 <span>次の問題</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -691,7 +698,7 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
               <button
                 type="button"
                 onClick={() => setShowFinishConfirm(true)}
-                className="px-5 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+                className="px-5 py-2.5 rounded-xl bg-[#B84E34] text-white text-xs font-bold hover:bg-[#9E3B21] shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 <span>採点して結果を見る</span>
                 <CheckCircle2 className="w-3.5 h-3.5" />
@@ -700,10 +707,10 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
           </div>
 
           {/* 問題ナンバーパレット（クリックで瞬時に移動） */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 mt-6 shadow-2xs">
-            <div className="flex items-center justify-between text-xs font-medium text-slate-500 mb-3">
-              <span className="flex items-center gap-1.5 font-bold text-slate-700">
-                <Layers className="w-3.5 h-3.5 text-slate-500" />
+          <div className="bg-white border border-[#EAE4DA] rounded-2xl p-4 sm:p-5 mt-6 shadow-2xs">
+            <div className="flex items-center justify-between text-xs font-medium text-stone-500 mb-3">
+              <span className="flex items-center gap-1.5 font-bold text-stone-700">
+                <Layers className="w-3.5 h-3.5 text-stone-500" />
                 解答状況パレット
               </span>
               <span className="font-mono text-[11px]">
@@ -725,12 +732,12 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
                     }}
                     className={`h-9 rounded-xl font-mono text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
                       isCurrent
-                        ? 'ring-2 ring-slate-900 ring-offset-1 font-bold'
+                        ? 'ring-2 ring-[#B84E34] ring-offset-1 font-bold'
                         : ''
                     } ${
                       isAns
-                        ? 'bg-emerald-600 text-white shadow-2xs'
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        ? 'bg-[#B84E34] text-white shadow-2xs'
+                        : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
                     }`}
                   >
                     {idx + 1}
@@ -745,22 +752,22 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
         {showFinishConfirm && (
           <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
             <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95">
-              <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center text-xl mx-auto">
+              <div className="w-12 h-12 rounded-2xl bg-[#FAF0EC] text-[#B84E34] flex items-center justify-center text-xl mx-auto">
                 <AlertCircle className="w-6 h-6" />
               </div>
-              <h3 className="text-lg font-bold text-center text-[#0F172A]">
+              <h3 className="text-lg font-bold text-center text-[#2A2421]">
                 試験を終了して採点しますか？
               </h3>
               <p className="text-xs text-stone-500 text-center leading-relaxed">
                 {unansweredCount > 0 ? (
-                  <span className="text-rose-600 font-bold">
+                  <span className="text-[#B84E34] font-bold">
                     未解答の問題がまだ {unansweredCount} 問あります！
                   </span>
                 ) : (
                   'すべての問題に解答済みです。'
                 )}
                 <br />
-                採点後はすぐに詳細な解説と学習カルテ（根拠と道筋）が表示されます。
+                採点後はすぐに詳細な解説と学習カルテが表示されます。
               </p>
               <div className="grid grid-cols-2 gap-2 pt-2">
                 <button
@@ -773,7 +780,7 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
                 <button
                   type="button"
                   onClick={finishExam}
-                  className="py-2.5 rounded-xl bg-[#58CC02] text-white text-xs font-bold hover:bg-[#46A302] shadow-sm cursor-pointer"
+                  className="py-2.5 rounded-xl bg-[#B84E34] text-white text-xs font-bold hover:bg-[#9E3B21] shadow-sm cursor-pointer"
                 >
                   採点する
                 </button>
@@ -792,70 +799,54 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
     <div className="w-full space-y-6 sm:space-y-8">
       {/* 総合スコアカード */}
       <div className="bg-white border border-slate-200/90 rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-xs text-center space-y-4 sm:space-y-5">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold tracking-wide bg-emerald-50 text-emerald-800 border border-emerald-200">
-          {activeExam.title} 公式判定結果
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold tracking-wide bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD]">
+          {activeExam.title} 判定結果
         </div>
 
         {/* 合格判定と得点 */}
         <div>
-          <div className="text-3xl sm:text-5xl font-bold text-slate-900 tracking-tight font-mono">
-            {evaluation.score} <span className="text-lg sm:text-2xl font-normal text-slate-400">/ {evaluation.totalScore}点</span>
+          <div className="text-3xl sm:text-5xl font-black text-[#2A2421] tracking-tight font-mono">
+            {evaluation.score} <span className="text-lg sm:text-2xl font-normal text-stone-400">/ {evaluation.totalScore}点</span>
           </div>
-          <div className="text-xs text-slate-500 font-medium mt-1 font-mono">
+          <div className="text-xs text-stone-500 font-medium mt-1 font-mono">
             正答数: {evaluation.correctCount} / {evaluation.totalCount}問（正答率 {evaluation.percentage}% / 合格ライン {activeExam.passScore}点）
           </div>
         </div>
 
         {/* 達成ランクバッジ */}
         {evaluation.achievedRank && (
-          <div className="inline-block px-5 py-2.5 rounded-xl shadow-2xs text-sm sm:text-base font-bold tracking-wide mx-auto border border-slate-200 bg-slate-50">
+          <div className="inline-block px-5 py-2.5 rounded-2xl shadow-2xs text-sm sm:text-base font-bold tracking-wide mx-auto border border-[#EAE4DA] bg-[#FAF7F2]">
             <span className={`px-4 py-1 rounded-lg ${evaluation.achievedRank.color}`}>
               {evaluation.achievedRank.level}
             </span>
-            <p className="text-xs text-slate-600 mt-2 font-normal max-w-md">
+            <p className="text-xs text-stone-600 mt-2 font-normal max-w-md">
               {evaluation.achievedRank.description}
             </p>
           </div>
         )}
 
-        {/* 🎮 ゲーミフィケーション報酬・アンロックカード */}
+        {/* 🎮 ゲーミフィケーション報酬 */}
         {rewardInfo && (
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 sm:p-5 text-left flex flex-col sm:flex-row items-center justify-between gap-4 max-w-2xl mx-auto shadow-2xs">
+          <div className="bg-[#FAF7F2] border border-[#EAE4DA] rounded-2xl p-4 sm:p-5 text-left flex flex-col sm:flex-row items-center justify-between gap-4 max-w-2xl mx-auto shadow-2xs">
             <div className="space-y-1 text-center sm:text-left">
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                 <span className="px-2.5 py-0.5 rounded-full bg-amber-500 text-white font-bold text-xs flex items-center gap-1 shadow-2xs">
                   <Zap className="w-3.5 h-3.5 fill-white" /> +{rewardInfo.xpGained} XP 獲得！
                 </span>
                 {rewardInfo.passed && (
-                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center gap-1 shadow-2xs">
-                    <Trophy className="w-3.5 h-3.5" /> ボス検定クリア！
+                  <span className="px-2.5 py-0.5 rounded-full bg-[#B84E34] text-white font-bold text-xs flex items-center gap-1 shadow-2xs">
+                    <Trophy className="w-3.5 h-3.5" /> 5級 合格！
                   </span>
                 )}
               </div>
-              <p className="text-xs sm:text-sm font-medium text-slate-800">
-                {rewardInfo.stageUnlocked ? (
-                  <span className="text-emerald-700 flex items-center gap-1.5 justify-center sm:justify-start font-semibold">
-                    <Unlock className="w-4 h-4 text-emerald-600 shrink-0" />
-                    おめでとうございます！ロードマップの【Stage {rewardInfo.newStageNum}】が新たにアンロックされました！
-                  </span>
-                ) : rewardInfo.passed ? (
-                  '合格基準を達成しました！蓄積した経験値でレベルアップが近づいています。'
+              <p className="text-xs sm:text-sm font-medium text-stone-800">
+                {rewardInfo.passed ? (
+                  '合格基準を達成しました！5級の土台がしっかりと身についています。'
                 ) : (
-                  '模試完了ボーナスを獲得しました！失点原因を復習して再挑戦しましょう。'
+                  '模試完了ボーナスを獲得しました！間違えた問題の解説と該当レッスンを復習しましょう。'
                 )}
               </p>
             </div>
-            {onNavigateToRoadmap && (
-              <button
-                type="button"
-                onClick={onNavigateToRoadmap}
-                className="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 shadow-2xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
-              >
-                <Compass className="w-3.5 h-3.5" />
-                <span>クエストを進める</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            )}
           </div>
         )}
 
@@ -864,35 +855,18 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
           <button
             type="button"
             onClick={() => startExam(selectedExamId)}
-            className="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+            className="px-5 py-2.5 rounded-xl bg-[#B84E34] text-white text-xs font-bold hover:bg-[#9E3B21] shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
           >
             <RotateCcw className="w-3.5 h-3.5" />
-            <span>もう一度解く</span>
-          </button>
-          {onNavigateToRoadmap && (
-            <button
-              type="button"
-              onClick={onNavigateToRoadmap}
-              className="px-4 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:bg-slate-50 transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
-            >
-              <Compass className="w-3.5 h-3.5" />
-              <span>クエストへ戻る</span>
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={() => setViewState('list')}
-            className="px-4 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:bg-slate-50 transition-all cursor-pointer shadow-2xs"
-          >
-            他の級の模擬試験を選ぶ
+            <span>もう一度受験する</span>
           </button>
           {onBackToDashboard && (
             <button
               type="button"
               onClick={onBackToDashboard}
-              className="px-4 py-2 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-500 hover:text-slate-800 transition-all cursor-pointer"
+              className="px-5 py-2.5 rounded-xl border border-[#EAE4DA] bg-white text-xs font-bold text-[#2A2421] hover:bg-[#FAF7F2] transition-all cursor-pointer shadow-2xs"
             >
-              ホームへ戻る
+              5級ホームに戻る
             </button>
           )}
         </div>
