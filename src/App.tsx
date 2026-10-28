@@ -1,49 +1,71 @@
 import React, { useState } from 'react';
-import { SpeakHomeScreen } from './components/speak/SpeakHomeScreen';
-import { SpeakLessonModal } from './components/speak/SpeakLessonModal';
-import { SpeakFreeTalkView } from './components/speak/SpeakFreeTalkView';
-import { SpeakPracticeView } from './components/speak/SpeakPracticeView';
-import { SpeakChallengeView } from './components/speak/SpeakChallengeView';
-import { SpeakProfileView } from './components/speak/SpeakProfileView';
-import { SpeakBottomNav, SpeakTabType } from './components/speak/SpeakBottomNav';
+import {
+  Home,
+  BookOpen,
+  Award,
+  Flame,
+  Zap,
+} from 'lucide-react';
+import { HankenHomeScreen } from './components/home/HankenHomeScreen';
+import { HankenTextbookView } from './components/textbook/HankenTextbookView';
+import { MockExamView } from './components/mockExam/MockExamView';
 import { ModernDrillSession } from './components/roadmap/ModernDrillSession';
-import { SpeakLesson } from './data/speakCurriculum';
+import { ExamType } from './types/mockExam';
+import { LessonData } from './types';
 import { QuestDrillData } from './data/stageMicroDrills';
+import hanmoaLogo from './assets/logo.jpg';
+import { sound } from './utils/audioSynth';
 import {
   StudyProgressState,
   getInitialStudyProgress,
   saveStudyProgress,
 } from './services/studySessionService';
-import { getTodayQuickDrill } from './services/drillGeneratorService';
+import {
+  getDrillForLesson,
+  getTodayQuickDrill,
+} from './services/drillGeneratorService';
+
+type MainTab = 'home' | 'textbook' | 'exam';
 
 export const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<SpeakTabType>('home');
-  const [activeLesson, setActiveLesson] = useState<SpeakLesson | null>(null);
-  const [activeDrill, setActiveDrill] = useState<QuestDrillData | null>(null);
+  const [activeTab, setActiveTab] = useState<MainTab>('home');
+  const [targetExamId, setTargetExamId] = useState<ExamType>('hanken_5');
+  const [selectedLessonId, setSelectedLessonId] = useState<string | undefined>(undefined);
 
-  // 学習進捗（ストリーク・XP）
+  // 学習進捗（localStorage永続化）
   const [studyProgress, setStudyProgress] = useState<StudyProgressState>(getInitialStudyProgress);
 
-  // レッスン完了ハンドラ
-  const handleLessonComplete = () => {
+  // 実行中の特訓ドリル
+  const [activeDrill, setActiveDrill] = useState<QuestDrillData | null>(null);
+  const [currentDrillLessonId, setCurrentDrillLessonId] = useState<string | null>(null);
+
+  // レッスン選択・読了ハンドラ
+  const handleSelectLesson = (lessonId: string) => {
+    setSelectedLessonId(lessonId);
     setStudyProgress((prev) => {
       const updated: StudyProgressState = {
         ...prev,
-        xp: prev.xp + 50,
-        streakDays: Math.max(1, prev.streakDays),
+        lastReadLessonId: lessonId,
+        readLessonIds: {
+          ...prev.readLessonIds,
+          [lessonId]: true,
+        },
       };
       saveStudyProgress(updated);
       return updated;
     });
-    setActiveLesson(null);
   };
 
   // ドリル完了ハンドラ
   const handleDrillComplete = (score: number) => {
     setStudyProgress((prev) => {
+      const xpGained = score * 20 + 30;
       const updated: StudyProgressState = {
         ...prev,
-        xp: prev.xp + score * 20 + 20,
+        xp: prev.xp + xpGained,
+        clearedDrillLessonIds: currentDrillLessonId
+          ? { ...prev.clearedDrillLessonIds, [currentDrillLessonId]: true }
+          : prev.clearedDrillLessonIds,
       };
       saveStudyProgress(updated);
       return updated;
@@ -51,63 +73,210 @@ export const App: React.FC = () => {
     setActiveDrill(null);
   };
 
-  // 今日の特訓
-  const handleStartTodayDrill = () => {
-    const drill = getTodayQuickDrill();
+  // ホームから教科書を開く
+  const handleOpenTextbook = (lessonId?: string) => {
+    if (lessonId) {
+      handleSelectLesson(lessonId);
+    }
+    setActiveTab('textbook');
+  };
+
+  // 課の特訓開始
+  const handleStartDrillForLesson = (lesson: LessonData) => {
+    const drill = getDrillForLesson(lesson);
+    setCurrentDrillLessonId(lesson.id);
     setActiveDrill(drill);
   };
 
+  // 今日の特訓開始
+  const handleStartTodayDrill = () => {
+    const drill = getTodayQuickDrill();
+    setCurrentDrillLessonId(null);
+    setActiveDrill(drill);
+  };
+
+  // 模試開始
+  const handleStartMockExam = (examId: 'hanken_5' | 'hanken_4' | 'hanken_3') => {
+    setTargetExamId(examId);
+    setActiveTab('exam');
+  };
+
   return (
-    <div className="min-h-screen bg-[#0A0D14] text-white font-sans antialiased selection:bg-blue-600 selection:text-white">
-      {/* メイン画面ルーティング（Speak 5大タブ完全対応） */}
-      {activeTab === 'home' && (
-        <SpeakHomeScreen
-          currentStreak={studyProgress.streakDays}
-          onStartLesson={(lesson) => setActiveLesson(lesson)}
-          onOpenFreeTalk={() => setActiveTab('freetalk')}
-        />
-      )}
+    <div className="min-h-screen bg-[#FAF9F6] text-stone-900 font-sans flex flex-col antialiased selection:bg-amber-100 selection:text-amber-900">
+      {/* 🌟 ハン検特化 洗練されたミニマル・ヘッダー */}
+      <header className="sticky top-0 z-40 bg-[#FAF9F6]/95 backdrop-blur-md border-b border-[#EAE8E3] px-3 sm:px-6 h-13 sm:h-14 flex items-center">
+        <div className="max-w-4xl mx-auto w-full flex items-center justify-between gap-2">
+          {/* ロゴ ＆ バッジ */}
+          <div
+            onClick={() => {
+              sound.playTap();
+              setActiveTab('home');
+            }}
+            className="flex items-center gap-2.5 cursor-pointer group shrink-0 select-none"
+          >
+            <div className="w-8 h-8 rounded-xl overflow-hidden border border-[#EAE8E3] shadow-2xs group-hover:scale-105 transition-all shrink-0 bg-white">
+              <img
+                src={hanmoaLogo}
+                alt="HanMoa Logo"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="font-bold text-base sm:text-lg tracking-tight text-stone-900 whitespace-nowrap">
+                HanMoa
+              </span>
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/80 whitespace-nowrap">
+                🇰🇷 ハン検 5級・4級・3級
+              </span>
+            </div>
+          </div>
 
-      {activeTab === 'freetalk' && (
-        <SpeakFreeTalkView />
-      )}
+          {/* 右側：ステータス（ストリーク ＆ XP） ＆ デスクトップナビ */}
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+            {/* ストリーク（炎） */}
+            <div
+              className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white border border-[#EAE8E3] text-stone-800 font-bold text-xs shadow-2xs"
+              title={`${studyProgress.streakDays}日連続学習中！`}
+            >
+              <Flame className="w-3.5 h-3.5 text-orange-500 fill-orange-500" />
+              <span>{studyProgress.streakDays}日</span>
+            </div>
 
-      {activeTab === 'practice' && (
-        <SpeakPracticeView onStartDrill={handleStartTodayDrill} />
-      )}
+            {/* XP（稲妻） */}
+            <div
+              className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white border border-[#EAE8E3] text-stone-800 font-bold text-xs shadow-2xs"
+              title={`累計獲得経験値: ${studyProgress.xp} XP`}
+            >
+              <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+              <span>{studyProgress.xp} XP</span>
+            </div>
 
-      {activeTab === 'challenge' && (
-        <SpeakChallengeView userXp={studyProgress.xp} />
-      )}
+            {/* デスクトップ用 ナビゲーション（3タブ セグメントコントロール） */}
+            <nav className="hidden sm:flex items-center p-0.5 rounded-xl bg-stone-200/50 border border-[#EAE8E3] shadow-2xs shrink-0 ml-1">
+              {[
+                { id: 'home' as const, label: 'ホーム', icon: Home },
+                { id: 'textbook' as const, label: '要点教科書', icon: BookOpen },
+                { id: 'exam' as const, label: '本番模試', icon: Award },
+              ].map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => {
+                      sound.playTap();
+                      setActiveTab(tab.id);
+                    }}
+                    className={`h-7 px-3 rounded-lg font-bold text-xs flex items-center gap-1.5 cursor-pointer transition-all ${
+                      isActive
+                        ? 'bg-white text-stone-900 shadow-2xs'
+                        : 'text-stone-500 hover:text-stone-900 hover:bg-stone-200/50'
+                    }`}
+                  >
+                    <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-stone-900 stroke-[2.2]' : 'stroke-2'}`} />
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+        </div>
+      </header>
 
-      {activeTab === 'profile' && (
-        <SpeakProfileView
-          streak={studyProgress.streakDays}
-          xp={studyProgress.xp}
-        />
-      )}
+      {/* メインコンテンツ */}
+      <main className="flex-1 pb-24 sm:pb-12">
+        {activeTab === 'home' && (
+          <div className="w-full max-w-4xl mx-auto px-3 sm:px-6 py-4 sm:py-7">
+            <HankenHomeScreen
+              progressState={studyProgress}
+              onOpenTextbook={handleOpenTextbook}
+              onStartDrillForLesson={handleStartDrillForLesson}
+              onStartTodayDrill={handleStartTodayDrill}
+              onStartMockExam={handleStartMockExam}
+            />
+          </div>
+        )}
 
-      {/* 📱 Speak本家スタイルのフローティング・ボトムナビ */}
-      <SpeakBottomNav
-        activeTab={activeTab}
-        onChangeTab={setActiveTab}
-      />
+        {activeTab === 'textbook' && (
+          <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 py-2 sm:py-6">
+            <HankenTextbookView
+              initialLessonId={selectedLessonId || studyProgress.lastReadLessonId || undefined}
+              onSelectLesson={handleSelectLesson}
+              onStartDrillForLesson={handleStartDrillForLesson}
+              onBackToHome={() => setActiveTab('home')}
+            />
+          </div>
+        )}
 
-      {/* 🎙️ Speakスピーキング・レッスンモーダル */}
-      {activeLesson && (
-        <SpeakLessonModal
-          lesson={activeLesson}
-          onClose={() => setActiveLesson(null)}
-          onComplete={handleLessonComplete}
-        />
-      )}
+        {activeTab === 'exam' && (
+          <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 py-2 sm:py-6">
+            <MockExamView
+              initialExamId={targetExamId}
+              onNavigateToTextbookLesson={(lessonId) => {
+                handleOpenTextbook(lessonId);
+              }}
+              onNavigateToDictionary={(dictId) => {
+                handleOpenTextbook(dictId);
+              }}
+              onBackToDashboard={() => setActiveTab('home')}
+              onNavigateToRoadmap={() => setActiveTab('home')}
+            />
+          </div>
+        )}
+      </main>
 
-      {/* ⚡ クイック特訓モーダル */}
+      {/* 📱 モバイル下部固定ナビゲーションバー（3タブ ミニマルフロストバー） */}
+      <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#FAF9F6]/95 backdrop-blur-md border-t border-[#EAE8E3] py-1.5 px-6 flex items-center justify-around shadow-[0_-2px_12px_rgba(0,0,0,0.03)] pb-[env(safe-area-inset-bottom)]">
+        {[
+          { id: 'home' as const, label: 'ホーム', icon: Home },
+          { id: 'textbook' as const, label: '要点教科書', icon: BookOpen },
+          { id: 'exam' as const, label: '本番模試', icon: Award },
+        ].map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => {
+                sound.playTap();
+                setActiveTab(tab.id);
+              }}
+              className={`flex flex-col items-center justify-center py-1 px-4 rounded-2xl transition-all cursor-pointer select-none active:scale-95 ${
+                isActive ? 'text-stone-900' : 'text-stone-400 hover:text-stone-700'
+              }`}
+            >
+              <div
+                className={`w-9 h-7 rounded-xl flex items-center justify-center transition-all ${
+                  isActive
+                    ? 'bg-stone-200/70 text-stone-900 font-bold'
+                    : 'bg-transparent text-stone-400'
+                }`}
+              >
+                <Icon className={`w-4 h-4 ${isActive ? 'stroke-[2.2]' : 'stroke-2'}`} />
+              </div>
+              <span
+                className={`text-[10px] mt-0.5 tracking-tight ${
+                  isActive ? 'font-bold text-stone-900' : 'font-medium text-stone-500'
+                }`}
+              >
+                {tab.label}
+              </span>
+            </button>
+          );
+        })}
+      </nav>
+
+      {/* ⚡ 実戦特訓ドリル モーダルセッション */}
       {activeDrill && (
         <ModernDrillSession
           drill={activeDrill}
-          onClose={() => setActiveDrill(null)}
-          onComplete={(score) => handleDrillComplete(score)}
+          onClose={() => {
+            setActiveDrill(null);
+            setCurrentDrillLessonId(null);
+          }}
+          onComplete={handleDrillComplete}
         />
       )}
     </div>
