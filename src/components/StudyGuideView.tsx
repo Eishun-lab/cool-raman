@@ -1095,14 +1095,18 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
       else if (lessonRange === '11-20') list = LESSONS_DATA.slice(10, 20);
       else if (lessonRange === '21-30') list = LESSONS_DATA.slice(20, 30);
       else list = LESSONS_DATA.slice(0, 30);
+    } else if (levelMode === 'intermediate') {
+      if (lessonRange === '31-35') list = LESSONS_DATA.slice(30, 35);
+      else list = LESSONS_DATA.slice(30, 35);
+    } else if (levelMode === 'advanced') {
+      if (lessonRange === '36-40') list = LESSONS_DATA.slice(35, 40);
+      else list = LESSONS_DATA.slice(35, 40);
     } else {
-      if (statusFilter === 'all') {
-        if (lessonRange === '1-10') list = LESSONS_DATA.slice(0, 10);
-        else if (lessonRange === '11-20') list = LESSONS_DATA.slice(10, 20);
-        else if (lessonRange === '21-30') list = LESSONS_DATA.slice(20, 30);
-        else if (lessonRange === '31-35') list = LESSONS_DATA.slice(30, 35);
-        else if (lessonRange === '36-40') list = LESSONS_DATA.slice(35, 40);
-      }
+      if (lessonRange === '1-10') list = LESSONS_DATA.slice(0, 10);
+      else if (lessonRange === '11-20') list = LESSONS_DATA.slice(10, 20);
+      else if (lessonRange === '21-30') list = LESSONS_DATA.slice(20, 30);
+      else if (lessonRange === '31-35') list = LESSONS_DATA.slice(30, 35);
+      else if (lessonRange === '36-40') list = LESSONS_DATA.slice(35, 40);
     }
     return list.filter((l) => matchesStatusFilter(l.id));
   }, [lessonRange, statusFilter, levelMode, guideProgress, myExamplesMap]);
@@ -2570,26 +2574,75 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
             ) : (
               <div className="space-y-4">
                 {/* 🐯 ホランイの教科書ウェルカムバナー */}
-                <div className="bg-gradient-to-r from-emerald-50 via-teal-50 to-green-50 border-2 border-emerald-300/80 rounded-3xl p-4 sm:p-5 flex items-center gap-3 sm:gap-4 shadow-2xs">
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-400/20 border-2 border-emerald-300 text-2xl flex items-center justify-center shrink-0 shadow-xs">
-                    🐯
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-black text-emerald-800 bg-emerald-100/90 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                        ソウル探訪・公式教科書
-                      </span>
-                      <span className="text-[11px] font-bold text-stone-500">
-                        {displayedLessons.length} 課を収録
-                      </span>
+                <div className={`border-2 rounded-3xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 shadow-[0_3px_0_#E5E7EB] transition-all ${
+                  levelMode === 'advanced'
+                    ? 'bg-gradient-to-r from-rose-50 via-amber-50 to-orange-50 border-rose-300'
+                    : levelMode === 'intermediate'
+                    ? 'bg-gradient-to-r from-purple-50 via-indigo-50 to-sky-50 border-purple-300'
+                    : 'bg-gradient-to-r from-emerald-50 via-teal-50 to-green-50 border-emerald-300'
+                }`}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-white text-2xl flex items-center justify-center shrink-0 shadow-xs border-2 border-stone-200">
+                      {levelMode === 'advanced' ? '🏛️' : levelMode === 'intermediate' ? '⚡' : '🐯'}
                     </div>
-                    <h3 className="text-sm sm:text-base font-black text-stone-900 mt-1 leading-snug">
-                      教科書で文法のルールをサクッと確認しよう！
-                    </h3>
-                    <p className="text-xs text-stone-600 font-medium mt-0.5">
-                      クエストと連動しているよ。気になるところから自由にタップして読んでみてね 📖
-                    </p>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className={`text-xs font-black px-2.5 py-0.5 rounded-full border ${
+                          levelMode === 'advanced'
+                            ? 'bg-rose-100 text-rose-800 border-rose-300'
+                            : levelMode === 'intermediate'
+                            ? 'bg-purple-100 text-purple-800 border-purple-300'
+                            : 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                        }`}>
+                          {levelMode === 'advanced' ? '🏆 上級・最高峰マスター' : levelMode === 'intermediate' ? '⚡ 中級突破・実戦会話' : '入門・初級マスター'}
+                        </span>
+                        <span className="text-[11px] font-black text-stone-500 font-mono">
+                          {displayedLessons.length} 課を表示中
+                        </span>
+                      </div>
+                      <h3 className="text-sm sm:text-base font-black text-stone-900 mt-1 leading-snug">
+                        {levelMode === 'advanced'
+                          ? 'TOPIK II 5〜6級・ハン検2〜1級対応 高級論述＆表現'
+                          : levelMode === 'intermediate'
+                          ? '使役・受身・間接話法短縮形・論理複文を完全マスター！'
+                          : '教科書で文法のルールをサクッと確認しよう！'}
+                      </h3>
+                      <p className="text-xs text-stone-600 font-medium mt-0.5">
+                        {levelMode === 'advanced'
+                          ? '第36〜40課の高級論述に加え、四字熟語50選・高級エッセイ執筆プロトコルも完全連動！'
+                          : levelMode === 'intermediate'
+                          ? '日常会話からビジネス実務まで、ネイティブが多用する複文を完全網羅。'
+                          : 'クエストと連動しているよ。気になるところから自由にタップして読んでみてね 📖'}
+                      </p>
+                    </div>
                   </div>
+
+                  {levelMode === 'advanced' && (
+                    <div className="flex items-center gap-1.5 flex-wrap pt-2 sm:pt-0 sm:ml-auto shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          sound.playTap();
+                          setActiveTab('reference');
+                          setRefSubTab('hanja');
+                        }}
+                        className="px-2.5 py-1.5 rounded-xl bg-white border-2 border-rose-200 text-rose-800 font-black text-xs shadow-2xs hover:bg-rose-50 cursor-pointer"
+                      >
+                        🏛️ 四字熟語50選 ➔
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          sound.playTap();
+                          setActiveTab('reference');
+                          setRefSubTab('columns');
+                        }}
+                        className="px-2.5 py-1.5 rounded-xl bg-white border-2 border-amber-200 text-amber-800 font-black text-xs shadow-2xs hover:bg-amber-50 cursor-pointer"
+                      >
+                        📰 時事コラム ➔
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {/* 📚 Duolingo風 3Dレッスンカードリスト */}
@@ -2599,7 +2652,7 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
 
                     // 章の区切りバナー判定
                     let stageHeader: { title: string; unit: string; range: string; color: string; shadow: string; badge: string } | null = null;
-                    if (lessonRange === 'all') {
+                    if (lessonRange === 'all' || lesson.number === 1 || lesson.number === 11 || lesson.number === 21 || lesson.number === 31 || lesson.number === 36) {
                       if (lesson.number === 1) stageHeader = { title: 'ハングルと基本助詞の土台', unit: 'UNIT 1', range: '1-10課', color: 'from-emerald-500 to-green-600', shadow: '#2E7D32', badge: '入門・基礎' };
                       else if (lesson.number === 11) stageHeader = { title: '日常表現の拡大と重要活用', unit: 'UNIT 2', range: '11-20課', color: 'from-sky-500 to-blue-600', shadow: '#1E40AF', badge: '初級前半' };
                       else if (lesson.number === 21) stageHeader = { title: '複文・応用と間接話法', unit: 'UNIT 3', range: '21-30課', color: 'from-amber-500 to-orange-600', shadow: '#C2410C', badge: '初級総決算' };

@@ -442,7 +442,7 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
               }`}
             >
               <Award className="w-3.5 h-3.5" />
-              <span>ハン検 (4)</span>
+              <span>ハン検 ({hankenExams.length})</span>
             </button>
             <button
               type="button"
@@ -479,7 +479,7 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
                 </div>
               </div>
               <span className="text-xs font-black px-3 py-1 rounded-full bg-amber-50 text-amber-800 border-2 border-amber-200/80 self-start sm:self-auto shadow-2xs">
-                5級・4級・3級・準2級 完備
+                5級・4級・3級・準2級・2級・1級 全級完備
               </span>
             </div>
 

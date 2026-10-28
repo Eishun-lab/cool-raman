@@ -198,7 +198,7 @@ export const DuolingoDrillSession: React.FC<DuolingoDrillSessionProps> = ({
       {/* 🌟 2. メインコンテンツ（ホランイ出題 ＋ 問題カード ＋ 選択肢タイル）    */}
       {/* ===================================================================== */}
       {!isFinished ? (
-        <main className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 flex flex-col justify-center max-w-2xl w-full mx-auto space-y-5 sm:space-y-6">
+        <main className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 pb-28 sm:pb-12 max-w-2xl w-full mx-auto space-y-5 sm:space-y-6">
           {/* ホランイ（マスコット）の感情連動出題 */}
           <div className="flex items-center justify-center">
             <HorangiMascot
@@ -378,9 +378,9 @@ export const DuolingoDrillSession: React.FC<DuolingoDrillSessionProps> = ({
               : 'bg-rose-100 border-rose-300'
           }`}
         >
-          <div className="max-w-2xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="max-w-2xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             {/* 回答前の案内 / 回答後の判定テキスト */}
-            <div className="min-w-0 w-full sm:w-auto">
+            <div className="min-w-0 flex-1 space-y-1.5">
               {!isAnswered ? (
                 <p className="text-xs text-stone-400 font-bold hidden sm:block">
                   ※ 数字キー(1〜4)またはタップで選択し、Enterキーで確認できます
@@ -392,7 +392,7 @@ export const DuolingoDrillSession: React.FC<DuolingoDrillSessionProps> = ({
                   </div>
                   <div>
                     <h4 className="text-sm sm:text-base font-black">正解！素晴らしい！</h4>
-                    <p className="text-xs text-emerald-800 line-clamp-1">{currentQ.explanation}</p>
+                    <p className="text-xs sm:text-sm text-emerald-950 font-bold leading-relaxed">{currentQ.explanation}</p>
                   </div>
                 </div>
               ) : (
@@ -411,7 +411,7 @@ export const DuolingoDrillSession: React.FC<DuolingoDrillSessionProps> = ({
             </div>
 
             {/* アクションボタン（確認する / 次へ進む） */}
-            <div className="w-full sm:w-auto shrink-0">
+            <div className="w-full sm:w-auto shrink-0 pt-1 sm:pt-0">
               {!isAnswered ? (
                 <button
                   type="button"

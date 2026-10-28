@@ -7,6 +7,8 @@ export type ExamType =
   | 'hanken_4'
   | 'hanken_3'
   | 'hanken_pre2'
+  | 'hanken_2'
+  | 'hanken_1'
   | 'topik1'
   | 'topik2'
   | 'hanken_basic'
@@ -14,7 +16,7 @@ export type ExamType =
 
 export type ExamCategory = 'hanken' | 'topik';
 
-export type ExamSection = 'listening' | 'vocab' | 'grammar' | 'reading' | 'pronunciation';
+export type ExamSection = 'listening' | 'vocab' | 'grammar' | 'reading' | 'pronunciation' | string;
 
 export interface PassCriterion {
   level: string;        // 例: "TOPIK 2級", "ハン検5級合格", "不合格（あと8点）"

@@ -318,17 +318,17 @@ export const ComprehensiveQuizView: React.FC = () => {
             <div
               className={`p-4 sm:p-5 rounded-3xl border-2 transition-all space-y-3 ${
                 selectedOption === currentQ.correctAnswer
-                  ? 'bg-emerald-50/90 border-emerald-300 shadow-[0_3px_0_#A7F3D0]'
-                  : 'bg-rose-50/90 border-rose-300 shadow-[0_3px_0_#FECDD3]'
+                  ? 'bg-emerald-50 border-emerald-300 shadow-[0_4px_0_#A7F3D0]'
+                  : 'bg-rose-50 border-rose-300 shadow-[0_4px_0_#FECDD3]'
               }`}
             >
-              <div className="flex items-center gap-2">
-                <span className="text-xl">
+              <div className="flex items-start gap-3">
+                <span className="text-2xl shrink-0 mt-0.5">
                   {selectedOption === currentQ.correctAnswer ? '🎉' : '💡'}
                 </span>
-                <div>
+                <div className="space-y-1.5 flex-1">
                   <h4
-                    className={`font-black text-sm ${
+                    className={`font-black text-sm sm:text-base ${
                       selectedOption === currentQ.correctAnswer
                         ? 'text-emerald-900'
                         : 'text-rose-900'
@@ -338,24 +338,27 @@ export const ComprehensiveQuizView: React.FC = () => {
                       ? '정답입니다! 素晴らしい！'
                       : `正解: ${currentQ.correctAnswer}`}
                   </h4>
-                  <p className="text-xs text-stone-700 leading-relaxed mt-0.5">
-                    {currentQ.explanation}
-                  </p>
+                  <div className="p-3 bg-white/90 rounded-2xl border border-stone-200/70 shadow-2xs">
+                    <span className="text-[10px] font-black uppercase text-stone-500 block mb-0.5">💡 解説・ポイント</span>
+                    <p className="text-xs sm:text-sm text-stone-800 leading-relaxed font-bold">
+                      {currentQ.explanation}
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex justify-end pt-1">
+              <div className="pt-2 flex justify-end">
                 <button
                   type="button"
                   onClick={handleNext}
-                  className={`px-6 py-3 font-black rounded-2xl text-white transition-all flex items-center gap-2 cursor-pointer active:translate-y-1 active:shadow-none ${
+                  className={`w-full sm:w-auto px-8 py-3.5 font-black rounded-2xl text-white transition-all flex items-center justify-center gap-2 cursor-pointer active:translate-y-1 active:shadow-none ${
                     selectedOption === currentQ.correctAnswer
-                      ? 'bg-[#58CC02] hover:bg-[#46A302] shadow-[0_3.5px_0_#388E00]'
-                      : 'bg-rose-500 hover:bg-rose-600 shadow-[0_3.5px_0_#BE123C]'
+                      ? 'bg-[#58CC02] hover:bg-[#46A302] shadow-[0_4px_0_#388E00] border-b-4 border-[#388E00]'
+                      : 'bg-rose-500 hover:bg-rose-600 shadow-[0_4px_0_#BE123C] border-b-4 border-[#BE123C]'
                   }`}
                 >
                   <span>{currentIndex + 1 === questions.length ? '結果を見る' : '次の問題へ'}</span>
-                  <ArrowRight className="w-4 h-4 stroke-[2.5]" />
+                  <ArrowRight className="w-5 h-5 stroke-[2.5]" />
                 </button>
               </div>
             </div>
