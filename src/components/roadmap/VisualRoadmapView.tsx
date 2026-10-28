@@ -772,8 +772,8 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                     : 'text-stone-600 hover:text-stone-900'
                 }`}
               >
-                <Bookmark className="w-3.5 h-3.5" />
-                <span>📋 到達基準 ＆ 設定</span>
+                <Target className="w-3.5 h-3.5 text-[#B84E34]" />
+                <span>🎯 エリア目標 ＆ 設定</span>
               </button>
             </div>
 
@@ -1114,31 +1114,53 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                 </div>
               )}
 
-              {/* ④ 📋 到達基準 ＆ 設定 */}
+              {/* ④ 🎯 エリア目標 ＆ 設定 */}
               {guideModalTab === 'curriculum' && (
                 <div className="space-y-4">
-                  {/* 公的到達基準 (Can-Do) */}
+                  {/* ホランイのマスコット応援バナー */}
+                  <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/90 rounded-2xl p-4 flex items-center gap-3 shadow-2xs">
+                    <div className="w-11 h-11 rounded-2xl bg-amber-400/20 border border-amber-300 text-2xl flex items-center justify-center shrink-0">
+                      🐯
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="text-xs sm:text-sm font-black text-amber-950 flex items-center gap-1.5">
+                        <span>ホランイのエリア攻略アドバイス</span>
+                        <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-200/60 text-amber-900 border border-amber-300">
+                          {activeDistrict.jaName}
+                        </span>
+                      </h4>
+                      <p className="text-[11px] sm:text-xs text-amber-800 font-medium mt-0.5 leading-relaxed">
+                        この街のクエストをすべてクリアすると、<strong>「{activeDistrict.shortTitle}マスター」</strong>の称号と特別XPがもらえるよ！
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* 🎯 この街で身につくスキル ＆ ゴール */}
                   <div className="bg-white border border-stone-200 rounded-2xl p-4 sm:p-5 space-y-3 shadow-2xs text-xs">
                     <div className="flex items-center justify-between pb-2 border-b border-stone-100 flex-wrap gap-2">
                       <span className="font-black text-stone-900 flex items-center gap-1.5 text-sm">
-                        <Target className="w-4 h-4 text-[#B84E34]" />
-                        <span>公的Can-Do基準 ＆ 学習目的（Step {activeStep.step}）</span>
+                        <Target className="w-4 h-4 text-emerald-600" />
+                        <span>この街でマスターできること（Area {activeStep.step}）</span>
                       </span>
-                      <span className="text-xs font-bold text-stone-700 bg-stone-100 px-2.5 py-0.5 rounded-full border border-stone-200">
+                      <span className="text-xs font-black text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
                         {activeStep.badge}
                       </span>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="bg-[#FAF7F2] p-3.5 rounded-xl border border-[#E8E2D5] space-y-1.5">
-                        <strong className="text-[#B84E34] font-black block">学習の核・目的</strong>
+                        <strong className="text-[#B84E34] font-black flex items-center gap-1">
+                          <span>🌟 目指すゴール</span>
+                        </strong>
                         <p className="text-stone-800 leading-relaxed font-medium">
                           {activeStep.goalDefinition.purpose}
                         </p>
                       </div>
 
-                      <div className="bg-sky-50/50 p-3.5 rounded-xl border border-sky-100 space-y-1.5">
-                        <strong className="text-sky-900 font-black block">公的Can-Doステートメント</strong>
+                      <div className="bg-sky-50/70 p-3.5 rounded-xl border border-sky-100 space-y-1.5">
+                        <strong className="text-sky-900 font-black flex items-center gap-1">
+                          <span>🚀 実戦で使えるようになること</span>
+                        </strong>
                         <p className="text-sky-950 leading-relaxed font-medium">
                           {activeStep.academicBasis.officialCanDo}
                         </p>
@@ -1151,44 +1173,46 @@ export const VisualRoadmapView: React.FC<VisualRoadmapViewProps> = ({
                     </div>
                   </div>
 
-                  {/* Done完了判定基準 ＆ 成果物 */}
+                  {/* 🏆 クリア条件 ＆ 💡 ホランイの5分レスキュー */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                     <div className="bg-emerald-50/60 p-4 rounded-2xl border border-emerald-200/80 space-y-2">
                       <span className="font-black text-emerald-900 flex items-center gap-1.5">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Done定義（完了判定基準）
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600" /> 🏆 エリア制覇の条件
                       </span>
                       <p className="text-emerald-950 leading-relaxed font-medium bg-white/80 p-2.5 rounded-xl border border-emerald-200/50">
                         {activeStep.goalDefinition.doneDefinition}
                       </p>
-                      <div className="text-[11px] text-emerald-800">
-                        <strong>手元に残る成果物: </strong>{activeStep.goalDefinition.deliverable}
+                      <div className="text-[11px] text-emerald-800 font-bold">
+                        🎁 手に入る成果: {activeStep.goalDefinition.deliverable}
                       </div>
                     </div>
 
                     <div className="bg-amber-50/60 p-4 rounded-2xl border border-amber-200/80 space-y-2">
                       <span className="font-black text-amber-900 flex items-center gap-1.5">
-                        <ShieldAlert className="w-4 h-4 text-amber-600" /> 挫折防止プロトコル
+                        <Lightbulb className="w-4 h-4 text-amber-600" /> 💡 忙しい日の5分レスキュー
                       </span>
                       <p className="text-stone-700 leading-relaxed font-medium">
                         {activeStep.scopePriority.scopeGuard}
                       </p>
-                      <div className="text-[11px] text-rose-800 bg-white/80 p-2 rounded-lg border border-amber-200/50">
-                        <strong>5分縮小プロトコル: </strong>{activeStep.learningExperience.riskAndFallback.fallbackProtocol}
+                      <div className="text-[11px] text-amber-900 bg-white/80 p-2 rounded-lg border border-amber-200/50 font-medium">
+                        <strong>⚡ スキマ時間メニュー: </strong>{activeStep.learningExperience.riskAndFallback.fallbackProtocol}
                       </div>
                     </div>
                   </div>
 
-                  {/* WBSタスク内訳 */}
-                  <div className="bg-white border border-stone-200 rounded-2xl p-4 space-y-2 shadow-2xs text-xs">
+                  {/* 🗺️ クエスト攻略ステップ */}
+                  <div className="bg-white border border-stone-200 rounded-2xl p-4 space-y-2.5 shadow-2xs text-xs">
                     <span className="font-black text-stone-800 flex items-center gap-1.5">
-                      <Layers className="w-4 h-4 text-[#B84E34]" />
-                      <span>WBS必須タスク内訳:</span>
+                      <Layers className="w-4 h-4 text-[#58CC02]" />
+                      <span>🗺️ この街のクエスト攻略ステップ:</span>
                     </span>
-                    <ul className="space-y-1 text-stone-700">
+                    <ul className="space-y-1.5 text-stone-700">
                       {activeStep.scopePriority.wbsBreakdown.map((item, idx) => (
-                        <li key={idx} className="flex items-start gap-1.5">
-                          <span className="text-emerald-600 font-bold">✓</span>
-                          <span>{item}</span>
+                        <li key={idx} className="flex items-start gap-2 bg-[#FAF7F2] p-2 rounded-xl border border-[#EDE7DC]">
+                          <span className="w-4 h-4 rounded-full bg-[#58CC02] text-white text-[10px] font-black flex items-center justify-center shrink-0 mt-0.5">
+                            {idx + 1}
+                          </span>
+                          <span className="font-medium">{item}</span>
                         </li>
                       ))}
                     </ul>
