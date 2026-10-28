@@ -11,6 +11,7 @@ import {
   Zap,
   CheckCircle2,
   List,
+  Sparkles,
 } from 'lucide-react';
 import { LessonData } from '../../types';
 import { LESSONS_DATA } from '../../data/lessons';
@@ -138,11 +139,11 @@ export const SkillstackTextbookView: React.FC<SkillstackTextbookViewProps> = ({
   }, [searchQuery]);
 
   return (
-    <div className="w-full max-w-3xl mx-auto pb-24 sm:pb-16 select-none animate-fadeIn">
+    <div className="w-full max-w-2xl mx-auto pb-24 sm:pb-16 select-none animate-fadeIn font-sans">
       {/* ===================================================================== */}
-      {/* 1. SkillStack風 スマートヘッダー (目次・文字サイズ・検索)            */}
+      {/* 1. Notion風 スマートサブヘッダー (目次・文字サイズ・検索)            */}
       {/* ===================================================================== */}
-      <header className="sticky top-14 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/90 px-3 sm:px-5 py-2.5 shadow-2xs">
+      <header className="sticky top-13 sm:top-14 z-30 bg-[#FAF9F6]/95 backdrop-blur-md border-b border-[#EAE8E3] px-3 sm:px-4 py-2 shadow-2xs">
         <div className="flex items-center justify-between gap-2">
           {/* 目次ドロワーを開くトリガー */}
           <button
@@ -151,38 +152,38 @@ export const SkillstackTextbookView: React.FC<SkillstackTextbookViewProps> = ({
               sound.playTap();
               setIsTocOpen(!isTocOpen);
             }}
-            className="flex items-center gap-1.5 min-w-0 flex-1 text-left cursor-pointer group"
+            className="flex items-center gap-2 min-w-0 flex-1 text-left cursor-pointer group"
           >
-            <span className="w-6 h-6 rounded-lg bg-slate-900 text-white font-mono text-[10px] font-bold flex items-center justify-center shrink-0">
+            <span className="w-6 h-6 rounded-lg bg-[#18181B] text-white font-mono text-[10px] font-bold flex items-center justify-center shrink-0">
               {currentLesson.number}
             </span>
             <div className="min-w-0 flex-1">
-              <span className="text-[10px] text-slate-600 block leading-none font-medium">
+              <span className="text-[10px] text-stone-600 block leading-none font-medium">
                 {currentChapter.badge}
               </span>
-              <span className="text-xs font-bold text-slate-900 group-hover:text-emerald-700 transition-colors truncate block">
+              <span className="text-xs font-bold text-stone-900 group-hover:text-emerald-800 transition-colors truncate block mt-0.5">
                 {currentLesson.title.replace(/^第\d+課：/, '')}
               </span>
             </div>
             <ChevronDown
-              className={`w-4 h-4 text-slate-400 group-hover:text-slate-800 shrink-0 transition-transform ${
+              className={`w-4 h-4 text-stone-400 group-hover:text-stone-800 shrink-0 transition-transform ${
                 isTocOpen ? 'rotate-180' : ''
               }`}
             />
           </button>
 
           {/* ツール群: 文字サイズ切替 & 全文検索 */}
-          <div className="flex items-center gap-1 shrink-0">
+          <div className="flex items-center gap-1.5 shrink-0">
             <button
               type="button"
               onClick={() => {
                 sound.playTap();
                 setIsLargeFont(!isLargeFont);
               }}
-              className={`px-2 py-1 rounded-xl border text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer ${
+              className={`px-2.5 py-1 rounded-xl border text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer ${
                 isLargeFont
-                  ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
-                  : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                  ? 'bg-stone-900 text-white border-stone-900'
+                  : 'bg-white text-stone-600 border-[#EAE8E3] hover:bg-stone-50'
               }`}
               title="文字サイズ切替"
             >
@@ -196,8 +197,8 @@ export const SkillstackTextbookView: React.FC<SkillstackTextbookViewProps> = ({
                 sound.playTap();
                 setIsSearchOpen(!isSearchOpen);
               }}
-              className={`p-1.5 rounded-xl border text-slate-600 hover:text-slate-900 transition-colors cursor-pointer ${
-                isSearchOpen ? 'bg-slate-100 border-slate-300' : 'bg-white border-slate-200 hover:bg-slate-50'
+              className={`p-1.5 rounded-xl border text-stone-600 hover:text-stone-900 transition-colors cursor-pointer ${
+                isSearchOpen ? 'bg-stone-100 border-stone-300' : 'bg-white border-[#EAE8E3] hover:bg-stone-50'
               }`}
               title="教科書を検索"
             >
@@ -208,21 +209,21 @@ export const SkillstackTextbookView: React.FC<SkillstackTextbookViewProps> = ({
 
         {/* 検索入力バー (開いている時) */}
         {isSearchOpen && (
-          <div className="mt-2 pt-2 border-t border-slate-100 relative">
+          <div className="mt-2 pt-2 border-t border-stone-200/80 relative animate-fadeIn">
             <input
               type="text"
               autoFocus
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="文法・例文・キーワードを検索..."
-              className="w-full pl-8 pr-8 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-slate-400"
+              className="w-full pl-8 pr-8 py-1.5 rounded-xl bg-white border border-[#EAE8E3] text-xs text-stone-900 placeholder-stone-400 focus:outline-none focus:border-stone-400"
             />
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 translate-y-[-1px] pointer-events-none" />
+            <Search className="w-3.5 h-3.5 text-stone-400 absolute left-2.5 top-1/2 translate-y-[-1px] pointer-events-none" />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 translate-y-[-1px] text-slate-400 hover:text-slate-700 cursor-pointer"
+                className="absolute right-2.5 top-1/2 translate-y-[-1px] text-stone-400 hover:text-stone-700 cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -230,26 +231,26 @@ export const SkillstackTextbookView: React.FC<SkillstackTextbookViewProps> = ({
 
             {/* 検索結果ドロップダウン */}
             {searchQuery.trim() && (
-              <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-60 overflow-y-auto divide-y divide-slate-100 z-40">
+              <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-[#EAE8E3] rounded-2xl shadow-xl max-h-60 overflow-y-auto divide-y divide-stone-100 z-40">
                 {searchResults.length > 0 ? (
                   searchResults.map((l) => (
                     <button
                       key={l.id}
                       type="button"
                       onClick={() => handleSelectLesson(l.id)}
-                      className="w-full text-left p-2.5 hover:bg-slate-50 cursor-pointer"
+                      className="w-full text-left p-2.5 hover:bg-stone-50 cursor-pointer"
                     >
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded font-mono">
+                        <span className="text-[10px] font-bold text-stone-700 bg-stone-100 px-1.5 py-0.2 rounded font-mono">
                           NO.{l.number}
                         </span>
-                        <span className="text-xs font-bold text-slate-900 truncate">{l.title}</span>
+                        <span className="text-xs font-bold text-stone-900 truncate">{l.title}</span>
                       </div>
-                      <p className="text-[11px] text-slate-500 truncate mt-0.5">{l.subtitle}</p>
+                      <p className="text-[11px] text-stone-500 truncate mt-0.5">{l.subtitle}</p>
                     </button>
                   ))
                 ) : (
-                  <div className="p-3 text-center text-xs text-slate-400">
+                  <div className="p-3 text-center text-xs text-stone-400">
                     一致するレッスンが見つかりませんでした
                   </div>
                 )}
@@ -260,26 +261,26 @@ export const SkillstackTextbookView: React.FC<SkillstackTextbookViewProps> = ({
       </header>
 
       {/* ===================================================================== */}
-      {/* 2. 目次ドロワー (SkillStack TextbookTableOfContents 準拠)            */}
+      {/* 2. 目次ドロワー (Notion Page サイドバー風)                            */}
       {/* ===================================================================== */}
       {isTocOpen && (
-        <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-xs flex justify-end">
-          <div className="bg-white w-full max-w-md h-full flex flex-col shadow-2xl animate-in slide-in-from-right duration-200">
-            <div className="p-4 border-b border-slate-200 flex items-center justify-between">
+        <div className="fixed inset-0 z-40 bg-stone-900/40 backdrop-blur-xs flex justify-end">
+          <div className="bg-white w-full max-w-sm h-full flex flex-col shadow-2xl animate-in slide-in-from-right duration-200">
+            <div className="p-4 border-b border-[#EAE8E3] flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <List className="w-5 h-5 text-slate-700" />
-                <h3 className="text-sm font-bold text-slate-900">教科書 目次（全40課）</h3>
+                <List className="w-4 h-4 text-stone-700" />
+                <h3 className="text-sm font-bold text-stone-900">カリキュラム目次（全40課）</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setIsTocOpen(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-700 cursor-pointer"
+                className="p-1 rounded-lg text-stone-400 hover:text-stone-700 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div className="flex-1 overflow-y-auto p-4 space-y-5">
               {TEXTBOOK_CHAPTERS.map((ch) => {
                 const chapterLessons = LESSONS_DATA.filter(
                   (l) => l.number >= ch.lessonStart && l.number <= ch.lessonEnd
@@ -287,11 +288,11 @@ export const SkillstackTextbookView: React.FC<SkillstackTextbookViewProps> = ({
 
                 return (
                   <div key={ch.id} className="space-y-1.5">
-                    <div className="flex items-center justify-between pb-1 border-b border-slate-100">
-                      <span className="text-xs font-bold text-slate-900">
+                    <div className="flex items-center justify-between pb-1 border-b border-stone-100">
+                      <span className="text-xs font-bold text-stone-900">
                         第{ch.number}章：{ch.title}
                       </span>
-                      <span className="text-[10px] text-slate-400 font-mono">{ch.range}</span>
+                      <span className="text-[10px] text-stone-600 font-mono">{ch.range}</span>
                     </div>
 
                     <div className="space-y-1 pl-1">
@@ -304,12 +305,12 @@ export const SkillstackTextbookView: React.FC<SkillstackTextbookViewProps> = ({
                             onClick={() => handleSelectLesson(l.id)}
                             className={`w-full text-left px-3 py-2 rounded-xl text-xs flex items-center justify-between transition-colors cursor-pointer ${
                               isCurrent
-                                ? 'bg-slate-900 text-white font-bold'
-                                : 'text-slate-700 hover:bg-slate-100'
+                                ? 'bg-[#18181B] text-white font-bold shadow-2xs'
+                                : 'text-stone-700 hover:bg-stone-50'
                             }`}
                           >
                             <span className="truncate flex-1">
-                              第{l.number}課 {l.subtitle}
+                              第{l.number}課 {l.title.replace(/^第\d+課：/, '')}
                             </span>
                             {isCurrent && <ChevronRight className="w-3.5 h-3.5 shrink-0 ml-2" />}
                           </button>
@@ -325,44 +326,42 @@ export const SkillstackTextbookView: React.FC<SkillstackTextbookViewProps> = ({
       )}
 
       {/* ===================================================================== */}
-      {/* 3. 教科書 本文エリア (SkillStack TextbookSectionContent 準拠)        */}
+      {/* 3. 教科書 本文エリア (Notion Document風 レイアウト)                   */}
       {/* ===================================================================== */}
-      <main ref={contentRef} className="px-3 sm:px-6 pt-4 space-y-5">
-        {/* レッスン表紙カード */}
-        <article className="bg-white border border-slate-200/90 rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-xs space-y-6">
+      <main ref={contentRef} className="px-3 sm:px-4 pt-4 space-y-5">
+        {/* レッスン本文カード */}
+        <article className="bg-white border border-[#E8E6DF] rounded-3xl p-5 sm:p-8 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-6">
           {/* 章・課ヘッダー */}
-          <div className="border-b border-slate-100 pb-4 space-y-1">
+          <div className="border-b border-stone-100 pb-4 space-y-1.5">
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md">
+              <span className="text-[10px] font-bold text-stone-600 bg-stone-100 border border-stone-200/80 px-2 py-0.5 rounded-md">
                 第{currentChapter.number}章 {currentChapter.badge}
               </span>
-              <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md font-mono">
+              <span className="text-[10px] font-bold text-stone-600 font-mono">
                 LESSON {currentLesson.number} / 40
               </span>
             </div>
 
             <h1
-              className={`font-bold text-slate-900 pt-1 leading-snug ${
+              className={`font-bold text-stone-900 pt-1 leading-snug tracking-tight ${
                 isLargeFont ? 'text-xl sm:text-2xl' : 'text-lg sm:text-xl'
               }`}
             >
               {currentLesson.title}
             </h1>
-            <p className="text-xs sm:text-sm text-slate-500 font-normal">
+            <p className="text-xs sm:text-sm text-stone-500 font-normal leading-relaxed">
               {currentLesson.subtitle}
             </p>
           </div>
 
-          {/* ① コア概念・仕組み */}
+          {/* ① Notion風 コールアウト：コア概念・仕組み */}
           {currentLesson.concept && (
             <section className="space-y-2">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900">
-                <span className="w-5 h-5 rounded-md bg-amber-50 text-amber-700 border border-amber-200 flex items-center justify-center text-[10px]">
-                  💡
-                </span>
+              <div className="flex items-center gap-1.5 text-xs font-bold text-stone-900">
+                <span className="text-sm">💡</span>
                 <span>仕組みとコアの考え方</span>
               </div>
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 text-slate-700 leading-relaxed font-normal text-xs sm:text-sm">
+              <div className="p-4 rounded-2xl bg-[#F8F9FA] border-l-4 border-amber-400 text-stone-700 leading-relaxed font-normal text-xs sm:text-sm shadow-2xs">
                 {currentLesson.concept.description}
               </div>
             </section>
@@ -371,23 +370,20 @@ export const SkillstackTextbookView: React.FC<SkillstackTextbookViewProps> = ({
           {/* ② 公式・ルール表 */}
           {currentLesson.rules && currentLesson.rules.items && (
             <section className="space-y-2.5">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900">
-                <span className="w-5 h-5 rounded-md bg-blue-50 text-blue-700 border border-blue-200 flex items-center justify-center text-[10px]">
-                  📐
-                </span>
+              <div className="flex items-center gap-1.5 text-xs font-bold text-stone-900">
+                <span className="text-sm">📐</span>
                 <span>{currentLesson.rules.title || '公式・文法ルール表'}</span>
               </div>
               <div className="space-y-2">
                 {currentLesson.rules.items.map((item, idx) => (
                   <div
                     key={idx}
-                    className="p-3.5 rounded-xl bg-white border border-slate-200 text-xs sm:text-sm space-y-1 shadow-2xs"
+                    className="p-3.5 rounded-2xl bg-[#F8F9FA] border-l-4 border-blue-400 text-xs sm:text-sm space-y-1 shadow-2xs"
                   >
-                    <div className="font-bold text-slate-900 flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    <div className="font-bold text-stone-900 flex items-center gap-1.5">
                       <span>{item.label}</span>
                     </div>
-                    <div className="text-slate-600 leading-relaxed whitespace-pre-wrap pl-3 font-normal text-xs">
+                    <div className="text-stone-600 leading-relaxed whitespace-pre-wrap font-normal text-xs pt-0.5">
                       {item.content}
                     </div>
                   </div>
@@ -396,13 +392,11 @@ export const SkillstackTextbookView: React.FC<SkillstackTextbookViewProps> = ({
             </section>
           )}
 
-          {/* ③ 実戦例文 (ネイティブ音声つき) */}
+          {/* ③ Speak風 実戦例文 (ネイティブ音声つき) */}
           {currentLesson.examples && currentLesson.examples.length > 0 && (
             <section className="space-y-2.5">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900">
-                <span className="w-5 h-5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center text-[10px]">
-                  🗣️
-                </span>
+              <div className="flex items-center gap-1.5 text-xs font-bold text-stone-900">
+                <span className="text-sm">🗣️</span>
                 <span>実戦例文（タップで韓国語音声を再生）</span>
               </div>
               <div className="space-y-2">
@@ -413,18 +407,18 @@ export const SkillstackTextbookView: React.FC<SkillstackTextbookViewProps> = ({
                       sound.playTap();
                       speechService.speak(ex.ko);
                     }}
-                    className="p-3.5 rounded-xl bg-slate-50 hover:bg-emerald-50/50 border border-slate-200/80 hover:border-emerald-300 transition-all cursor-pointer group flex items-start justify-between gap-3 shadow-2xs"
+                    className="p-3.5 rounded-2xl bg-[#FAF9F5] hover:bg-emerald-50/50 border border-[#EAE8E3] hover:border-emerald-300 transition-all cursor-pointer group flex items-start justify-between gap-3 shadow-2xs"
                   >
                     <div className="space-y-0.5 flex-1 min-w-0">
-                      <div className="font-bold text-slate-900 text-sm group-hover:text-emerald-800 transition-colors">
+                      <div className="font-bold text-stone-900 text-sm group-hover:text-emerald-800 transition-colors">
                         {ex.ko}
                       </div>
                       {ex.reading && (
-                        <div className="text-[11px] text-slate-400 font-mono">
+                        <div className="text-[11px] text-stone-600 font-mono">
                           {ex.reading}
                         </div>
                       )}
-                      <div className="text-xs text-slate-600 font-normal pt-0.5">
+                      <div className="text-xs text-stone-600 font-normal pt-0.5">
                         {ex.ja}
                       </div>
                     </div>
@@ -435,7 +429,7 @@ export const SkillstackTextbookView: React.FC<SkillstackTextbookViewProps> = ({
                         sound.playTap();
                         speechService.speak(ex.ko);
                       }}
-                      className="p-2 rounded-lg bg-white border border-slate-200 text-slate-500 group-hover:text-emerald-700 group-hover:border-emerald-300 transition-colors shrink-0 cursor-pointer"
+                      className="p-2 rounded-xl bg-white border border-stone-200 text-stone-500 group-hover:text-emerald-700 group-hover:border-emerald-300 transition-colors shrink-0 cursor-pointer shadow-2xs"
                       title="音声を再生"
                     >
                       <Volume2 className="w-4 h-4" />
@@ -446,30 +440,28 @@ export const SkillstackTextbookView: React.FC<SkillstackTextbookViewProps> = ({
             </section>
           )}
 
-          {/* ④ 日本人がハマる落とし穴・注意点 */}
+          {/* ④ Notion風 コールアウト：日本人がハマる落とし穴・注意点 */}
           {currentLesson.pitfall && (
             <section className="space-y-2">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900">
-                <span className="w-5 h-5 rounded-md bg-rose-50 text-rose-700 border border-rose-200 flex items-center justify-center text-[10px]">
-                  ⚠️
-                </span>
+              <div className="flex items-center gap-1.5 text-xs font-bold text-stone-900">
+                <span className="text-sm">⚠️</span>
                 <span>{currentLesson.pitfall.title || '試験の注意点・日本人がハマる落とし穴'}</span>
               </div>
-              <div className="p-4 rounded-xl bg-rose-50/60 border border-rose-200/80 text-rose-950 text-xs sm:text-sm leading-relaxed font-normal">
+              <div className="p-4 rounded-2xl bg-[#FDF6F0] border-l-4 border-rose-400 text-stone-800 text-xs sm:text-sm leading-relaxed font-normal shadow-2xs">
                 {currentLesson.pitfall.content}
               </div>
             </section>
           )}
 
-          {/* ⑤ その場で解く特訓問題への誘導バナー */}
-          <div className="pt-2 border-t border-slate-100">
-            <div className="p-4 sm:p-5 rounded-2xl bg-slate-900 text-white flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
+          {/* ⑤ その場で解く特訓問題への誘導バナー（Speak風 ミニマルブラックカード） */}
+          <div className="pt-2 border-t border-stone-100">
+            <div className="p-4 sm:p-5 rounded-2xl bg-[#18181B] text-white flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
               <div className="space-y-0.5 text-center sm:text-left">
                 <span className="text-xs font-bold text-emerald-400 flex items-center gap-1 justify-center sm:justify-start">
                   <Zap className="w-3.5 h-3.5 fill-emerald-400 text-emerald-400" />
                   第{currentLesson.number}課のアウトプット
                 </span>
-                <p className="text-xs text-slate-300 font-normal">
+                <p className="text-xs text-stone-300 font-normal">
                   読んだ知識を30秒の即答ドリルですぐに定着させましょう
                 </p>
               </div>
@@ -479,7 +471,7 @@ export const SkillstackTextbookView: React.FC<SkillstackTextbookViewProps> = ({
                   sound.playTap();
                   onStartDrillForLesson?.(currentLesson);
                 }}
-                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs shadow-2xs transition-all cursor-pointer whitespace-nowrap flex items-center justify-center gap-1.5"
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-stone-950 font-bold text-xs shadow-2xs transition-all cursor-pointer whitespace-nowrap flex items-center justify-center gap-1.5"
               >
                 <span>理解度チェック特訓を解く</span>
                 <ChevronRight className="w-4 h-4" />
@@ -494,7 +486,7 @@ export const SkillstackTextbookView: React.FC<SkillstackTextbookViewProps> = ({
             <button
               type="button"
               onClick={() => handleSelectLesson(prevLesson.id)}
-              className="px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer shadow-2xs"
+              className="px-3.5 py-2 rounded-xl bg-white border border-[#EAE8E3] text-stone-700 hover:bg-stone-50 text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer shadow-2xs"
             >
               <ChevronLeft className="w-4 h-4" />
               <span>第{prevLesson.number}課へ</span>
@@ -506,7 +498,7 @@ export const SkillstackTextbookView: React.FC<SkillstackTextbookViewProps> = ({
           <button
             type="button"
             onClick={() => setIsTocOpen(true)}
-            className="text-xs text-slate-500 hover:text-slate-900 font-medium underline cursor-pointer"
+            className="text-xs text-stone-600 hover:text-stone-900 font-medium underline cursor-pointer"
           >
             目次を開く
           </button>
@@ -515,7 +507,7 @@ export const SkillstackTextbookView: React.FC<SkillstackTextbookViewProps> = ({
             <button
               type="button"
               onClick={() => handleSelectLesson(nextLesson.id)}
-              className="px-4 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800 text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer shadow-2xs"
+              className="px-4 py-2 rounded-xl bg-[#18181B] text-white hover:bg-[#27272A] text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer shadow-2xs"
             >
               <span>第{nextLesson.number}課へ進む</span>
               <ChevronRight className="w-4 h-4" />
@@ -528,3 +520,5 @@ export const SkillstackTextbookView: React.FC<SkillstackTextbookViewProps> = ({
     </div>
   );
 };
+
+export default SkillstackTextbookView;

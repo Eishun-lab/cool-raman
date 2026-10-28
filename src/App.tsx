@@ -32,7 +32,7 @@ export const App: React.FC = () => {
   const [targetExamId, setTargetExamId] = useState<ExamType | undefined>(undefined);
   const [selectedLessonId, setSelectedLessonId] = useState<string | undefined>(undefined);
 
-  // 学習進捗状態（SkillStack準拠：localStorage永続化）
+  // 学習進捗状態（localStorage永続化）
   const [studyProgress, setStudyProgress] = useState<StudyProgressState>(getInitialStudyProgress);
 
   // 実行中の特訓ドリル
@@ -97,9 +97,9 @@ export const App: React.FC = () => {
   const currentLevel = Math.floor(studyProgress.xp / 300) + 1;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 font-sans flex flex-col">
-      {/* 🌟 洗練されたスティッキー・トップバー（SkillStack / Speakスタイル） */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-3 sm:px-6 h-13 sm:h-14 flex items-center shadow-2xs">
+    <div className="min-h-screen bg-[#FAF9F6] text-stone-900 font-sans flex flex-col antialiased selection:bg-amber-100 selection:text-amber-900">
+      {/* 🌟 Speak × Notion風 洗練されたミニマル・ヘッダー */}
+      <header className="sticky top-0 z-40 bg-[#FAF9F6]/90 backdrop-blur-md border-b border-[#EAE8E3] px-3 sm:px-6 h-13 sm:h-14 flex items-center">
         <div className="max-w-4xl mx-auto w-full flex items-center justify-between gap-2">
           {/* ロゴ ＆ 言語バッジ */}
           <div
@@ -107,9 +107,9 @@ export const App: React.FC = () => {
               sound.playTap();
               setActiveTab('home');
             }}
-            className="flex items-center gap-2 cursor-pointer group shrink-0 select-none"
+            className="flex items-center gap-2.5 cursor-pointer group shrink-0 select-none"
           >
-            <div className="w-8 h-8 rounded-xl overflow-hidden border border-slate-200 shadow-2xs group-hover:scale-105 transition-all shrink-0 bg-white">
+            <div className="w-8 h-8 rounded-xl overflow-hidden border border-[#EAE8E3] shadow-2xs group-hover:scale-105 transition-all shrink-0 bg-white">
               <img
                 src={hanmoaLogo}
                 alt="HanMoa Logo"
@@ -117,29 +117,29 @@ export const App: React.FC = () => {
               />
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="font-black text-base sm:text-lg tracking-tight text-slate-900 whitespace-nowrap">
+              <span className="font-bold text-base sm:text-lg tracking-tight text-stone-900 whitespace-nowrap">
                 HanMoa
               </span>
-              <span className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-stone-100 text-stone-700 border border-stone-200 whitespace-nowrap">
+              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-stone-100 text-stone-600 border border-stone-200/80 whitespace-nowrap">
                 🇰🇷 韓国語
               </span>
             </div>
           </div>
 
-          {/* 右側：ステータス（ストリーク ＆ XP ＆ レベル） ＆ ナビゲーション */}
-          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+          {/* 右側：Notion風ステータス ＆ ナビゲーション */}
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
             {/* ストリーク（炎） */}
             <div
-              className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-orange-50 border border-orange-200/90 text-orange-950 font-black text-xs shadow-2xs"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white border border-[#EAE8E3] text-stone-800 font-bold text-xs shadow-2xs"
               title={`${studyProgress.streakDays}日連続学習中！`}
             >
-              <Flame className="w-3.5 h-3.5 text-orange-500 fill-orange-500 animate-pulse" />
+              <Flame className="w-3.5 h-3.5 text-orange-500 fill-orange-500" />
               <span>{studyProgress.streakDays}日</span>
             </div>
 
             {/* XP（稲妻） */}
             <div
-              className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-50 border border-amber-200/90 text-amber-950 font-black text-xs shadow-2xs"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white border border-[#EAE8E3] text-stone-800 font-bold text-xs shadow-2xs"
               title={`累計獲得経験値: ${studyProgress.xp} XP`}
             >
               <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
@@ -148,14 +148,14 @@ export const App: React.FC = () => {
 
             {/* レベル */}
             <div
-              className="hidden xs:flex items-center gap-1 px-2 py-1 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 font-black text-xs shadow-2xs"
+              className="hidden xs:flex items-center gap-1 px-2 py-1 rounded-xl bg-white border border-[#EAE8E3] text-stone-600 font-bold text-xs shadow-2xs"
               title={`現在のレベル: Lv.${currentLevel}`}
             >
-              <span className="text-[10px] text-slate-600 font-mono">Lv.{currentLevel}</span>
+              <span className="text-[10px] text-stone-500 font-mono">Lv.{currentLevel}</span>
             </div>
 
             {/* デスクトップ用 ナビゲーション（3タブ セグメントコントロール） */}
-            <nav className="hidden sm:flex items-center p-1 rounded-2xl bg-slate-100/90 border border-slate-200/70 shadow-2xs shrink-0 ml-1">
+            <nav className="hidden sm:flex items-center p-0.5 rounded-xl bg-stone-200/50 border border-[#EAE8E3] shadow-2xs shrink-0 ml-1">
               {[
                 { id: 'home' as const, label: 'ホーム', icon: Home },
                 { id: 'textbook' as const, label: '教科書', icon: BookOpen },
@@ -171,13 +171,13 @@ export const App: React.FC = () => {
                       sound.playTap();
                       setActiveTab(tab.id);
                     }}
-                    className={`h-7 px-3.5 rounded-xl font-bold text-xs flex items-center gap-1.5 cursor-pointer transition-all ${
+                    className={`h-7 px-3 rounded-lg font-bold text-xs flex items-center gap-1.5 cursor-pointer transition-all ${
                       isActive
-                        ? 'bg-white text-slate-900 shadow-2xs'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+                        ? 'bg-white text-stone-900 shadow-2xs'
+                        : 'text-stone-500 hover:text-stone-900 hover:bg-stone-200/50'
                     }`}
                   >
-                    <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-emerald-600 stroke-[2.5]' : 'stroke-2'}`} />
+                    <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-stone-900 stroke-[2.2]' : 'stroke-2'}`} />
                     <span>{tab.label}</span>
                   </button>
                 );
@@ -190,7 +190,7 @@ export const App: React.FC = () => {
       {/* メインコンテンツ */}
       <main className="flex-1 pb-24 sm:pb-12">
         {activeTab === 'home' ? (
-          <div className="w-full max-w-4xl mx-auto px-3 sm:px-6 py-4 sm:py-8">
+          <div className="w-full max-w-4xl mx-auto px-3 sm:px-6 py-4 sm:py-7">
             <SkillstackHomeScreen
               progressState={studyProgress}
               onOpenTextbook={handleOpenTextbook}
@@ -228,8 +228,8 @@ export const App: React.FC = () => {
         ) : null}
       </main>
 
-      {/* 📱 モバイル下部固定ナビゲーションバー（3タブ ミニマルフロストバー） */}
-      <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/80 py-1.5 px-6 flex items-center justify-around shadow-[0_-2px_12px_rgba(0,0,0,0.04)] pb-[env(safe-area-inset-bottom)]">
+      {/* 📱 モバイル下部固定ナビゲーションバー（Speak / Apple風 ミニマルフロストバー） */}
+      <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#FAF9F6]/95 backdrop-blur-md border-t border-[#EAE8E3] py-1.5 px-6 flex items-center justify-around shadow-[0_-2px_12px_rgba(0,0,0,0.03)] pb-[env(safe-area-inset-bottom)]">
         {[
           { id: 'home' as const, label: 'ホーム', icon: Home },
           { id: 'textbook' as const, label: '教科書', icon: BookOpen },
@@ -246,21 +246,21 @@ export const App: React.FC = () => {
                 setActiveTab(tab.id);
               }}
               className={`flex flex-col items-center justify-center py-1 px-4 rounded-2xl transition-all cursor-pointer select-none active:scale-95 ${
-                isActive ? 'text-emerald-700' : 'text-slate-500 hover:text-slate-800'
+                isActive ? 'text-stone-900' : 'text-stone-400 hover:text-stone-700'
               }`}
             >
               <div
                 className={`w-9 h-7 rounded-xl flex items-center justify-center transition-all ${
                   isActive
-                    ? 'bg-emerald-50 text-emerald-700 font-bold'
-                    : 'bg-transparent text-slate-500'
+                    ? 'bg-stone-200/70 text-stone-900 font-bold'
+                    : 'bg-transparent text-stone-400'
                 }`}
               >
-                <Icon className={`w-4 h-4 ${isActive ? 'stroke-[2.5]' : 'stroke-2'}`} />
+                <Icon className={`w-4 h-4 ${isActive ? 'stroke-[2.2]' : 'stroke-2'}`} />
               </div>
               <span
                 className={`text-[10px] mt-0.5 tracking-tight ${
-                  isActive ? 'font-bold text-emerald-800' : 'font-medium text-slate-500'
+                  isActive ? 'font-bold text-stone-900' : 'font-medium text-stone-500'
                 }`}
               >
                 {tab.label}

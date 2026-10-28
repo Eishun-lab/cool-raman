@@ -9,6 +9,9 @@ import {
   Clock,
   CheckCircle2,
   GraduationCap,
+  ArrowRight,
+  Flame,
+  Check,
 } from 'lucide-react';
 import { LessonData } from '../../types';
 import { LESSONS_DATA } from '../../data/lessons';
@@ -23,6 +26,55 @@ interface SkillstackHomeScreenProps {
   onNavigateToExam: () => void;
 }
 
+// 5大章の体系定義（Speak / Notion式 カリキュラム設計）
+export const CHAPTER_DEFINITIONS = [
+  {
+    id: 1,
+    title: '第1章 入門・ハングルと基本助詞の土台',
+    range: '第1課 〜 第10課',
+    lessonStart: 1,
+    lessonEnd: 10,
+    description: '文字・母音子音・パッチムの仕組みから、自己紹介や必須助詞（〜は、〜が、〜を）の完全定着。',
+    tag: '入門・基礎',
+  },
+  {
+    id: 2,
+    title: '第2章 初級前半・日常表現と重要活用',
+    range: '第11課 〜 第20課',
+    lessonStart: 11,
+    lessonEnd: 20,
+    description: 'ヘヨ体・過去形・変則活用・数詞。韓国旅行や日常会話で意思疎通できる文法力を構築。',
+    tag: '初級前半',
+  },
+  {
+    id: 3,
+    title: '第3章 初級後半・複文応用と間接話法',
+    range: '第21課 〜 第30課',
+    lessonStart: 21,
+    lessonEnd: 30,
+    description: '理由・逆接・仮定などの接続表現と「〜と言っていました」の間接話法。複文を自然に操る。',
+    tag: '初級総決算',
+  },
+  {
+    id: 4,
+    title: '第4章 中級・実戦会話と使役受身・絶対敬語',
+    range: '第31課 〜 第35課',
+    lessonStart: 31,
+    lessonEnd: 35,
+    description: '使役・受身・格式体・ビジネスや人間関係に応じた絶対敬語。ハン検3級〜準2級レベルへ。',
+    tag: '中級突破',
+  },
+  {
+    id: 5,
+    title: '第5章 上級・推量配慮・高級論述',
+    range: '第36課 〜 第40課',
+    lessonStart: 36,
+    lessonEnd: 40,
+    description: '微妙な感情のニュアンス、口語縮約、新聞・論説文の書き言葉文型。ハン検2級・1級・TOPIK高級へ。',
+    tag: '上級マスター',
+  },
+];
+
 export const SkillstackHomeScreen: React.FC<SkillstackHomeScreenProps> = ({
   progressState,
   onOpenTextbook,
@@ -30,208 +82,236 @@ export const SkillstackHomeScreen: React.FC<SkillstackHomeScreenProps> = ({
   onStartTodayDrill,
   onNavigateToExam,
 }) => {
-  const [selectedLevel, setSelectedLevel] = useState<'beginner' | 'intermediate' | 'advanced'>('beginner');
+  const [selectedChapterId, setSelectedChapterId] = useState<number>(1);
 
   // 読了数と演習クリア数
   const readCount = Object.keys(progressState.readLessonIds).length;
   const clearedDrillCount = Object.keys(progressState.clearedDrillLessonIds).length;
   const progressPercent = Math.min(100, Math.round((readCount / LESSONS_DATA.length) * 100));
 
-  // 前回の続きのレッスン
-  const lastLesson = useMemo(() => {
+  // 前回の続きのレッスン（未読・最後に読んだ課）
+  const currentFocusLesson = useMemo(() => {
     return LESSONS_DATA.find((l) => l.id === progressState.lastReadLessonId) || LESSONS_DATA[0];
   }, [progressState.lastReadLessonId]);
 
-  // レベル別レッスン
-  const displayedLessons = useMemo(() => {
-    if (selectedLevel === 'beginner') {
-      return LESSONS_DATA.filter((l) => l.number <= 30);
-    }
-    if (selectedLevel === 'intermediate') {
-      return LESSONS_DATA.filter((l) => l.number >= 31 && l.number <= 35);
-    }
-    return LESSONS_DATA.filter((l) => l.number >= 36);
-  }, [selectedLevel]);
+  // 選択中チャプターのレッスン一覧
+  const currentChapter = useMemo(() => {
+    return CHAPTER_DEFINITIONS.find((c) => c.id === selectedChapterId) || CHAPTER_DEFINITIONS[0];
+  }, [selectedChapterId]);
+
+  const chapterLessons = useMemo(() => {
+    return LESSONS_DATA.filter(
+      (l) => l.number >= currentChapter.lessonStart && l.number <= currentChapter.lessonEnd
+    );
+  }, [currentChapter]);
 
   return (
-    <div className="w-full max-w-3xl mx-auto space-y-4 sm:space-y-5 pb-24 sm:pb-16 select-none animate-fadeIn">
+    <div className="w-full max-w-2xl mx-auto space-y-6 pb-20 select-none animate-fadeIn font-sans">
       {/* ===================================================================== */}
-      {/* 1. 合格ターゲット進捗ステータス (SkillStack ホーム最上部準拠)        */}
+      {/* 1. Speak風 今日のフォーカスカード（Hero Focus Session）               */}
       {/* ===================================================================== */}
-      <div className="bg-slate-900 text-white border border-slate-800 rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-sm space-y-3">
+      <section className="bg-white border border-[#E8E6DF] rounded-3xl p-5 sm:p-7 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-4">
+        {/* カード上部：タグ ＆ 全体進捗率 */}
         <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-            <span className="text-xs font-bold text-white tracking-tight truncate">
-              韓国語マスター進捗
-            </span>
-            <span className="text-[11px] text-slate-400 font-mono shrink-0">
-              ({readCount} / {LESSONS_DATA.length}課 読了)
-            </span>
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/70 text-[11px] font-bold">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span>今進めるレッスン</span>
           </div>
-          <span className="text-sm font-bold text-emerald-400 font-mono shrink-0">
-            {progressPercent}%
+          <span className="text-xs font-bold text-stone-500 font-mono">
+            {readCount} / {LESSONS_DATA.length} 課 完了 ({progressPercent}%)
           </span>
         </div>
 
-        {/* スタイリッシュな進捗グラデーションバー */}
-        <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+        {/* メインタイトル ＆ レッスン名 */}
+        <div className="space-y-1">
+          <span className="text-[11px] font-bold text-stone-600 uppercase tracking-wider block">
+            第{currentFocusLesson.number}課
+          </span>
+          <h2 className="text-lg sm:text-xl font-bold text-stone-900 tracking-tight leading-snug">
+            {currentFocusLesson.title.replace(/^第\d+課：/, '')}
+          </h2>
+          <p className="text-xs sm:text-sm text-stone-500 leading-relaxed pt-0.5 font-normal">
+            {currentFocusLesson.subtitle}
+          </p>
+        </div>
+
+        {/* 洗練された細身のプログレスバー */}
+        <div className="w-full bg-stone-100 h-1.5 rounded-full overflow-hidden">
           <div
-            className="bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 h-full rounded-full transition-all duration-500 ease-out"
-            style={{ width: `${Math.max(2, progressPercent)}%` }}
+            className="bg-emerald-600 h-full rounded-full transition-all duration-700 ease-out"
+            style={{ width: `${Math.max(3, progressPercent)}%` }}
           />
         </div>
 
-        {/* ミニマル統計タグ */}
-        <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-800/80 font-mono">
-          <span>連続学習: <b className="text-amber-400">{progressState.streakDays}日</b></span>
-          <span>特訓クリア: <b className="text-white">{clearedDrillCount}課</b></span>
-          <span>総獲得: <b className="text-emerald-400">{progressState.xp} XP</b></span>
-        </div>
-      </div>
-
-      {/* ===================================================================== */}
-      {/* 2. 前回の続きから再開バナー (中断セッションのワンタップ再開)          */}
-      {/* ===================================================================== */}
-      {lastLesson && (
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs flex items-center justify-between gap-3 group">
-          <div className="flex items-center gap-3 min-w-0">
-            <span className="w-10 h-10 rounded-xl bg-slate-100 text-slate-800 font-bold text-xs flex items-center justify-center shrink-0 border border-slate-200 font-mono">
-              NO.{lastLesson.number}
-            </span>
-            <div className="min-w-0">
-              <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1">
-                <BookmarkCheck className="w-3.5 h-3.5 text-emerald-600" />
-                前回の続きから再開
-              </span>
-              <h3 className="text-xs sm:text-sm font-bold text-slate-900 truncate mt-0.5">
-                {lastLesson.title.replace(/^第\d+課：/, '')}
-              </h3>
-            </div>
-          </div>
+        {/* アクションボタン（Speak式：明確な2択） */}
+        <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+          <button
+            type="button"
+            onClick={() => {
+              sound.playTap();
+              onOpenTextbook(currentFocusLesson.id);
+            }}
+            className="flex-1 py-3 px-5 rounded-2xl bg-[#18181B] hover:bg-[#27272A] text-white text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-2 shadow-2xs"
+          >
+            <BookOpen className="w-4 h-4" />
+            <span>教科書を開く</span>
+            <ArrowRight className="w-4 h-4 ml-0.5" />
+          </button>
 
           <button
             type="button"
             onClick={() => {
               sound.playTap();
-              onOpenTextbook(lastLesson.id);
+              onStartTodayDrill();
             }}
-            className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shrink-0 transition-colors cursor-pointer flex items-center gap-1 shadow-2xs"
+            className="py-3 px-5 rounded-2xl bg-stone-50 hover:bg-stone-100 border border-stone-200/90 text-stone-800 text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center justify-center gap-2 shadow-2xs"
           >
-            <span>続きを読む</span>
-            <ChevronRight className="w-3.5 h-3.5" />
+            <Zap className="w-4 h-4 text-amber-500 fill-amber-500" />
+            <span>今日の3分特訓（5問）</span>
           </button>
         </div>
-      )}
+      </section>
 
       {/* ===================================================================== */}
-      {/* 3. 今日の3分クイック特訓カード (SkillStack「今日の10問」準拠)         */}
+      {/* 2. Notion風 ミニマル・スタッツリボン                                   */}
       {/* ===================================================================== */}
-      <div className="bg-gradient-to-r from-slate-50 via-emerald-50/30 to-slate-50 border border-slate-200/90 rounded-2xl p-4 sm:p-5 flex items-center justify-between gap-3 shadow-2xs">
-        <div className="space-y-1 min-w-0">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-800">
-            <Zap className="w-4 h-4 fill-emerald-600 text-emerald-600" />
-            <span>今日の3分クイック特訓</span>
-          </div>
-          <p className="text-xs text-slate-600 font-normal">
-            全ジャンルから抽出された実戦5問。毎日3分で語彙と文法を即答アウトプット
-          </p>
+      <section className="grid grid-cols-3 gap-2 px-1 text-center">
+        <div className="bg-white/80 border border-[#EAE8E3] rounded-2xl p-3 shadow-2xs">
+          <span className="text-[10px] text-stone-500 block font-medium">連続学習</span>
+          <span className="text-sm sm:text-base font-bold text-stone-900 font-mono flex items-center justify-center gap-1 mt-0.5">
+            <Flame className="w-3.5 h-3.5 text-orange-500 fill-orange-500 inline" />
+            {progressState.streakDays}日
+          </span>
         </div>
 
-        <button
-          type="button"
-          onClick={() => {
-            sound.playTap();
-            onStartTodayDrill();
-          }}
-          className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shrink-0 transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs whitespace-nowrap"
-        >
-          <span>特訓スタート</span>
-          <ChevronRight className="w-3.5 h-3.5" />
-        </button>
-      </div>
+        <div className="bg-white/80 border border-[#EAE8E3] rounded-2xl p-3 shadow-2xs">
+          <span className="text-[10px] text-stone-500 block font-medium">特訓クリア</span>
+          <span className="text-sm sm:text-base font-bold text-stone-900 font-mono mt-0.5 block">
+            {clearedDrillCount} <span className="text-xs text-stone-500 font-normal">/ 40課</span>
+          </span>
+        </div>
+
+        <div className="bg-white/80 border border-[#EAE8E3] rounded-2xl p-3 shadow-2xs">
+          <span className="text-[10px] text-stone-500 block font-medium">累計獲得</span>
+          <span className="text-sm sm:text-base font-bold text-stone-900 font-mono flex items-center justify-center gap-1 mt-0.5">
+            <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500 inline" />
+            {progressState.xp} <span className="text-[10px] text-stone-500 font-normal">XP</span>
+          </span>
+        </div>
+      </section>
 
       {/* ===================================================================== */}
-      {/* 4. カリキュラム一覧 (全40課：教科書を読む & 特訓する)                */}
+      {/* 3. Notion風 カリキュラム目次（全5章・40課）                            */}
       {/* ===================================================================== */}
       <section className="space-y-3 pt-2">
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-2">
-            <BookOpen className="w-4 h-4 text-slate-800" />
-            <h2 className="text-sm font-bold text-slate-900">カリキュラム（全40課）</h2>
+            <span className="w-2 h-2 rounded-full bg-stone-900" />
+            <h3 className="text-sm font-bold text-stone-900 tracking-tight">カリキュラム体系</h3>
           </div>
+          <span className="text-xs text-stone-500 font-mono font-medium">全5章・40課</span>
+        </div>
 
-          {/* 初級 / 中級 / 上級 切り替えセグメント */}
-          <div className="inline-flex p-0.5 bg-slate-100 border border-slate-200/80 rounded-xl">
-            {(['beginner', 'intermediate', 'advanced'] as const).map((level) => (
+        {/* チャプター選択タブ（Notion風ピルコントロール） */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+          {CHAPTER_DEFINITIONS.map((ch) => {
+            const isSelected = selectedChapterId === ch.id;
+            return (
               <button
-                key={level}
+                key={ch.id}
                 type="button"
                 onClick={() => {
                   sound.playTap();
-                  setSelectedLevel(level);
+                  setSelectedChapterId(ch.id);
                 }}
-                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  selectedLevel === level
-                    ? 'bg-white text-slate-900 shadow-2xs font-bold'
-                    : 'text-slate-600 hover:text-slate-900'
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
+                  isSelected
+                    ? 'bg-[#18181B] text-white shadow-2xs'
+                    : 'bg-white text-stone-600 hover:text-stone-900 border border-[#EAE8E3] hover:bg-stone-50'
                 }`}
               >
-                {level === 'beginner' ? '初級 (1-30)' : level === 'intermediate' ? '中級 (31-35)' : '上級 (36-40)'}
+                <span>{ch.tag}</span>
+                <span className={`text-[10px] ml-1.5 font-mono ${isSelected ? 'text-stone-300' : 'text-stone-500'}`}>
+                  ({ch.lessonStart}-{ch.lessonEnd})
+                </span>
               </button>
-            ))}
-          </div>
+            );
+          })}
         </div>
 
-        {/* レッスンカードリスト */}
+        {/* 選択されたチャプターの概要カード */}
+        <div className="bg-[#FAF9F5] border border-[#EAE8E3] rounded-2xl p-4 text-xs space-y-1">
+          <div className="flex items-center justify-between">
+            <span className="font-bold text-stone-900">{currentChapter.title}</span>
+            <span className="text-[11px] text-stone-500 font-mono">{currentChapter.range}</span>
+          </div>
+          <p className="text-stone-500 text-[11px] leading-relaxed font-normal">
+            {currentChapter.description}
+          </p>
+        </div>
+
+        {/* レッスンリスト（Notionのドキュメント行風） */}
         <div className="space-y-2">
-          {displayedLessons.map((lesson) => {
+          {chapterLessons.map((lesson) => {
             const isRead = !!progressState.readLessonIds[lesson.id];
             const isDrillCleared = !!progressState.clearedDrillLessonIds[lesson.id];
 
             return (
               <div
                 key={lesson.id}
-                className="bg-white border border-slate-200/90 hover:border-slate-300 rounded-2xl p-3.5 sm:p-4 shadow-2xs transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
+                className="bg-white border border-[#EAE8E3] hover:border-stone-300 rounded-2xl p-3.5 sm:p-4 shadow-2xs transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
               >
-                <div className="flex items-center gap-3 min-w-0 flex-1">
-                  {/* レッスン番号 */}
-                  <span className="w-9 h-9 rounded-xl bg-slate-100 text-slate-800 font-mono font-bold text-xs flex items-center justify-center shrink-0 border border-slate-200">
-                    {lesson.number < 10 ? `0${lesson.number}` : lesson.number}
-                  </span>
+                {/* 左側：ナンバー ＆ タイトル ＆ ステータス */}
+                <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
+                  {/* ステータスサークル */}
+                  <div
+                    className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 font-mono text-xs font-bold transition-colors ${
+                      isDrillCleared
+                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                        : isRead
+                        ? 'bg-stone-100 text-stone-700 border border-stone-200'
+                        : 'bg-stone-50 text-stone-500 border border-stone-200/80'
+                    }`}
+                  >
+                    {isDrillCleared ? (
+                      <Check className="w-4 h-4 stroke-[2.5]" />
+                    ) : (
+                      <span>{lesson.number < 10 ? `0${lesson.number}` : lesson.number}</span>
+                    )}
+                  </div>
 
                   <div className="min-w-0 flex-1 space-y-0.5">
                     <div className="flex items-center gap-2">
-                      <h3 className="text-xs sm:text-sm font-bold text-slate-900 truncate">
+                      <h4 className="text-xs sm:text-sm font-bold text-stone-900 truncate group-hover:text-emerald-800 transition-colors">
                         {lesson.title.replace(/^第\d+課：/, '')}
-                      </h3>
+                      </h4>
                       {isDrillCleared ? (
-                        <span className="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded font-bold shrink-0">
-                          特訓クリア
+                        <span className="text-[10px] text-emerald-800 bg-emerald-50 border border-emerald-200/70 px-1.5 py-0.2 rounded font-bold shrink-0">
+                          特訓済
                         </span>
                       ) : isRead ? (
-                        <span className="text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.2 rounded font-medium shrink-0">
+                        <span className="text-[10px] text-stone-600 bg-stone-100 px-1.5 py-0.2 rounded font-medium shrink-0">
                           読了
                         </span>
                       ) : null}
                     </div>
-                    <p className="text-xs text-slate-500 truncate font-normal">
+                    <p className="text-[11px] text-stone-500 truncate font-normal">
                       {lesson.subtitle}
                     </p>
                   </div>
                 </div>
 
-                {/* アクションボタン2つ: 教科書を読む / 特訓する */}
-                <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-center">
+                {/* 右側：洗練されたミニマルアクション（教科書 / 特訓） */}
+                <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
                   <button
                     type="button"
                     onClick={() => {
                       sound.playTap();
                       onOpenTextbook(lesson.id);
                     }}
-                    className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-xs transition-colors cursor-pointer flex items-center gap-1 shadow-2xs"
+                    className="px-3 py-1.5 rounded-xl bg-stone-50 hover:bg-stone-100 border border-stone-200 text-stone-700 font-bold text-xs transition-colors cursor-pointer flex items-center gap-1 shadow-2xs"
                   >
-                    <BookOpen className="w-3.5 h-3.5 text-slate-500" />
+                    <BookOpen className="w-3.5 h-3.5 text-stone-500" />
                     <span>教科書</span>
                   </button>
 
@@ -241,9 +321,9 @@ export const SkillstackHomeScreen: React.FC<SkillstackHomeScreenProps> = ({
                       sound.playTap();
                       onStartDrillForLesson(lesson);
                     }}
-                    className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-colors cursor-pointer flex items-center gap-1 shadow-2xs"
+                    className="px-3.5 py-1.5 rounded-xl bg-[#18181B] hover:bg-[#27272A] text-white font-bold text-xs transition-colors cursor-pointer flex items-center gap-1 shadow-2xs"
                   >
-                    <Zap className="w-3.5 h-3.5" />
+                    <Zap className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
                     <span>特訓</span>
                   </button>
                 </div>
@@ -254,20 +334,20 @@ export const SkillstackHomeScreen: React.FC<SkillstackHomeScreenProps> = ({
       </section>
 
       {/* ===================================================================== */}
-      {/* 5. CBT公式模試センターへの案内バナー                                 */}
+      {/* 4. CBT公式模試センターへの案内カード（Speak風 ミニマルバナー）         */}
       {/* ===================================================================== */}
-      <div className="pt-2">
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 flex items-center justify-between gap-3 shadow-2xs">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-800 border border-slate-200 flex items-center justify-center font-bold shrink-0">
-              <Award className="w-5 h-5 text-slate-700" />
+      <section className="pt-2">
+        <div className="bg-white border border-[#EAE8E3] rounded-3xl p-5 flex items-center justify-between gap-4 shadow-2xs">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-2xl bg-stone-100 text-stone-800 border border-stone-200 flex items-center justify-center shrink-0">
+              <GraduationCap className="w-5 h-5 text-stone-700" />
             </div>
-            <div>
-              <h3 className="text-xs sm:text-sm font-bold text-slate-900">
+            <div className="space-y-0.5">
+              <h4 className="text-xs sm:text-sm font-bold text-stone-900">
                 TOPIK・ハン検 CBT模擬試験センター
-              </h3>
-              <p className="text-[11px] text-slate-500 font-normal">
-                ハン検（5〜1級 全級完備）・TOPIK（I・II）で実力を公式判定
+              </h4>
+              <p className="text-[11px] text-stone-500 font-normal leading-relaxed">
+                全8大試験。合否判定とCan-Do学習カルテを即時発行
               </p>
             </div>
           </div>
@@ -278,13 +358,15 @@ export const SkillstackHomeScreen: React.FC<SkillstackHomeScreenProps> = ({
               sound.playTap();
               onNavigateToExam();
             }}
-            className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shrink-0 transition-colors cursor-pointer flex items-center gap-1 shadow-2xs whitespace-nowrap"
+            className="px-4 py-2.5 rounded-2xl bg-[#18181B] hover:bg-[#27272A] text-white font-bold text-xs shrink-0 transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs whitespace-nowrap"
           >
             <span>模試に挑む</span>
             <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>
-      </div>
+      </section>
     </div>
   );
 };
+
+export default SkillstackHomeScreen;
