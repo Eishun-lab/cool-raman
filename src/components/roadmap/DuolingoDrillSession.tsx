@@ -231,17 +231,17 @@ export const DuolingoDrillSession: React.FC<DuolingoDrillSessionProps> = ({
           </div>
 
           {/* 問題文カード */}
-          <div className="bg-white border-2 border-stone-200/90 rounded-3xl p-4 sm:p-6 shadow-xs space-y-2.5">
+          <div className="bg-white border border-slate-200/90 rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-xs space-y-3">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-[10px] sm:text-[11px] font-black uppercase text-[#58CC02] tracking-wider px-2.5 py-0.5 rounded-full bg-[#F0FDF4] border border-[#BBF7D0]">
+              <span className="text-[10px] sm:text-[11px] font-bold uppercase text-emerald-800 tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200">
                 {drill.targetSkill}
               </span>
-              <span className="text-xs font-mono font-bold text-stone-400">
+              <span className="text-xs font-mono font-medium text-slate-400">
                 問 {questionIndex + 1} / {drill.questions.length}
               </span>
             </div>
 
-            <p className="text-base sm:text-xl font-black text-[#0F172A] leading-snug">
+            <p className="text-base sm:text-xl font-bold text-slate-900 leading-snug">
               {currentQ.question}
             </p>
 
@@ -249,35 +249,35 @@ export const DuolingoDrillSession: React.FC<DuolingoDrillSessionProps> = ({
               <button
                 type="button"
                 onClick={() => speechService.speak(currentQ.audioText!)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-xs font-bold transition-all cursor-pointer mt-1 shadow-2xs"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold transition-all cursor-pointer mt-1 shadow-2xs"
               >
-                <Volume2 className="w-3.5 h-3.5 text-amber-700" />
+                <Volume2 className="w-3.5 h-3.5 text-slate-600" />
                 <span>韓国語の音声を聴く</span>
               </button>
             )}
           </div>
 
-          {/* 選択肢タイル（Duolingo風 太枠3D押し込みタイル） */}
+          {/* 選択肢タイル（Speak風 ミニマルタイル） */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
             {currentQ.options.map((opt, optIdx) => {
               const isSelected = selectedOption === optIdx;
               const isCorrectOpt = optIdx === currentQ.correctIndex;
 
               let tileClass =
-                'bg-white border-2 border-b-4 border-stone-200 text-stone-800 hover:bg-stone-50 hover:border-stone-300';
+                'bg-white border border-slate-200 text-slate-800 hover:bg-slate-50 hover:border-slate-300 shadow-2xs';
 
               if (isSelected && !isAnswered) {
                 tileClass =
-                  'bg-[#F0FDF4] border-2 border-b-4 border-[#58CC02] text-[#58CC02] shadow-xs';
+                  'bg-emerald-50/80 border-2 border-emerald-600 text-emerald-950 shadow-2xs';
               } else if (isAnswered) {
                 if (isCorrectOpt) {
                   tileClass =
-                    'bg-emerald-50 border-2 border-b-4 border-emerald-500 text-emerald-950 font-black';
+                    'bg-emerald-50 border-2 border-emerald-600 text-emerald-950 font-bold';
                 } else if (isSelected && !isCorrectOpt) {
                   tileClass =
-                    'bg-rose-50 border-2 border-b-4 border-rose-400 text-rose-900 line-through opacity-80';
+                    'bg-rose-50 border-2 border-rose-400 text-rose-900 line-through opacity-80';
                 } else {
-                  tileClass = 'bg-stone-50 border-2 border-stone-200 text-stone-400 opacity-60';
+                  tileClass = 'bg-slate-50 border border-slate-200 text-slate-400 opacity-60';
                 }
               }
 
@@ -287,15 +287,15 @@ export const DuolingoDrillSession: React.FC<DuolingoDrillSessionProps> = ({
                   type="button"
                   disabled={isAnswered}
                   onClick={() => handleSelectOption(optIdx)}
-                  className={`w-full text-left p-3.5 sm:p-4 rounded-2xl transition-all cursor-pointer flex items-center justify-between font-bold text-xs sm:text-sm active:translate-y-0.5 active:border-b-2 ${tileClass}`}
+                  className={`w-full text-left p-3.5 sm:p-4 rounded-xl transition-all cursor-pointer flex items-center justify-between font-medium text-xs sm:text-sm active:scale-[0.99] ${tileClass}`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     {/* キーボードショートカット番号バッジ */}
                     <span
-                      className={`w-6 h-6 rounded-lg text-xs font-black flex items-center justify-center shrink-0 border ${
+                      className={`w-6 h-6 rounded-lg text-xs font-bold flex items-center justify-center shrink-0 border ${
                         isSelected && !isAnswered
-                          ? 'bg-[#58CC02] text-white border-[#58CC02]'
-                          : 'bg-stone-100 text-stone-600 border-stone-200'
+                          ? 'bg-emerald-600 text-white border-emerald-600'
+                          : 'bg-slate-100 text-slate-600 border-slate-200'
                       }`}
                     >
                       {optIdx + 1}
@@ -417,10 +417,10 @@ export const DuolingoDrillSession: React.FC<DuolingoDrillSessionProps> = ({
                   type="button"
                   disabled={selectedOption === null}
                   onClick={handleCheck}
-                  className={`w-full sm:w-44 py-3.5 px-6 rounded-2xl font-black text-sm transition-all cursor-pointer ${
+                  className={`w-full sm:w-44 py-3.5 px-6 rounded-xl font-bold text-sm transition-all cursor-pointer ${
                     selectedOption !== null
-                      ? 'bg-[#58CC02] hover:bg-[#46A302] text-white shadow-[0_5px_0_#388E00] active:translate-y-1 active:shadow-[0_1px_0_#388E00]'
-                      : 'bg-stone-200 text-stone-400 cursor-not-allowed'
+                      ? 'bg-slate-900 hover:bg-slate-800 text-white shadow-2xs active:scale-[0.98]'
+                      : 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
                   }`}
                 >
                   確認する
@@ -429,10 +429,10 @@ export const DuolingoDrillSession: React.FC<DuolingoDrillSessionProps> = ({
                 <button
                   type="button"
                   onClick={handleNext}
-                  className={`w-full sm:w-44 py-3.5 px-6 rounded-2xl font-black text-sm transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                  className={`w-full sm:w-44 py-3.5 px-6 rounded-xl font-bold text-sm transition-all cursor-pointer flex items-center justify-center gap-2 shadow-2xs ${
                     isCorrect
-                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-[0_5px_0_#047857] active:translate-y-1 active:shadow-[0_1px_0_#047857]'
-                      : 'bg-rose-600 hover:bg-rose-700 text-white shadow-[0_5px_0_#9f1239] active:translate-y-1 active:shadow-[0_1px_0_#9f1239]'
+                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white active:scale-[0.98]'
+                      : 'bg-slate-900 hover:bg-slate-800 text-white active:scale-[0.98]'
                   }`}
                 >
                   <span>{questionIndex < drill.questions.length - 1 ? '次へ進む' : '結果を見る'}</span>
@@ -444,14 +444,14 @@ export const DuolingoDrillSession: React.FC<DuolingoDrillSessionProps> = ({
         </footer>
       ) : (
         /* リザルト画面時のボトムボタン */
-        <footer className="w-full p-4 sm:p-6 bg-white border-t border-stone-200 shrink-0">
+        <footer className="w-full p-4 sm:p-6 bg-white border-t border-slate-200 shrink-0">
           <div className="max-w-md mx-auto">
             <button
               type="button"
               onClick={onClose}
-              className="w-full py-4 px-6 rounded-2xl bg-[#58CC02] hover:bg-[#46A302] text-white font-black text-sm sm:text-base shadow-[0_5px_0_#388E00] active:translate-y-1 active:shadow-[0_1px_0_#388E00] transition-all cursor-pointer flex items-center justify-center gap-2"
+              className="w-full py-3.5 px-6 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm sm:text-base shadow-2xs transition-all cursor-pointer flex items-center justify-center gap-2"
             >
-              <span>冒険マップに戻る ➔</span>
+              <span>探訪マップに戻る ➔</span>
             </button>
           </div>
         </footer>

@@ -182,20 +182,20 @@ export const ComprehensiveQuizView: React.FC = () => {
     speechService.speak(text);
   };
 
-  const categoryConfigs: { key: QuizCategory; label: string; color: string; shadow: string }[] = [
-    { key: 'all', label: '🔥 全ジャンル総合', color: '#58CC02', shadow: '#388E00' },
-    { key: 'vocab', label: '📖 必修単語', color: '#1CB0F6', shadow: '#1899D6' },
-    { key: 'grammar', label: '📐 文法・助詞', color: '#FF9600', shadow: '#CC7A00' },
-    { key: 'chunks', label: '💬 日常チャンク', color: '#CE82FF', shadow: '#A855F7' },
-    { key: 'phrases', label: '⚡ キラーフレーズ', color: '#FF4B4B', shadow: '#D32F2F' },
-    { key: 'hanja', label: '🏛️ 四字熟語', color: '#2DD4BF', shadow: '#0D9488' },
+  const categoryConfigs: { key: QuizCategory; label: string }[] = [
+    { key: 'all', label: '全ジャンル総合' },
+    { key: 'vocab', label: '必修単語' },
+    { key: 'grammar', label: '文法・助詞' },
+    { key: 'chunks', label: '日常チャンク' },
+    { key: 'phrases', label: 'キラーフレーズ' },
+    { key: 'hanja', label: '四字熟語' },
   ];
 
   return (
     <div className="max-w-2xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4">
-      {/* 🌟 Duolingo 3D カテゴリ切り替えツールバー */}
-      <div className="bg-white border-2 border-stone-200/90 rounded-3xl p-2.5 sm:p-3 shadow-[0_3px_0_#E5E7EB]">
-        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-0.5">
+      {/* 🌟 Speak風 ミニマル・カテゴリ切り替えバー */}
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-1.5 shadow-2xs">
+        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5">
           {categoryConfigs.map((cat) => {
             const isActive = selectedCategory === cat.key;
             return (
@@ -206,19 +206,11 @@ export const ComprehensiveQuizView: React.FC = () => {
                   sound.playTap();
                   setSelectedCategory(cat.key);
                 }}
-                className={`px-3.5 py-2 rounded-2xl text-xs font-black transition-all shrink-0 cursor-pointer whitespace-nowrap ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer whitespace-nowrap ${
                   isActive
-                    ? 'text-white -translate-y-0.5'
-                    : 'bg-white border-2 border-stone-200 text-stone-700 shadow-[0_2px_0_#E5E7EB] hover:bg-stone-50'
+                    ? 'bg-slate-900 text-white shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 }`}
-                style={
-                  isActive
-                    ? {
-                        backgroundColor: cat.color,
-                        boxShadow: `0 3px 0 ${cat.shadow}`,
-                      }
-                    : undefined
-                }
               >
                 {cat.label}
               </button>
@@ -228,68 +220,66 @@ export const ComprehensiveQuizView: React.FC = () => {
       </div>
 
       {!isFinished && currentQ ? (
-        <div className="bg-white rounded-3xl p-5 sm:p-8 shadow-[0_4px_0_#E5E7EB] border-2 border-stone-200/90 space-y-6">
+        <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-xs border border-slate-200/90 space-y-5">
           {/* プログレスバー & ヘッダー */}
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             <div className="flex items-center justify-between">
-              <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-50 text-amber-700 text-xs font-black rounded-full border border-amber-200 shadow-2xs">
-                <Sparkles className="w-3.5 h-3.5" />
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-slate-100 text-slate-800 text-xs font-bold rounded-md border border-slate-200">
+                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
                 {currentQ.category}
               </span>
-              <span className="text-xs font-black text-stone-500 font-mono">
+              <span className="text-xs font-bold text-slate-400 font-mono">
                 {currentIndex + 1} / {questions.length}
               </span>
             </div>
 
-            {/* Duolingo グリーンプログレスバー */}
-            <div className="w-full bg-stone-100 h-3 rounded-full overflow-hidden p-0.5 border border-stone-200 shadow-inner">
+            {/* プログレスバー */}
+            <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
               <div
-                className="bg-gradient-to-r from-emerald-400 to-[#58CC02] h-full rounded-full transition-all duration-300 relative shadow-sm"
+                className="bg-emerald-500 h-full rounded-full transition-all duration-300"
                 style={{ width: `${((currentIndex + 1) / questions.length) * 100}%` }}
-              >
-                <div className="absolute inset-x-0 top-0 h-1/2 bg-white/30 rounded-t-full" />
-              </div>
+              />
             </div>
           </div>
 
-          {/* 問題文 ＆ 3D音声ボタン */}
-          <div className="text-center py-2 space-y-3">
-            <p className="text-[11px] font-black uppercase tracking-wider text-stone-400">
+          {/* 問題文 ＆ 音声ボタン */}
+          <div className="text-center py-2 space-y-2.5">
+            <p className="text-[11px] font-medium tracking-wide text-slate-400">
               意味として最も適切なものを選択してください
             </p>
             <div className="flex items-center justify-center gap-3">
-              <h2 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
                 {currentQ.question}
               </h2>
               <button
                 type="button"
                 onClick={(e) => handlePlayAudio(currentQ.audioText, e)}
-                className="p-3 bg-[#1CB0F6] hover:bg-[#1899D6] text-white rounded-2xl shadow-[0_3px_0_#1899D6] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer shrink-0"
+                className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-all cursor-pointer shrink-0 border border-slate-200"
                 title="音声を聴く"
               >
-                <Volume2 className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2.5]" />
+                <Volume2 className="w-5 h-5" />
               </button>
             </div>
           </div>
 
-          {/* 四択選択肢（Duolingo 3D厚みボタン） */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* 四択選択肢 */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             {currentQ.options.map((opt, idx) => {
               const isSelected = selectedOption === opt;
               const isCorrect = opt === currentQ.correctAnswer;
 
               let btnStyle =
-                'bg-white border-2 border-stone-200 shadow-[0_3.5px_0_#E5E7EB] text-stone-800 hover:bg-stone-50 active:translate-y-1 active:shadow-none';
+                'bg-white border border-slate-200 text-slate-800 hover:bg-slate-50 hover:border-slate-300 shadow-2xs';
 
               if (isAnswered) {
                 if (isCorrect) {
                   btnStyle =
-                    'bg-emerald-50 border-2 border-[#58CC02] text-emerald-900 shadow-[0_3.5px_0_#388E00] font-black -translate-y-0.5';
+                    'bg-emerald-50 border-2 border-emerald-600 text-emerald-950 font-bold';
                 } else if (isSelected) {
                   btnStyle =
-                    'bg-rose-50 border-2 border-rose-500 text-rose-900 shadow-[0_3.5px_0_#BE123C] font-black';
+                    'bg-rose-50 border-2 border-rose-400 text-rose-900 font-bold';
                 } else {
-                  btnStyle = 'bg-stone-50 opacity-40 border-2 border-stone-200 text-stone-400 shadow-none';
+                  btnStyle = 'bg-slate-50 opacity-40 border border-slate-200 text-slate-400';
                 }
               }
 
@@ -299,11 +289,11 @@ export const ComprehensiveQuizView: React.FC = () => {
                   type="button"
                   disabled={isAnswered}
                   onClick={() => handleSelectOption(opt)}
-                  className={`p-4 rounded-2xl text-left font-black text-sm sm:text-base transition-all flex items-center justify-between cursor-pointer ${btnStyle}`}
+                  className={`p-3.5 sm:p-4 rounded-xl text-left font-medium text-xs sm:text-sm transition-all flex items-center justify-between cursor-pointer active:scale-[0.99] ${btnStyle}`}
                 >
                   <span className="leading-snug">{opt}</span>
                   {isAnswered && isCorrect && (
-                    <CheckCircle2 className="w-5 h-5 text-[#58CC02] flex-shrink-0 ml-2" />
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 ml-2" />
                   )}
                   {isAnswered && isSelected && !isCorrect && (
                     <XCircle className="w-5 h-5 text-rose-500 flex-shrink-0 ml-2" />
@@ -313,34 +303,31 @@ export const ComprehensiveQuizView: React.FC = () => {
             })}
           </div>
 
-          {/* Duolingo風 アクション＆解説バナー */}
+          {/* アクション＆解説バナー */}
           {isAnswered && (
             <div
-              className={`p-4 sm:p-5 rounded-3xl border-2 transition-all space-y-3 ${
+              className={`p-4 sm:p-5 rounded-2xl border transition-all space-y-3 ${
                 selectedOption === currentQ.correctAnswer
-                  ? 'bg-emerald-50 border-emerald-300 shadow-[0_4px_0_#A7F3D0]'
-                  : 'bg-rose-50 border-rose-300 shadow-[0_4px_0_#FECDD3]'
+                  ? 'bg-emerald-50/70 border-emerald-200 shadow-2xs'
+                  : 'bg-rose-50/70 border-rose-200 shadow-2xs'
               }`}
             >
               <div className="flex items-start gap-3">
-                <span className="text-2xl shrink-0 mt-0.5">
-                  {selectedOption === currentQ.correctAnswer ? '🎉' : '💡'}
-                </span>
                 <div className="space-y-1.5 flex-1">
                   <h4
-                    className={`font-black text-sm sm:text-base ${
+                    className={`font-bold text-sm sm:text-base ${
                       selectedOption === currentQ.correctAnswer
                         ? 'text-emerald-900'
                         : 'text-rose-900'
                     }`}
                   >
                     {selectedOption === currentQ.correctAnswer
-                      ? '정답입니다! 素晴らしい！'
+                      ? '正解です！'
                       : `正解: ${currentQ.correctAnswer}`}
                   </h4>
-                  <div className="p-3 bg-white/90 rounded-2xl border border-stone-200/70 shadow-2xs">
-                    <span className="text-[10px] font-black uppercase text-stone-500 block mb-0.5">💡 解説・ポイント</span>
-                    <p className="text-xs sm:text-sm text-stone-800 leading-relaxed font-bold">
+                  <div className="p-3 bg-white rounded-xl border border-slate-200 shadow-2xs">
+                    <span className="text-[10px] font-bold uppercase text-slate-500 block mb-0.5">解説・ポイント</span>
+                    <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal">
                       {currentQ.explanation}
                     </p>
                   </div>
@@ -351,44 +338,44 @@ export const ComprehensiveQuizView: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleNext}
-                  className={`w-full sm:w-auto px-8 py-3.5 font-black rounded-2xl text-white transition-all flex items-center justify-center gap-2 cursor-pointer active:translate-y-1 active:shadow-none ${
+                  className={`w-full sm:w-auto px-6 py-2.5 font-bold rounded-xl text-white transition-all flex items-center justify-center gap-2 cursor-pointer shadow-2xs ${
                     selectedOption === currentQ.correctAnswer
-                      ? 'bg-[#58CC02] hover:bg-[#46A302] shadow-[0_4px_0_#388E00] border-b-4 border-[#388E00]'
-                      : 'bg-rose-500 hover:bg-rose-600 shadow-[0_4px_0_#BE123C] border-b-4 border-[#BE123C]'
+                      ? 'bg-slate-900 hover:bg-slate-800'
+                      : 'bg-slate-900 hover:bg-slate-800'
                   }`}
                 >
                   <span>{currentIndex + 1 === questions.length ? '結果を見る' : '次の問題へ'}</span>
-                  <ArrowRight className="w-5 h-5 stroke-[2.5]" />
+                  <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
           )}
         </div>
       ) : isFinished ? (
-        /* 🏆 Duolingo 結果発表画面 */
-        <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-[0_4px_0_#E5E7EB] border-2 border-stone-200/90 text-center space-y-6">
-          <div className="w-20 h-20 bg-amber-100 text-amber-600 rounded-3xl flex items-center justify-center mx-auto shadow-[0_3px_0_#FDE68A] border-2 border-amber-200">
-            <Award className="w-10 h-10 stroke-[2.5]" />
+        /* 結果発表画面 */
+        <div className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-xs border border-slate-200 text-center space-y-6">
+          <div className="w-16 h-16 bg-emerald-50 text-emerald-700 rounded-2xl flex items-center justify-center mx-auto border border-emerald-200">
+            <Award className="w-8 h-8" />
           </div>
 
           <div className="space-y-1">
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900">テスト完了！</h2>
-            <p className="text-stone-500 text-xs sm:text-sm font-bold">
-              日々のトレーニングが着実に力になっています！
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">特訓完了！</h2>
+            <p className="text-slate-500 text-xs sm:text-sm font-normal">
+              日々のトレーニングが着実に力になっています
             </p>
           </div>
 
           {/* スコアカード */}
-          <div className="bg-slate-50 rounded-2xl p-6 max-w-sm mx-auto border-2 border-stone-200 shadow-2xs space-y-2">
-            <div className="flex items-center justify-center gap-1.5 text-xs font-black text-amber-600">
+          <div className="bg-slate-50 rounded-xl p-5 max-w-sm mx-auto border border-slate-200 shadow-2xs space-y-1.5">
+            <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-amber-700">
               <Zap className="w-4 h-4 fill-amber-500 text-amber-500" />
               <span>+{score * 5} XP 獲得！</span>
             </div>
-            <p className="text-5xl font-black text-[#58CC02]">
+            <p className="text-4xl font-bold text-slate-900 font-mono">
               {score}{' '}
-              <span className="text-2xl text-stone-400 font-bold">/ {questions.length}</span>
+              <span className="text-xl text-slate-400 font-normal">/ {questions.length}</span>
             </p>
-            <p className="text-xs font-black text-stone-600">
+            <p className="text-xs font-medium text-slate-500">
               正答率: {Math.round((score / questions.length) * 100)}%
             </p>
           </div>
@@ -396,27 +383,27 @@ export const ComprehensiveQuizView: React.FC = () => {
           {/* 復習セクション */}
           {reviewList.length > 0 && (
             <div className="text-left space-y-3 max-w-md mx-auto">
-              <h3 className="text-xs font-black text-stone-700 flex items-center gap-1.5">
-                <Brain className="w-4 h-4 text-rose-500" />
-                間違えた問題の復習 ({reviewList.length}問)
+              <h3 className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                <Brain className="w-4 h-4 text-slate-500" />
+                復習が必要な問題 ({reviewList.length}問)
               </h3>
               <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
                 {reviewList.map((r) => (
                   <div
                     key={r.id}
-                    className="p-3 bg-white rounded-2xl border-2 border-stone-200 flex justify-between items-center text-xs shadow-2xs"
+                    className="p-3 bg-white rounded-xl border border-slate-200 flex justify-between items-center text-xs shadow-2xs"
                   >
                     <div>
-                      <span className="font-black text-slate-900 mr-2">{r.question}</span>
-                      <span className="text-stone-500 font-bold">➔ {r.correctAnswer}</span>
+                      <span className="font-bold text-slate-900 mr-2">{r.question}</span>
+                      <span className="text-slate-500 font-normal">➔ {r.correctAnswer}</span>
                     </div>
                     <button
                       type="button"
                       onClick={() => handlePlayAudio(r.audioText)}
-                      className="p-2 hover:bg-stone-100 rounded-xl text-[#1CB0F6] cursor-pointer shrink-0"
+                      className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-600 cursor-pointer shrink-0"
                       title="音声を再生"
                     >
-                      <Volume2 className="w-4 h-4 stroke-[2.5]" />
+                      <Volume2 className="w-4 h-4" />
                     </button>
                   </div>
                 ))}
@@ -431,9 +418,9 @@ export const ComprehensiveQuizView: React.FC = () => {
                 sound.playTap();
                 generateQuestions(selectedCategory, 10);
               }}
-              className="px-6 py-3 bg-[#58CC02] hover:bg-[#46A302] text-white font-black rounded-2xl shadow-[0_3.5px_0_#388E00] active:translate-y-1 active:shadow-none transition-all flex items-center gap-2 cursor-pointer"
+              className="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl shadow-2xs transition-all flex items-center gap-2 cursor-pointer text-sm"
             >
-              <RotateCcw className="w-5 h-5 stroke-[2.5]" />
+              <RotateCcw className="w-4 h-4" />
               <span>もう一度特訓する</span>
             </button>
           </div>

@@ -395,50 +395,53 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
   const topikExams = ALL_MOCK_EXAMS.filter((e) => e.category === 'topik');
 
   // ==========================================================================
-  // ① 模擬試験 選択画面（トップ一覧：公式検定別の明確な区分）
+  // ① 模擬試験 選択画面（トップ一覧：CBT公式検定センター）
   // ==========================================================================
   if (viewState === 'list') {
     return (
       <div className="w-full space-y-6 sm:space-y-8">
-        {/* ホランイのトロフィー模試アリーナ ヘッダー */}
+        {/* CBT公式模擬試験センター ヘッダー */}
         <div className="max-w-3xl mx-auto space-y-3 sm:space-y-4">
-          <div className="bg-gradient-to-r from-amber-400/20 via-orange-400/15 to-emerald-400/15 border-2 border-amber-300 rounded-3xl p-4 sm:p-5 flex flex-col sm:flex-row items-center gap-3 sm:gap-4 shadow-xs text-left">
-            <div className="p-1 rounded-2xl bg-amber-400/20 border-2 border-amber-300/60 shrink-0 shadow-xs">
-              <HorangiMascot size="sm" mood="cheering" showMessage={false} interactive={true} />
-            </div>
-            <div className="flex-1 min-w-0 text-center sm:text-left">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-400 text-amber-950 text-[11px] font-black uppercase tracking-wider mb-1 shadow-2xs">
-                <Trophy className="w-3.5 h-3.5" /> 公式実戦トロフィー模試アリーナ
+          <div className="bg-slate-900 text-white border border-slate-800 rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="space-y-1.5 flex-1 min-w-0">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-950/80 text-emerald-400 border border-emerald-800/60 text-[11px] font-bold tracking-wide">
+                <Trophy className="w-3.5 h-3.5 text-emerald-400" /> CBT公式模擬試験センター
               </div>
-              <h2 className="text-base sm:text-lg font-black text-stone-900 leading-snug">
-                ホランイと一緒に検定試験にチャレンジ！
+              <h2 className="text-lg sm:text-xl font-bold text-white leading-snug">
+                TOPIK・ハン検 実戦模試（全8大検定完備）
               </h2>
-              <p className="text-xs sm:text-sm text-stone-600 font-medium mt-0.5">
-                過去問の出題傾向に完全準拠！合格ライン（60点）突破でトロフィーと大量XPをGETしよう ⚡
+              <p className="text-xs text-slate-300 font-normal leading-relaxed">
+                本番同様の配点・制限時間・出題傾向に完全準拠。合否判定とCan-Do学習カルテ（根拠と学習処方箋）を即時発行します。
               </p>
+            </div>
+            <div className="flex sm:flex-col items-center gap-2 shrink-0 self-stretch sm:self-auto justify-between sm:justify-center border-t sm:border-t-0 sm:border-l border-slate-800 pt-3 sm:pt-0 sm:pl-5">
+              <div className="text-center sm:text-right">
+                <div className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">収録試験数</div>
+                <div className="text-xl sm:text-2xl font-bold text-white font-mono">{ALL_MOCK_EXAMS.length} <span className="text-xs text-slate-400 font-normal">試験</span></div>
+              </div>
             </div>
           </div>
 
-          {/* カテゴリ切り替えフィルター（Duolingo 3Dピル・モバイル1行スクロール） */}
-          <div className="flex items-center justify-start sm:justify-center gap-2 pt-1 overflow-x-auto no-scrollbar py-1">
+          {/* カテゴリ切り替えフィルター（Speak風 ミニマルセグメント） */}
+          <div className="flex items-center justify-start sm:justify-center gap-1.5 pt-1 overflow-x-auto no-scrollbar py-1">
             <button
               type="button"
               onClick={() => setCategoryFilter('all')}
-              className={`px-3.5 sm:px-4 py-2 rounded-2xl text-xs font-black transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 border ${
                 categoryFilter === 'all'
-                  ? 'bg-[#58CC02] text-white shadow-[0_3px_0_#388E00] -translate-y-0.5'
-                  : 'bg-white border-2 border-stone-200 text-stone-600 shadow-[0_2px_0_#E5E7EB] hover:bg-stone-50'
+                  ? 'bg-slate-900 text-white border-slate-900 shadow-2xs'
+                  : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50'
               }`}
             >
-              🏅 すべて (6)
+              すべて ({ALL_MOCK_EXAMS.length})
             </button>
             <button
               type="button"
               onClick={() => setCategoryFilter('hanken')}
-              className={`px-3.5 sm:px-4 py-2 rounded-2xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap shrink-0 border ${
                 categoryFilter === 'hanken'
-                  ? 'bg-[#FF9600] text-white shadow-[0_3px_0_#CC7A00] -translate-y-0.5'
-                  : 'bg-white border-2 border-stone-200 text-stone-600 shadow-[0_2px_0_#E5E7EB] hover:bg-stone-50'
+                  ? 'bg-slate-900 text-white border-slate-900 shadow-2xs'
+                  : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50'
               }`}
             >
               <Award className="w-3.5 h-3.5" />
@@ -447,14 +450,14 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
             <button
               type="button"
               onClick={() => setCategoryFilter('topik')}
-              className={`px-3.5 sm:px-4 py-2 rounded-2xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap shrink-0 border ${
                 categoryFilter === 'topik'
-                  ? 'bg-[#1CB0F6] text-white shadow-[0_3px_0_#1899D6] -translate-y-0.5'
-                  : 'bg-white border-2 border-stone-200 text-stone-600 shadow-[0_2px_0_#E5E7EB] hover:bg-stone-50'
+                  ? 'bg-slate-900 text-white border-slate-900 shadow-2xs'
+                  : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50'
               }`}
             >
               <GraduationCap className="w-3.5 h-3.5" />
-              <span>TOPIK (2)</span>
+              <span>TOPIK ({topikExams.length})</span>
             </button>
           </div>
         </div>
@@ -464,70 +467,70 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
         {/* ================================================================== */}
         {(categoryFilter === 'all' || categoryFilter === 'hanken') && (
           <section className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b-2 border-stone-200">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-200">
               <div className="flex items-center gap-2.5">
-                <span className="w-9 h-9 rounded-2xl bg-[#FF9600]/15 text-[#FF9600] border-2 border-[#FF9600]/30 flex items-center justify-center font-black">
-                  <Award className="w-5 h-5 text-[#FF9600]" />
+                <span className="w-8 h-8 rounded-xl bg-slate-100 text-slate-800 border border-slate-200 flex items-center justify-center font-bold">
+                  <Award className="w-4 h-4 text-slate-800" />
                 </span>
                 <div>
-                  <h2 className="text-lg sm:text-xl font-black text-[#0F172A]">
+                  <h2 className="text-base sm:text-lg font-bold text-slate-900">
                     ハングル能力検定試験（ハン検）
                   </h2>
-                  <p className="text-[11px] sm:text-xs text-stone-500 font-medium">
+                  <p className="text-[11px] sm:text-xs text-slate-500 font-normal">
                     文字・発音・助詞から敬語・慣用句まで、日本人に最適な段階ステップ判定
                   </p>
                 </div>
               </div>
-              <span className="text-xs font-black px-3 py-1 rounded-full bg-amber-50 text-amber-800 border-2 border-amber-200/80 self-start sm:self-auto shadow-2xs">
+              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 self-start sm:self-auto">
                 5級・4級・3級・準2級・2級・1級 全級完備
               </span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
               {hankenExams.map((exam) => (
                 <div
                   key={exam.id}
-                  className="bg-white border-2 border-stone-200/90 rounded-3xl p-5 sm:p-6 shadow-[0_4px_0_#E5E7EB] hover:shadow-[0_6px_0_#CBD5E1] hover:border-amber-300 transition-all flex flex-col justify-between group"
+                  className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-2xs hover:shadow-xs hover:border-slate-300 transition-all flex flex-col justify-between group"
                 >
-                  <div className="space-y-4">
+                  <div className="space-y-3.5">
                     {/* バッジ行 */}
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
-                        <span className="px-3 py-1 rounded-full text-xs font-black tracking-wide bg-amber-50 text-amber-900 border border-amber-200">
+                        <span className="px-2.5 py-0.5 rounded-md text-xs font-bold tracking-wide bg-slate-100 text-slate-800 border border-slate-200 font-mono">
                           {exam.badge}
                         </span>
-                        <span className="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200">
                           合格基準: {exam.passScore}点
                         </span>
                       </div>
-                      <div className="flex items-center gap-1.5 text-xs text-stone-500 font-bold shrink-0">
-                        <Clock className="w-3.5 h-3.5 text-stone-400" />
+                      <div className="flex items-center gap-1 text-xs text-slate-400 font-medium shrink-0 font-mono">
+                        <Clock className="w-3.5 h-3.5" />
                         <span>{Math.round(exam.timeLimitSeconds / 60)}分 / {exam.questionCount}問</span>
                       </div>
                     </div>
 
                     {/* タイトルとサブタイトル */}
                     <div>
-                      <h3 className="text-xl sm:text-2xl font-black text-[#0F172A] group-hover:text-[#FF9600] transition-colors mb-1">
+                      <h3 className="text-lg sm:text-xl font-bold text-slate-900 group-hover:text-emerald-800 transition-colors mb-0.5">
                         {exam.title}
                       </h3>
-                      <p className="text-xs font-bold text-stone-500">{exam.subtitle}</p>
+                      <p className="text-xs text-slate-500 font-normal">{exam.subtitle}</p>
                     </div>
 
-                    <p className="text-xs text-stone-600 leading-relaxed font-medium">
+                    <p className="text-xs text-slate-600 leading-relaxed font-normal">
                       {exam.overview}
                     </p>
 
                     {/* 🎯 この級でクリアできること */}
-                    <div className="bg-emerald-50/70 rounded-2xl p-4 border-2 border-emerald-200/90 shadow-2xs space-y-2">
-                      <div className="text-xs font-black text-stone-800 flex items-center gap-1.5">
-                        <Target className="w-4 h-4 text-[#58CC02]" />
+                    <div className="bg-slate-50 rounded-xl p-3.5 border border-slate-200/80 space-y-1.5">
+                      <div className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                        <Target className="w-3.5 h-3.5 text-emerald-600" />
                         <span>この級でクリアできること</span>
                       </div>
-                      <ul className="space-y-1.5">
+                      <ul className="space-y-1">
                         {exam.canDoList.slice(0, 3).map((canDo, idx) => (
-                          <li key={idx} className="text-[11px] text-stone-700 font-medium flex items-start gap-1.5">
-                            <span className="text-[#58CC02] font-black shrink-0">✓</span>
+                          <li key={idx} className="text-[11px] text-slate-600 font-normal flex items-start gap-1.5">
+                            <span className="text-emerald-600 font-bold shrink-0">✓</span>
                             <span>{canDo}</span>
                           </li>
                         ))}
@@ -535,7 +538,7 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
                     </div>
                   </div>
 
-                  {/* 受験開始ボタン（Duolingo 3Dグリーンボタン） */}
+                  {/* 受験開始ボタン */}
                   <div className="pt-5">
                     <button
                       type="button"
@@ -543,10 +546,10 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
                         sound.playTap();
                         startExam(exam.id);
                       }}
-                      className="w-full py-4 rounded-2xl bg-[#58CC02] hover:bg-[#46A302] active:translate-y-1 active:shadow-[0_1px_0_#388E00] text-white font-black text-base shadow-[0_5px_0_#388E00] border-b-4 border-[#388E00] transition-all flex items-center justify-center gap-2 cursor-pointer"
+                      className="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm shadow-2xs transition-all flex items-center justify-center gap-2 cursor-pointer"
                     >
-                      <span>🚀 模擬試験に挑戦する！</span>
-                      <ArrowRight className="w-5 h-5 stroke-[2.5]" />
+                      <span>模擬試験に挑戦する</span>
+                      <ArrowRight className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
@@ -560,70 +563,70 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
         {/* ================================================================== */}
         {(categoryFilter === 'all' || categoryFilter === 'topik') && (
           <section className="space-y-4 pt-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b-2 border-stone-200">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-200">
               <div className="flex items-center gap-2.5">
-                <span className="w-9 h-9 rounded-2xl bg-[#1CB0F6]/15 text-[#1CB0F6] border-2 border-[#1CB0F6]/30 flex items-center justify-center font-black">
-                  <GraduationCap className="w-5 h-5 text-[#1CB0F6]" />
+                <span className="w-8 h-8 rounded-xl bg-slate-100 text-slate-800 border border-slate-200 flex items-center justify-center font-bold">
+                  <GraduationCap className="w-4 h-4 text-slate-800" />
                 </span>
                 <div>
-                  <h2 className="text-lg sm:text-xl font-black text-[#0F172A]">
+                  <h2 className="text-base sm:text-lg font-bold text-slate-900">
                     TOPIK（韓国教育省公認・世界共通基準）
                   </h2>
-                  <p className="text-[11px] sm:text-xs text-stone-500 font-medium">
+                  <p className="text-[11px] sm:text-xs text-slate-500 font-normal">
                     留学・就職・永住権基準として世界で通用する公認テスト。聞き取り・読解の実戦運用力を判定
                   </p>
                 </div>
               </div>
-              <span className="text-xs font-black px-3 py-1 rounded-full bg-sky-50 text-sky-800 border-2 border-sky-200/80 self-start sm:self-auto shadow-2xs">
+              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 self-start sm:self-auto">
                 TOPIK I・II 完備
               </span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
               {topikExams.map((exam) => (
                 <div
                   key={exam.id}
-                  className="bg-white border-2 border-stone-200/90 rounded-3xl p-5 sm:p-6 shadow-[0_4px_0_#E5E7EB] hover:shadow-[0_6px_0_#CBD5E1] hover:border-sky-300 transition-all flex flex-col justify-between group"
+                  className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-2xs hover:shadow-xs hover:border-slate-300 transition-all flex flex-col justify-between group"
                 >
-                  <div className="space-y-4">
+                  <div className="space-y-3.5">
                     {/* バッジ行 */}
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
-                        <span className="px-3 py-1 rounded-full text-xs font-black tracking-wide bg-sky-50 text-sky-800 border border-sky-200">
+                        <span className="px-2.5 py-0.5 rounded-md text-xs font-bold tracking-wide bg-slate-100 text-slate-800 border border-slate-200 font-mono">
                           {exam.badge}
                         </span>
-                        <span className="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200">
                           合格基準: {exam.passScore}点
                         </span>
                       </div>
-                      <div className="flex items-center gap-1.5 text-xs text-stone-500 font-bold shrink-0">
-                        <Clock className="w-3.5 h-3.5 text-stone-400" />
+                      <div className="flex items-center gap-1 text-xs text-slate-400 font-medium shrink-0 font-mono">
+                        <Clock className="w-3.5 h-3.5" />
                         <span>{Math.round(exam.timeLimitSeconds / 60)}分 / {exam.questionCount}問</span>
                       </div>
                     </div>
 
                     {/* タイトルとサブタイトル */}
                     <div>
-                      <h3 className="text-xl sm:text-2xl font-black text-[#0F172A] group-hover:text-[#1CB0F6] transition-colors mb-1">
+                      <h3 className="text-lg sm:text-xl font-bold text-slate-900 group-hover:text-emerald-800 transition-colors mb-0.5">
                         {exam.title}
                       </h3>
-                      <p className="text-xs font-bold text-stone-500">{exam.subtitle}</p>
+                      <p className="text-xs text-slate-500 font-normal">{exam.subtitle}</p>
                     </div>
 
-                    <p className="text-xs text-stone-600 leading-relaxed font-medium">
+                    <p className="text-xs text-slate-600 leading-relaxed font-normal">
                       {exam.overview}
                     </p>
 
                     {/* 🎯 この級でクリアできること */}
-                    <div className="bg-[#F8FAFC] rounded-2xl p-4 border border-[#E2E8F0] space-y-2">
-                      <div className="text-xs font-black text-stone-800 flex items-center gap-1.5">
-                        <Target className="w-4 h-4 text-[#1CB0F6]" />
+                    <div className="bg-slate-50 rounded-xl p-3.5 border border-slate-200/80 space-y-1.5">
+                      <div className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                        <Target className="w-3.5 h-3.5 text-emerald-600" />
                         <span>この級でクリアできること</span>
                       </div>
-                      <ul className="space-y-1.5">
+                      <ul className="space-y-1">
                         {exam.canDoList.slice(0, 3).map((canDo, idx) => (
-                          <li key={idx} className="text-[11px] text-stone-700 font-medium flex items-start gap-1.5">
-                            <span className="text-[#1CB0F6] font-black shrink-0">✓</span>
+                          <li key={idx} className="text-[11px] text-slate-600 font-normal flex items-start gap-1.5">
+                            <span className="text-emerald-600 font-bold shrink-0">✓</span>
                             <span>{canDo}</span>
                           </li>
                         ))}
@@ -631,15 +634,18 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
                     </div>
                   </div>
 
-                  {/* 受験開始ボタン（Duolingo 3Dブルーボタン） */}
+                  {/* 受験開始ボタン */}
                   <div className="pt-5">
                     <button
                       type="button"
-                      onClick={() => startExam(exam.id)}
-                      className="w-full py-3.5 rounded-2xl bg-[#1CB0F6] hover:bg-[#1899D6] active:translate-y-1 active:shadow-[0_1px_0_#1480B3] text-white font-black text-sm sm:text-base shadow-[0_5px_0_#1480B3] transition-all flex items-center justify-center gap-2 cursor-pointer"
+                      onClick={() => {
+                        sound.playTap();
+                        startExam(exam.id);
+                      }}
+                      className="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm shadow-2xs transition-all flex items-center justify-center gap-2 cursor-pointer"
                     >
-                      <span>🚀 模擬試験に挑戦する！</span>
-                      <ArrowRight className="w-5 h-5 stroke-[2.5]" />
+                      <span>模擬試験に挑戦する</span>
+                      <ArrowRight className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
@@ -664,23 +670,23 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
           <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
             {/* 試験タイトルと進捗 */}
             <div className="flex items-center gap-2 min-w-0">
-              <span className="text-xs font-bold px-2 py-0.5 rounded-lg bg-[#F0FDF4] text-[#58CC02] border border-[#BBF7D0] shrink-0">
+              <span className="text-xs font-bold px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0 font-mono">
                 {activeExam.badge}
               </span>
-              <span className="text-xs sm:text-sm font-extrabold text-[#0F172A] truncate">
+              <span className="text-xs sm:text-sm font-bold text-slate-900 truncate">
                 第 {currentQuestionIndex + 1} / {activeExam.questionCount} 問
               </span>
             </div>
 
             {/* カウントダウンタイマー */}
             <div
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-xl font-mono font-black text-sm transition-colors ${
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-xl font-mono font-bold text-sm transition-colors ${
                 timeLeftSeconds <= 180
                   ? 'bg-rose-100 text-rose-700 animate-pulse'
-                  : 'bg-white border border-[#E2E8F0] text-[#0F172A]'
+                  : 'bg-white border border-slate-200 text-slate-800'
               }`}
             >
-              <Clock className="w-3.5 h-3.5 text-[#58CC02]" />
+              <Clock className="w-3.5 h-3.5 text-slate-500" />
               <span>{formatTime(timeLeftSeconds)}</span>
             </div>
 
@@ -688,7 +694,7 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
             <button
               type="button"
               onClick={() => setShowFinishConfirm(true)}
-              className="text-xs font-bold px-3 py-1.5 rounded-xl bg-[#58CC02] text-white hover:bg-[#46A302] shadow-xs transition-all cursor-pointer shrink-0"
+              className="text-xs font-bold px-3 py-1.5 rounded-xl bg-slate-900 text-white hover:bg-slate-800 shadow-2xs transition-all cursor-pointer shrink-0"
             >
               採点する
             </button>
@@ -697,46 +703,46 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
 
         {/* メイン問題カード領域 */}
         <main className="max-w-3xl mx-auto px-3 sm:px-6 pt-4 sm:pt-6">
-          <div className="bg-white border border-stone-200 rounded-3xl p-5 sm:p-8 shadow-xs space-y-6">
+          <div className="bg-white border border-slate-200/90 rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-xs space-y-6">
             {/* 問題ヘッダー */}
-            <div className="flex items-center justify-between gap-2 pb-3 border-b border-stone-100">
+            <div className="flex items-center justify-between gap-2 pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2">
-                <span className="w-7 h-7 rounded-xl bg-stone-100 text-stone-800 font-black text-xs flex items-center justify-center">
+                <span className="w-7 h-7 rounded-xl bg-slate-100 text-slate-800 font-bold text-xs flex items-center justify-center font-mono">
                   Q{currentQuestionIndex + 1}
                 </span>
-                <span className="text-xs font-bold text-[#58CC02] bg-[#F0FDF4] px-2 py-0.5 rounded-md">
+                <span className="text-xs font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
                   {currentQuestion.sectionLabel}
                 </span>
               </div>
-              <span className="text-xs text-stone-400 font-bold">配点: {currentQuestion.score}点</span>
+              <span className="text-xs text-slate-400 font-medium">配点: {currentQuestion.score}点</span>
             </div>
 
             {/* 指示文 */}
-            <h2 className="text-sm sm:text-base font-extrabold text-[#0F172A] leading-relaxed">
+            <h2 className="text-sm sm:text-base font-bold text-slate-900 leading-relaxed">
               {currentQuestion.instruction}
             </h2>
 
             {/* リスニング音声再生ボタン（音声問題の場合） */}
             {currentQuestion.audioText && (
-              <div className="bg-amber-50/70 border border-amber-200 rounded-2xl p-4 flex items-center justify-between gap-3">
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
                     onClick={() => playAudio(currentQuestion.audioText)}
-                    className={`w-11 h-11 rounded-2xl flex items-center justify-center shadow-xs transition-all cursor-pointer ${
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-2xs transition-all cursor-pointer ${
                       isAudioPlaying
-                        ? 'bg-amber-500 text-white animate-pulse'
-                        : 'bg-white text-amber-800 border border-amber-300 hover:bg-amber-100'
+                        ? 'bg-emerald-600 text-white animate-pulse'
+                        : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-100'
                     }`}
                     title="音声を再生"
                   >
                     <Volume2 className="w-5 h-5" />
                   </button>
                   <div>
-                    <div className="text-xs font-bold text-amber-900">
+                    <div className="text-xs font-bold text-slate-800">
                       {isAudioPlaying ? '音声再生中...' : 'リスニング音声を再生'}
                     </div>
-                    <div className="text-[10px] text-amber-700">
+                    <div className="text-[10px] text-slate-500">
                       ボタンをタップすると韓国語ネイティブ音声が流れます
                     </div>
                   </div>
@@ -746,20 +752,20 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
 
             {/* パッセージ・対話文・案内文（ある場合） */}
             {currentQuestion.passage && (
-              <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl p-4 sm:p-5 text-xs sm:text-sm text-[#0F172A] font-sans leading-relaxed whitespace-pre-wrap select-none font-medium">
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 sm:p-5 text-xs sm:text-sm text-slate-800 font-sans leading-relaxed whitespace-pre-wrap select-none font-normal">
                 {currentQuestion.passage}
               </div>
             )}
 
             {/* 個別の問い（ある場合） */}
             {currentQuestion.questionText && (
-              <p className="text-xs sm:text-sm font-bold text-stone-700 pt-1">
+              <p className="text-xs sm:text-sm font-bold text-slate-800 pt-1">
                 {currentQuestion.questionText}
               </p>
             )}
 
             {/* 4つの選択肢 */}
-            <div className="space-y-2.5 pt-2">
+            <div className="space-y-2 pt-1">
               {currentQuestion.options.map((opt, optIdx) => {
                 const isSelected = userAnswers[currentQuestion.id] === optIdx;
                 const circleNumber = ['①', '②', '③', '④'][optIdx];
@@ -769,22 +775,22 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
                     key={optIdx}
                     type="button"
                     onClick={() => handleSelectOption(currentQuestion.id, optIdx)}
-                    className={`w-full text-left p-3.5 sm:p-4 rounded-2xl border transition-all flex items-start gap-3 cursor-pointer group active:scale-[0.99] ${
+                    className={`w-full text-left p-3.5 sm:p-4 rounded-xl border transition-all flex items-start gap-3 cursor-pointer group active:scale-[0.99] ${
                       isSelected
-                        ? 'bg-[#F0FDF4] border-[#58CC02] text-[#58CC02] shadow-xs'
-                        : 'bg-white border-stone-200 text-stone-700 hover:bg-stone-50 hover:border-stone-300'
+                        ? 'bg-emerald-50/80 border-emerald-500 text-emerald-950 shadow-2xs'
+                        : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
                     }`}
                   >
                     <span
-                      className={`w-6 h-6 rounded-lg text-xs font-black flex items-center justify-center shrink-0 transition-colors ${
+                      className={`w-6 h-6 rounded-lg text-xs font-bold flex items-center justify-center shrink-0 transition-colors ${
                         isSelected
-                          ? 'bg-[#58CC02] text-white'
-                          : 'bg-stone-100 text-stone-600 group-hover:bg-stone-200'
+                          ? 'bg-emerald-600 text-white'
+                          : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
                       }`}
                     >
                       {circleNumber}
                     </span>
-                    <span className="text-xs sm:text-sm font-bold leading-normal flex-1 pt-0.5">
+                    <span className="text-xs sm:text-sm font-medium leading-normal flex-1 pt-0.5">
                       {opt}
                     </span>
                   </button>
@@ -802,7 +808,7 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
                 setCurrentQuestionIndex((prev) => Math.max(0, prev - 1));
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="px-4 py-2.5 rounded-xl border border-stone-300 bg-white text-xs font-bold text-stone-700 hover:bg-stone-50 disabled:opacity-30 disabled:pointer-events-none transition-all flex items-center gap-1.5 cursor-pointer"
+              className="px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-30 disabled:pointer-events-none transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>前の問題</span>
@@ -815,7 +821,7 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
                   setCurrentQuestionIndex((prev) => prev + 1);
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className="px-5 py-2.5 rounded-xl bg-[#58CC02] text-white text-xs font-bold hover:bg-[#46A302] shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+                className="px-5 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 <span>次の問題</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -824,7 +830,7 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
               <button
                 type="button"
                 onClick={() => setShowFinishConfirm(true)}
-                className="px-5 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
+                className="px-5 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 <span>採点して結果を見る</span>
                 <CheckCircle2 className="w-3.5 h-3.5" />
@@ -833,13 +839,13 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
           </div>
 
           {/* 問題ナンバーパレット（クリックで瞬時に移動） */}
-          <div className="bg-white border border-stone-200 rounded-3xl p-4 sm:p-5 mt-6 shadow-2xs">
-            <div className="flex items-center justify-between text-xs font-bold text-stone-500 mb-3">
-              <span className="flex items-center gap-1.5">
-                <Layers className="w-3.5 h-3.5 text-stone-500" />
+          <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 mt-6 shadow-2xs">
+            <div className="flex items-center justify-between text-xs font-medium text-slate-500 mb-3">
+              <span className="flex items-center gap-1.5 font-bold text-slate-700">
+                <Layers className="w-3.5 h-3.5 text-slate-500" />
                 解答状況パレット
               </span>
-              <span>
+              <span className="font-mono text-[11px]">
                 解答済: {answeredCount} / 未解答: {unansweredCount}
               </span>
             </div>
@@ -858,12 +864,12 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
                     }}
                     className={`h-9 rounded-xl font-mono text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
                       isCurrent
-                        ? 'ring-2 ring-[#58CC02] ring-offset-1 font-black'
+                        ? 'ring-2 ring-slate-900 ring-offset-1 font-bold'
                         : ''
                     } ${
                       isAns
-                        ? 'bg-[#58CC02] text-white shadow-2xs'
-                        : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
+                        ? 'bg-emerald-600 text-white shadow-2xs'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                     }`}
                   >
                     {idx + 1}
@@ -924,28 +930,28 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
   return (
     <div className="w-full space-y-6 sm:space-y-8">
       {/* 総合スコアカード */}
-      <div className="bg-white border border-stone-200 rounded-2xl sm:rounded-3xl p-4 sm:p-7 shadow-md text-center space-y-4 sm:space-y-5">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black tracking-wide bg-[#F0FDF4] text-[#58CC02] border border-[#BBF7D0]">
+      <div className="bg-white border border-slate-200/90 rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-xs text-center space-y-4 sm:space-y-5">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold tracking-wide bg-emerald-50 text-emerald-800 border border-emerald-200">
           {activeExam.title} 公式判定結果
         </div>
 
         {/* 合格判定と得点 */}
         <div>
-          <div className="text-3xl sm:text-5xl font-black text-[#0F172A] tracking-tight">
-            {evaluation.score} <span className="text-lg sm:text-2xl font-bold text-stone-400">/ {evaluation.totalScore}点</span>
+          <div className="text-3xl sm:text-5xl font-bold text-slate-900 tracking-tight font-mono">
+            {evaluation.score} <span className="text-lg sm:text-2xl font-normal text-slate-400">/ {evaluation.totalScore}点</span>
           </div>
-          <div className="text-xs text-stone-500 font-bold mt-1">
+          <div className="text-xs text-slate-500 font-medium mt-1 font-mono">
             正答数: {evaluation.correctCount} / {evaluation.totalCount}問（正答率 {evaluation.percentage}% / 合格ライン {activeExam.passScore}点）
           </div>
         </div>
 
         {/* 達成ランクバッジ */}
         {evaluation.achievedRank && (
-          <div className="inline-block px-5 py-2.5 rounded-2xl shadow-sm text-sm sm:text-base font-black tracking-wide mx-auto">
-            <span className={`px-4 py-1.5 rounded-xl ${evaluation.achievedRank.color}`}>
+          <div className="inline-block px-5 py-2.5 rounded-xl shadow-2xs text-sm sm:text-base font-bold tracking-wide mx-auto border border-slate-200 bg-slate-50">
+            <span className={`px-4 py-1 rounded-lg ${evaluation.achievedRank.color}`}>
               {evaluation.achievedRank.level}
             </span>
-            <p className="text-xs text-stone-600 mt-2 font-normal max-w-md">
+            <p className="text-xs text-slate-600 mt-2 font-normal max-w-md">
               {evaluation.achievedRank.description}
             </p>
           </div>
@@ -953,21 +959,21 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
 
         {/* 🎮 ゲーミフィケーション報酬・アンロックカード */}
         {rewardInfo && (
-          <div className="bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-red-500/10 border-2 border-amber-300 rounded-2xl p-4 sm:p-5 text-left flex flex-col sm:flex-row items-center justify-between gap-4 max-w-2xl mx-auto shadow-2xs">
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 sm:p-5 text-left flex flex-col sm:flex-row items-center justify-between gap-4 max-w-2xl mx-auto shadow-2xs">
             <div className="space-y-1 text-center sm:text-left">
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                <span className="px-2.5 py-0.5 rounded-full bg-amber-500 text-white font-black text-xs flex items-center gap-1 shadow-2xs">
+                <span className="px-2.5 py-0.5 rounded-full bg-amber-500 text-white font-bold text-xs flex items-center gap-1 shadow-2xs">
                   <Zap className="w-3.5 h-3.5 fill-white" /> +{rewardInfo.xpGained} XP 獲得！
                 </span>
                 {rewardInfo.passed && (
-                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white font-black text-xs flex items-center gap-1 shadow-2xs">
+                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center gap-1 shadow-2xs">
                     <Trophy className="w-3.5 h-3.5" /> ボス検定クリア！
                   </span>
                 )}
               </div>
-              <p className="text-xs sm:text-sm font-bold text-stone-800">
+              <p className="text-xs sm:text-sm font-medium text-slate-800">
                 {rewardInfo.stageUnlocked ? (
-                  <span className="text-emerald-700 flex items-center gap-1.5 justify-center sm:justify-start">
+                  <span className="text-emerald-700 flex items-center gap-1.5 justify-center sm:justify-start font-semibold">
                     <Unlock className="w-4 h-4 text-emerald-600 shrink-0" />
                     おめでとうございます！ロードマップの【Stage {rewardInfo.newStageNum}】が新たにアンロックされました！
                   </span>
@@ -982,7 +988,7 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
               <button
                 type="button"
                 onClick={onNavigateToRoadmap}
-                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#58CC02] to-orange-600 text-white font-bold text-xs hover:opacity-90 shadow-sm transition-all flex items-center gap-1.5 shrink-0 cursor-pointer active:scale-95"
+                className="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 shadow-2xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
               >
                 <Compass className="w-3.5 h-3.5" />
                 <span>クエストを進める</span>
@@ -993,11 +999,11 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
         )}
 
         {/* アクションボタン */}
-        <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+        <div className="flex flex-wrap items-center justify-center gap-2.5 pt-2">
           <button
             type="button"
             onClick={() => startExam(selectedExamId)}
-            className="px-5 py-2.5 rounded-xl bg-[#58CC02] text-white text-xs font-bold hover:bg-[#46A302] shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
+            className="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>もう一度解く</span>
@@ -1006,7 +1012,7 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
             <button
               type="button"
               onClick={onNavigateToRoadmap}
-              className="px-5 py-2.5 rounded-xl border border-[#58CC02] bg-orange-50 text-xs font-bold text-[#58CC02] hover:bg-orange-100 transition-all flex items-center gap-1.5 cursor-pointer"
+              className="px-4 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:bg-slate-50 transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
             >
               <Compass className="w-3.5 h-3.5" />
               <span>クエストへ戻る</span>
@@ -1015,7 +1021,7 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
           <button
             type="button"
             onClick={() => setViewState('list')}
-            className="px-5 py-2.5 rounded-xl border border-stone-200 bg-white text-xs font-bold text-stone-700 hover:bg-stone-50 transition-all cursor-pointer"
+            className="px-4 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:bg-slate-50 transition-all cursor-pointer shadow-2xs"
           >
             他の級の模擬試験を選ぶ
           </button>
@@ -1023,7 +1029,7 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
             <button
               type="button"
               onClick={onBackToDashboard}
-              className="px-5 py-2.5 rounded-xl border border-stone-200 bg-white text-xs font-bold text-stone-500 hover:text-stone-800 transition-all cursor-pointer"
+              className="px-4 py-2 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-500 hover:text-slate-800 transition-all cursor-pointer"
             >
               ホームへ戻る
             </button>
@@ -1034,17 +1040,17 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
       {/* ====================================================================== */}
       {/* 🎯 【公的Can-Do到達度 ＆ 学習カルテ（根拠と道筋）】特設カード */}
       {/* ====================================================================== */}
-      <section className="bg-gradient-to-br from-[#F8FAFC] to-white border-2 border-[#E2E8F0] rounded-3xl p-5 sm:p-8 shadow-sm space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#E2E8F0]">
+      <section className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-7 shadow-xs space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
           <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-[#58CC02] text-white flex items-center justify-center shadow-xs">
+            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center">
               <Target className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base sm:text-lg font-black text-[#0F172A] flex items-center gap-2">
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
                 公的Can-Do到達度 ＆ 学習カルテ（根拠と道筋）
               </h3>
-              <p className="text-[11px] sm:text-xs text-stone-500">
+              <p className="text-[11px] sm:text-xs text-slate-500 font-normal">
                 客観的な解答データから「何ができて」「何が不足しているのか」の根拠と次の具体的アクションを提示
               </p>
             </div>

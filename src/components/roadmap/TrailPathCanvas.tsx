@@ -373,29 +373,29 @@ export const TrailPathCanvas: React.FC<TrailPathCanvasProps> = ({
                 <button
                   type="button"
                   onClick={() => handleNodeClick(tIdx, isLocked)}
-                  className={`w-[74px] h-[74px] sm:w-[80px] sm:h-[80px] rounded-full flex items-center justify-center font-black cursor-pointer select-none transition-all relative ${
+                  className={`w-[74px] h-[74px] sm:w-[80px] sm:h-[80px] rounded-full flex items-center justify-center font-bold cursor-pointer select-none transition-all relative ${
                     isShaking ? 'animate-rubber' : ''
                   } ${
                     isDone
-                      ? 'bg-gradient-to-b from-[#10B981] to-[#059669] text-white border-b-[8px] border-[#047857] hover:brightness-105 active:translate-y-[6px] active:border-b-[2px]'
+                      ? 'bg-gradient-to-b from-emerald-500 to-emerald-600 text-white shadow-xs border-b-[4px] border-emerald-700 hover:brightness-105 active:translate-y-[3px] active:border-b-0'
                       : isCurrent
-                      ? 'bg-gradient-to-b from-[#EA580C] to-[#C2410C] text-white border-b-[8px] border-[#9A3412] hover:brightness-105 active:translate-y-[6px] active:border-b-[2px]'
-                      : 'bg-gradient-to-b from-[#F1F5F9] to-[#E2E8F0] text-slate-400 border-b-[7px] border-[#CBD5E1] cursor-pointer active:translate-y-[4px] active:border-b-[3px]'
+                      ? 'bg-gradient-to-b from-amber-500 to-amber-600 text-white shadow-xs border-b-[4px] border-amber-700 hover:brightness-105 active:translate-y-[3px] active:border-b-0'
+                      : 'bg-gradient-to-b from-slate-100 to-slate-200 text-slate-400 border-b-[4px] border-slate-300 cursor-pointer active:translate-y-[2px] active:border-b-0'
                   }`}
                   title={`第${tIdx + 1}問`}
                 >
-                  {/* 上部の光彩ハイライト（Duolingo特有のツヤ感） */}
-                  <span className="absolute top-2 w-7 h-2.5 rounded-full bg-white/35 pointer-events-none" />
+                  {/* 上部の光彩ハイライト */}
+                  <span className="absolute top-2 w-7 h-2 rounded-full bg-white/30 pointer-events-none" />
 
                   {isDone ? (
                     <div className="relative flex items-center justify-center">
-                      <Check className="w-9 h-9 stroke-[4]" />
+                      <Check className="w-8 h-8 stroke-[3]" />
                       <Sparkles className="w-4 h-4 fill-amber-300 text-amber-300 absolute -top-2 -right-2 animate-star-spin" />
                     </div>
                   ) : isCurrent ? (
-                    <Zap className="w-9 h-9 fill-amber-300 text-amber-300 drop-shadow-xs" />
+                    <Zap className="w-8 h-8 fill-white text-white drop-shadow-xs" />
                   ) : (
-                    <Lock className="w-6 h-6 text-slate-400 stroke-[2.5]" />
+                    <Lock className="w-5 h-5 text-slate-400 stroke-[2]" />
                   )}
                 </button>
               </div>
@@ -518,12 +518,12 @@ export const TrailPathCanvas: React.FC<TrailPathCanvasProps> = ({
                     onNavigateToExam(stepMeta.examId);
                   }
                 }}
-                className={`w-[84px] h-[84px] sm:w-[90px] sm:h-[90px] rounded-full flex items-center justify-center font-black cursor-pointer select-none transition-all relative ${
+                className={`w-[84px] h-[84px] sm:w-[90px] sm:h-[90px] rounded-full flex items-center justify-center font-bold cursor-pointer select-none transition-all relative ${
                   isBossCleared
-                    ? 'bg-gradient-to-b from-[#10B981] to-[#047857] text-white border-b-[8px] border-[#065F46] active:translate-y-[6px] active:border-b-[2px]'
+                    ? 'bg-gradient-to-b from-emerald-500 to-emerald-700 text-white shadow-xs border-b-[4px] border-emerald-800 active:translate-y-[3px] active:border-b-0'
                     : isStageCleared
-                    ? 'bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600 text-white border-b-[8px] border-[#B45309] active:translate-y-[6px] active:border-b-[2px] animate-pulse'
-                    : 'bg-gradient-to-b from-[#334155] to-[#1E293B] text-white border-b-[8px] border-[#0F172A] active:translate-y-[6px] active:border-b-[2px]'
+                    ? 'bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600 text-white shadow-xs border-b-[4px] border-amber-700 active:translate-y-[3px] active:border-b-0 animate-pulse'
+                    : 'bg-gradient-to-b from-slate-700 to-slate-800 text-white shadow-xs border-b-[4px] border-slate-900 active:translate-y-[3px] active:border-b-0'
                 }`}
                 title={qMeta.bossLabel}
               >
@@ -596,7 +596,7 @@ export const TrailPathCanvas: React.FC<TrailPathCanvasProps> = ({
               </div>
             </div>
 
-            {/* スタートボタン（Duolingo本家の高輝度3Dグリーンボタン） */}
+            {/* スタートボタン（Speak風 クリーンなプライマリボタン） */}
             <button
               type="button"
               onClick={() => {
@@ -605,7 +605,7 @@ export const TrailPathCanvas: React.FC<TrailPathCanvasProps> = ({
                 setPreviewTaskIdx(null);
                 onStartDrill(step.step, targetIdx);
               }}
-              className="w-full py-4 rounded-2xl bg-[#58CC02] hover:bg-[#46A302] text-white font-black text-base sm:text-lg shadow-[0_5px_0_#388E00] active:translate-y-[4px] active:shadow-[0_1px_0_#388E00] border-b-4 border-[#388E00] transition-all flex items-center justify-center gap-2 cursor-pointer tracking-wide uppercase"
+              className="w-full py-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-base shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer tracking-wide"
             >
               <Zap className="w-5 h-5 fill-white text-white drop-shadow-xs" />
               <span>{isPreviewDone ? 'もう一度特訓する (+60 XP)' : '特訓スタート (+60 XP)'}</span>

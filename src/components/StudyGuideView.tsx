@@ -1966,19 +1966,19 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
 
           {/* リアルタイムインデックス検索バー */}
           <div className="relative flex-1 min-w-[120px]">
-            <Search className="w-3.5 h-3.5 text-stone-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="教科書・文法・表現を検索..."
-              className="w-full pl-8 pr-7 py-1.5 rounded-xl bg-white border-2 border-stone-200/90 focus:border-emerald-400 focus:outline-none text-xs text-stone-900 placeholder-stone-400 transition-colors h-9"
+              className="w-full pl-8 pr-7 py-1.5 rounded-xl bg-slate-50/80 hover:bg-white focus:bg-white border border-slate-200/90 focus:border-slate-400 focus:outline-none text-xs text-slate-900 placeholder-slate-400 transition-colors h-9 shadow-2xs"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 p-0.5 rounded cursor-pointer"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-0.5 rounded cursor-pointer"
                 title="検索をクリア"
               >
                 <X className="w-3.5 h-3.5" />
@@ -1989,7 +1989,7 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
             {searchQuery.trim() && (
               <div
                 data-testid="search-results-dropdown"
-                className="absolute left-0 right-0 top-full mt-1.5 bg-white border border-[#E8E2D5] rounded-xl shadow-lg p-1.5 z-50 divide-y divide-[#F2ECE1] max-h-72 overflow-y-auto"
+                className="absolute left-0 right-0 top-full mt-1.5 bg-white border border-slate-200 rounded-xl shadow-lg p-1.5 z-50 divide-y divide-slate-100 max-h-72 overflow-y-auto"
               >
                 {filteredIndex.length > 0 ? (
                   filteredIndex.map((item) => (
@@ -2000,11 +2000,11 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                         scrollTo(item.id, item.tab);
                         setSearchQuery('');
                       }}
-                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-[#FAF7F2] transition-colors cursor-pointer group"
+                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer group"
                     >
-                      <div className="flex items-center justify-between text-[10px] font-bold text-[#B84E34]">
+                      <div className="flex items-center justify-between text-[10px] font-bold text-emerald-700">
                         <span>{item.category}</span>
-                        <span className="text-[10px] text-[#948C82] bg-[#FAF7F2] px-1.5 py-0.5 rounded">
+                        <span className="text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
                           {item.tab === 'textbook'
                             ? '教科書'
                             : item.tab === 'reference'
@@ -2016,11 +2016,11 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                             : '助詞'}
                         </span>
                       </div>
-                      <div className="text-xs font-bold text-[#1B2A38] mt-0.5">{item.title}</div>
+                      <div className="text-xs font-bold text-slate-800 mt-0.5">{item.title}</div>
                     </button>
                   ))
                 ) : (
-                  <div className="px-3 py-3 text-center text-xs text-[#948C82]">
+                  <div className="px-3 py-3 text-center text-xs text-slate-400">
                     一致する項目が見つかりませんでした
                   </div>
                 )}
@@ -2028,21 +2028,17 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
             )}
           </div>
 
-          {/* 難易度ピル（初級/中級/上級）Duolingo 3Dスタイル */}
-          <div className="inline-flex p-0.5 bg-stone-200/80 rounded-xl shrink-0 h-9 items-center">
+          {/* 難易度ピル（初級/中級/上級）Speak風 ミニマルセグメント */}
+          <div className="inline-flex p-0.5 bg-slate-100/90 border border-slate-200/70 rounded-xl shrink-0 h-9 items-center">
             {(['beginner', 'intermediate', 'advanced'] as const).map((mode) => (
               <button
                 key={mode}
                 type="button"
                 onClick={() => changeLevelMode(mode)}
-                className={`px-2 sm:px-2.5 py-1 rounded-lg text-[11px] font-black transition-all cursor-pointer ${
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
                   levelMode === mode
-                    ? mode === 'beginner'
-                      ? 'bg-[#58CC02] text-white shadow-[0_2px_0_#388E00]'
-                      : mode === 'intermediate'
-                      ? 'bg-[#1CB0F6] text-white shadow-[0_2px_0_#1899D6]'
-                      : 'bg-[#FF9600] text-white shadow-[0_2px_0_#CC7A00]'
-                    : 'text-stone-600 hover:text-stone-900'
+                    ? 'bg-white text-slate-900 shadow-2xs font-bold'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
                 title={
                   mode === 'beginner'
@@ -2061,14 +2057,14 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
           <button
             type="button"
             onClick={() => setShowDashboard(!showDashboard)}
-            className={`flex items-center gap-1 px-2.5 rounded-xl border-2 transition-all cursor-pointer shrink-0 text-xs font-black h-9 ${
+            className={`flex items-center gap-1 px-2.5 rounded-xl border transition-all cursor-pointer shrink-0 text-xs font-bold h-9 shadow-2xs ${
               showDashboard
-                ? 'bg-stone-900 text-white border-stone-900 shadow-[0_2px_0_#000]'
-                : 'bg-white text-stone-700 hover:bg-stone-50 border-stone-200 shadow-[0_2px_0_#E5E7EB]'
+                ? 'bg-slate-900 text-white border-slate-900'
+                : 'bg-white text-slate-700 hover:bg-slate-50 border-slate-200'
             }`}
             title="進捗詳細・章切り替え"
           >
-            <Compass className={`w-3.5 h-3.5 ${showDashboard ? 'text-white' : 'text-amber-500'}`} />
+            <Compass className={`w-3.5 h-3.5 ${showDashboard ? 'text-white' : 'text-slate-500'}`} />
             <span className="hidden sm:inline">進捗</span>
             {(progressStats.totalCleared > 0 || activeMissionDetails.length > 0) && (
               <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ml-0.5 ${
@@ -2111,14 +2107,14 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
               </div>
 
               <div className="flex items-center gap-1.5 shrink-0">
-                <div className="inline-flex p-0.5 bg-stone-200/80 rounded-xl shrink-0">
+                <div className="inline-flex p-0.5 bg-slate-100 rounded-xl shrink-0 border border-slate-200/60">
                   <button
                     type="button"
                     onClick={() => changeLevelMode('beginner')}
-                    className={`text-[10px] px-2.5 py-1 rounded-lg font-black transition-all cursor-pointer ${
+                    className={`text-[10px] px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${
                       levelMode === 'beginner'
-                        ? 'bg-[#58CC02] text-white shadow-[0_2px_0_#388E00]'
-                        : 'text-stone-600 hover:text-stone-900'
+                        ? 'bg-white text-slate-900 shadow-2xs font-bold'
+                        : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
                     初級
@@ -2126,10 +2122,10 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                   <button
                     type="button"
                     onClick={() => changeLevelMode('intermediate')}
-                    className={`text-[10px] px-2.5 py-1 rounded-lg font-black transition-all cursor-pointer ${
+                    className={`text-[10px] px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${
                       levelMode === 'intermediate'
-                        ? 'bg-[#1CB0F6] text-white shadow-[0_2px_0_#1899D6]'
-                        : 'text-stone-600 hover:text-stone-900'
+                        ? 'bg-white text-slate-900 shadow-2xs font-bold'
+                        : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
                     中級
@@ -2137,10 +2133,10 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                   <button
                     type="button"
                     onClick={() => changeLevelMode('advanced')}
-                    className={`text-[10px] px-2.5 py-1 rounded-lg font-black transition-all cursor-pointer ${
+                    className={`text-[10px] px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer ${
                       levelMode === 'advanced'
-                        ? 'bg-[#FF9600] text-white shadow-[0_2px_0_#CC7A00]'
-                        : 'text-stone-600 hover:text-stone-900'
+                        ? 'bg-white text-slate-900 shadow-2xs font-bold'
+                        : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
                     上級
@@ -2152,10 +2148,10 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                   type="button"
                   onClick={toggleFontSize}
                   title={isLargeFont ? '文字サイズ：標準に戻す' : '文字サイズ：大きくする'}
-                  className={`flex items-center gap-1 px-2.5 py-1 rounded-xl border transition-all cursor-pointer text-xs font-black ${
+                  className={`flex items-center gap-1 px-2.5 py-1 rounded-xl border transition-all cursor-pointer text-xs font-semibold ${
                     isLargeFont
                       ? 'bg-emerald-50 text-emerald-800 border-emerald-300 shadow-2xs'
-                      : 'bg-white text-stone-600 hover:text-stone-900 border-stone-200'
+                      : 'bg-white text-slate-600 hover:text-slate-900 border-slate-200'
                   }`}
                 >
                   <Type className="w-3 h-3 text-emerald-600" />
@@ -2166,7 +2162,7 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowDashboard(false)}
-                  className="p-1.5 text-stone-400 hover:text-stone-700 rounded-xl cursor-pointer"
+                  className="p-1.5 text-slate-400 hover:text-slate-700 rounded-xl cursor-pointer"
                   title="メニューを閉じる"
                 >
                   <X className="w-4 h-4" />
@@ -2174,43 +2170,43 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
               </div>
             </div>
 
-            {/* ② 📚 教科書 章選択 ＆ すべて開く/閉じる（Duolingo 3Dスタイル） */}
+            {/* ② 📚 教科書 章選択 ＆ すべて開く/閉じる（Speak風 ミニマルピル） */}
             {activeTab === 'textbook' && (
-              <div className="bg-white p-3 sm:p-4 rounded-3xl border-2 border-stone-200/90 space-y-2.5 shadow-[0_3px_0_#E5E7EB]">
+              <div className="bg-white p-3 sm:p-4 rounded-2xl border border-slate-200/90 space-y-2.5 shadow-2xs">
                 {/* ヘッダー行: 章を選択タイトル + すべて開く/閉じる */}
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1.5">
-                    <BookOpen className="w-4 h-4 text-[#58CC02] stroke-[2.5]" />
-                    <span className="text-xs font-black text-slate-800">章を選択</span>
-                    <span className="text-[10px] font-black text-slate-600 bg-stone-100 px-2 py-0.5 rounded-full border border-stone-200">
+                    <BookOpen className="w-4 h-4 text-emerald-600" />
+                    <span className="text-xs font-bold text-slate-800">章を選択</span>
+                    <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
                       {lessonRange === 'all' ? `全${LESSONS_DATA.length}課` : `${lessonRange}課`}
                     </span>
                   </div>
                   <button
                     type="button"
                     onClick={handleToggleExpandAll}
-                    className="px-2.5 py-1 rounded-xl text-xs font-black text-emerald-700 hover:bg-emerald-50 cursor-pointer whitespace-nowrap border-2 border-emerald-200 bg-white shadow-[0_2px_0_#A7F3D0] active:translate-y-0.5"
+                    className="px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer whitespace-nowrap border border-slate-200 bg-white shadow-2xs"
                   >
                     {expandAllLessons ? 'すべて閉じる' : 'すべて開く'}
                   </button>
                 </div>
 
-                {/* セグメントピル（横スクロール可能 & 3Dボタンスタイル） */}
+                {/* セグメントピル（横スクロール可能） */}
                 <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5 pt-0.5 -mx-0.5 px-0.5">
                   {/* 全課ボタン */}
                   <button
                     type="button"
                     onClick={() => setLessonRange('all')}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-black whitespace-nowrap transition-all cursor-pointer border-2 flex items-center gap-1 shrink-0 ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer border flex items-center gap-1 shrink-0 ${
                       lessonRange === 'all'
-                        ? 'bg-slate-900 text-white border-slate-900 shadow-[0_2.5px_0_#0F172A] -translate-y-0.5'
-                        : 'bg-white text-stone-600 border-stone-200 hover:text-stone-900 shadow-[0_2px_0_#E5E7EB]'
+                        ? 'bg-slate-900 text-white border-slate-900 shadow-2xs'
+                        : 'bg-white text-slate-600 border-slate-200 hover:text-slate-900 hover:bg-slate-50'
                     }`}
                   >
                     <span>{levelMode === 'beginner' ? '全30課（初級）を表示' : `全${LESSONS_DATA.length}課を表示`}</span>
                   </button>
 
-                  {/* 第1章〜第4章ボタン（初級モード時は第4章を完全非表示） */}
+                  {/* 第1章〜第5章ボタン */}
                   {TEXTBOOK_STAGES
                     .filter((stg) => levelMode !== 'beginner' || (stg.id !== 'stage-4' && stg.id !== 'stage-5'))
                     .map((stg) => {
@@ -2226,14 +2222,10 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                             if (isStage5 && levelMode !== 'advanced') setLevelMode('advanced');
                             else if (isStage4 && levelMode === 'beginner') setLevelMode('intermediate');
                           }}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-black whitespace-nowrap transition-all cursor-pointer border-2 flex items-center gap-1.5 shrink-0 ${
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer border flex items-center gap-1.5 shrink-0 ${
                             isCurrent
-                              ? isStage5
-                                ? 'bg-[#FF9600] text-white border-[#FF9600] shadow-[0_2px_0_#CC7A00] -translate-y-0.5'
-                                : isStage4
-                                ? 'bg-[#CE82FF] text-white border-[#CE82FF] shadow-[0_2px_0_#A855F7] -translate-y-0.5'
-                                : 'bg-[#58CC02] text-white border-[#58CC02] shadow-[0_2px_0_#388E00] -translate-y-0.5'
-                              : 'bg-white text-stone-700 border-stone-200 hover:border-emerald-300 shadow-[0_2px_0_#E5E7EB]'
+                              ? 'bg-slate-900 text-white border-slate-900 shadow-2xs'
+                              : 'bg-white text-slate-600 border-slate-200 hover:text-slate-900 hover:bg-slate-50'
                           }`}
                         >
                           <span>{stg.chapter}</span>
@@ -2258,20 +2250,20 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                   const currentStage = TEXTBOOK_STAGES.find((s) => s.range === lessonRange);
                   if (lessonRange === 'all') {
                     return (
-                      <div className="bg-stone-50 px-2.5 py-1.5 rounded-xl border border-stone-200 text-xs text-stone-600 flex items-center justify-between">
-                        <span className="font-black text-slate-900">全課一覧</span>
-                        <span className="truncate text-[11px]">入門ハングルから中級複文・使役受身まで完全網羅</span>
+                      <div className="bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs text-slate-600 flex items-center justify-between">
+                        <span className="font-bold text-slate-900">全課一覧</span>
+                        <span className="truncate text-[11px] text-slate-500">入門ハングルから中級複文・使役受身・上級論述まで完全網羅</span>
                       </div>
                     );
                   }
                   if (currentStage) {
                     const isStage4 = currentStage.id === 'stage-4';
                     return (
-                      <div className="bg-stone-50 px-2.5 py-1.5 rounded-xl border border-stone-200 text-xs flex items-center justify-between gap-2">
-                        <span className={`font-black shrink-0 ${isStage4 ? 'text-purple-700' : 'text-emerald-700'}`}>
+                      <div className="bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs flex items-center justify-between gap-2">
+                        <span className={`font-bold shrink-0 ${isStage4 ? 'text-purple-700' : 'text-emerald-700'}`}>
                           {currentStage.title}
                         </span>
-                        <span className="text-stone-500 truncate text-[11px]">
+                        <span className="text-slate-500 truncate text-[11px]">
                           {currentStage.desc}
                         </span>
                       </div>
@@ -2373,18 +2365,18 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                 })}
               </div>
 
-              {/* 4大領域進捗カード（Duolingo 3Dキャンディ統計カード） */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-stone-200">
+              {/* 4大領域進捗カード（Speak風 ミニマル統計カード） */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setActiveTab('textbook')}
-                  className="p-2.5 rounded-2xl bg-white border-2 border-emerald-200/90 shadow-[0_2px_0_#A7F3D0] hover:border-emerald-400 text-left cursor-pointer transition-all"
+                  className="p-2.5 rounded-xl bg-slate-50/80 border border-slate-200/80 hover:bg-white hover:border-slate-300 text-left cursor-pointer transition-all shadow-2xs"
                 >
-                  <div className="text-[10px] font-black text-emerald-700 flex items-center gap-1">
+                  <div className="text-[10px] font-bold text-slate-500 flex items-center gap-1">
                     <span>📖 教科書</span>
                   </div>
-                  <div className="text-sm font-black text-stone-900 mt-0.5">
-                    {progressStats.lessonTouched} <span className="text-[10px] font-bold text-stone-400">/ {LESSONS_DATA.length}課</span>
+                  <div className="text-sm font-bold text-slate-900 mt-0.5">
+                    {progressStats.lessonTouched} <span className="text-[10px] font-normal text-slate-400">/ {LESSONS_DATA.length}課</span>
                   </div>
                 </button>
                 <button
@@ -2393,25 +2385,25 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                     setActiveTab('dictionary');
                     setDictSubTab('grammar');
                   }}
-                  className="p-2.5 rounded-2xl bg-white border-2 border-sky-200/90 shadow-[0_2px_0_#BAE6FD] hover:border-sky-400 text-left cursor-pointer transition-all"
+                  className="p-2.5 rounded-xl bg-slate-50/80 border border-slate-200/80 hover:bg-white hover:border-slate-300 text-left cursor-pointer transition-all shadow-2xs"
                 >
-                  <div className="text-[10px] font-black text-sky-700 flex items-center gap-1">
+                  <div className="text-[10px] font-bold text-slate-500 flex items-center gap-1">
                     <span>🔖 文法辞典</span>
                   </div>
-                  <div className="text-sm font-black text-stone-900 mt-0.5">
-                    {progressStats.dictTouched} <span className="text-[10px] font-bold text-stone-400">/ {GRAMMAR_DICT_DATA.length}選</span>
+                  <div className="text-sm font-bold text-slate-900 mt-0.5">
+                    {progressStats.dictTouched} <span className="text-[10px] font-normal text-slate-400">/ {GRAMMAR_DICT_DATA.length}選</span>
                   </div>
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveTab('reference')}
-                  className="p-2.5 rounded-2xl bg-white border-2 border-amber-200/90 shadow-[0_2px_0_#FDE68A] hover:border-amber-400 text-left cursor-pointer transition-all"
+                  className="p-2.5 rounded-xl bg-slate-50/80 border border-slate-200/80 hover:bg-white hover:border-slate-300 text-left cursor-pointer transition-all shadow-2xs"
                 >
-                  <div className="text-[10px] font-black text-amber-700 flex items-center gap-1">
+                  <div className="text-[10px] font-bold text-slate-500 flex items-center gap-1">
                     <span>💡 使い分け</span>
                   </div>
-                  <div className="text-sm font-black text-stone-900 mt-0.5">
-                    {progressStats.pairTouched} <span className="text-[10px] font-bold text-stone-400">/ {CONFUSING_PAIRS_DATA.length}選</span>
+                  <div className="text-sm font-bold text-slate-900 mt-0.5">
+                    {progressStats.pairTouched} <span className="text-[10px] font-normal text-slate-400">/ {CONFUSING_PAIRS_DATA.length}選</span>
                   </div>
                 </button>
                 <button
@@ -2420,13 +2412,13 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                     setActiveTab('dictionary');
                     setDictSubTab('vocab');
                   }}
-                  className="p-2.5 rounded-2xl bg-white border-2 border-purple-200/90 shadow-[0_2px_0_#E9D5FF] hover:border-purple-400 text-left cursor-pointer transition-all"
+                  className="p-2.5 rounded-xl bg-slate-50/80 border border-slate-200/80 hover:bg-white hover:border-slate-300 text-left cursor-pointer transition-all shadow-2xs"
                 >
-                  <div className="text-[10px] font-black text-purple-700 flex items-center gap-1">
+                  <div className="text-[10px] font-bold text-slate-500 flex items-center gap-1">
                     <span>🔤 重要単語</span>
                   </div>
-                  <div className="text-sm font-black text-stone-900 mt-0.5">
-                    {progressStats.vocabTouched} <span className="text-[10px] font-bold text-stone-400">/ {ESSENTIAL_VOCAB_DATA.length}選</span>
+                  <div className="text-sm font-bold text-slate-900 mt-0.5">
+                    {progressStats.vocabTouched} <span className="text-[10px] font-normal text-slate-400">/ {ESSENTIAL_VOCAB_DATA.length}選</span>
                   </div>
                 </button>
               </div>
@@ -2442,21 +2434,21 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
             {readingLesson ? (
               <div className="space-y-4">
                 {/* 1課集中モード ナビゲーションバー */}
-                <div className="flex items-center justify-between bg-white border-2 border-stone-200/90 rounded-2xl p-2.5 sm:p-3 shadow-[0_2px_0_#E5E7EB]">
+                <div className="flex items-center justify-between bg-white border border-slate-200/90 rounded-2xl p-2.5 sm:p-3 shadow-2xs">
                   <button
                     type="button"
                     onClick={() => {
                       setReadingLessonId(null);
                       window.scrollTo({ top: 0, behavior: 'smooth' });
                     }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-black text-xs sm:text-sm transition-colors cursor-pointer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs sm:text-sm transition-colors cursor-pointer"
                   >
                     <ArrowLeft className="w-4 h-4" />
                     <span>目次一覧に戻る</span>
                   </button>
 
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-stone-500 font-black px-2.5 py-1 rounded-full bg-stone-100 border border-stone-200">
+                    <span className="text-xs text-slate-600 font-bold px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200">
                       第 {readingLessonIndex + 1} / {LESSONS_DATA.length} 課
                     </span>
                   </div>
@@ -2465,13 +2457,13 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                 {/* 1課集中カード（本文全体） */}
                 <article
                   id={readingLesson.id}
-                  className="bg-white border-2 border-stone-200/90 rounded-3xl p-4 sm:p-6 shadow-[0_4px_0_#E5E7EB] space-y-5"
+                  className="bg-white border border-slate-200/90 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xs space-y-5"
                 >
                   {/* ヘッダー情報 */}
-                  <div className="border-b border-stone-100 pb-3.5">
+                  <div className="border-b border-slate-100 pb-3.5">
                     <div className="flex items-center justify-between gap-2 mb-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-white font-black px-2.5 py-0.5 rounded-lg bg-[#58CC02] shadow-[0_2px_0_#388E00]">
+                        <span className="text-xs text-emerald-800 font-bold px-2.5 py-0.5 rounded-lg bg-emerald-50 border border-emerald-200">
                           LESSON {readingLesson.number}
                         </span>
                       </div>
@@ -2479,22 +2471,22 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                         <button
                           type="button"
                           onClick={() => scrollTo(readingLesson.refLink!.id, readingLesson.refLink!.tab)}
-                          className="flex items-center gap-1 text-xs font-bold text-sky-800 bg-sky-50 hover:bg-sky-100 border border-sky-200 px-2.5 py-1 rounded-xl transition-colors cursor-pointer"
+                          className="flex items-center gap-1 text-xs font-semibold text-sky-800 bg-sky-50 hover:bg-sky-100 border border-sky-200 px-2.5 py-1 rounded-xl transition-colors cursor-pointer"
                         >
                           <span>{readingLesson.refLink.label}</span>
                           <ExternalLink className="w-3 h-3" />
                         </button>
                       )}
                     </div>
-                    <h2 className={`font-black text-[#1B2A38] ${isLargeFont ? 'text-xl sm:text-2xl' : 'text-lg sm:text-xl'}`}>
+                    <h2 className={`font-bold text-slate-900 ${isLargeFont ? 'text-xl sm:text-2xl' : 'text-lg sm:text-xl'}`}>
                       {readingLesson.title}
                     </h2>
-                    <p className={`text-stone-600 font-medium mt-1 ${isLargeFont ? 'text-base' : 'text-sm'}`}>
+                    <p className={`text-slate-500 font-normal mt-1 ${isLargeFont ? 'text-base' : 'text-sm'}`}>
                       {readingLesson.subtitle}
                     </p>
 
                     {/* ステップ切り替えタブ（仕組み・公式・例文・落とし穴） */}
-                    <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar pt-3.5 pb-1 pr-4">
+                    <div className="flex items-center gap-1 overflow-x-auto no-scrollbar pt-3.5 pb-1">
                       {[
                         { id: 'all', label: 'すべて表示' },
                         { id: 'concept', label: '① 仕組み' },
@@ -2509,10 +2501,10 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                             sound.playTap();
                             setLessonStepTab(tab.id as any);
                           }}
-                          className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-black transition-all whitespace-nowrap cursor-pointer shrink-0 ${
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer shrink-0 ${
                             lessonStepTab === tab.id
-                              ? 'bg-[#58CC02] text-white shadow-[0_2.5px_0_#388E00] -translate-y-0.5'
-                              : 'bg-white text-stone-600 hover:text-stone-900 border-2 border-stone-200 shadow-[0_2px_0_#E5E7EB]'
+                              ? 'bg-slate-900 text-white shadow-2xs'
+                              : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200'
                           }`}
                         >
                           {tab.label}
@@ -2525,7 +2517,7 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                   {renderLessonContent(readingLesson, lessonStepTab)}
 
                   {/* 課のナビゲーション（前へ / 目次へ / 次へ） */}
-                  <div className="flex items-center justify-between pt-4 border-t border-stone-100 text-xs sm:text-sm">
+                  <div className="flex items-center justify-between pt-4 border-t border-slate-100 text-xs sm:text-sm">
                     {prevLesson ? (
                       <button
                         type="button"
@@ -2533,7 +2525,7 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                           setReadingLessonId(prevLesson.id);
                           window.scrollTo({ top: 0, behavior: 'smooth' });
                         }}
-                        className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-white border-2 border-stone-200 text-stone-700 font-bold hover:bg-stone-50 shadow-[0_2px_0_#E5E7EB] cursor-pointer"
+                        className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 shadow-2xs cursor-pointer"
                       >
                         <ChevronLeft className="w-4 h-4" />
                         <span>第{prevLesson.number}課へ</span>
@@ -2548,7 +2540,7 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                         setReadingLessonId(null);
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                       }}
-                      className="text-xs text-stone-500 hover:text-stone-900 font-bold underline cursor-pointer"
+                      className="text-xs text-slate-500 hover:text-slate-900 font-medium underline cursor-pointer"
                     >
                       目次一覧
                     </button>
@@ -2560,10 +2552,10 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                           setReadingLessonId(nextLesson.id);
                           window.scrollTo({ top: 0, behavior: 'smooth' });
                         }}
-                        className="flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-[#58CC02] hover:bg-[#46A302] active:translate-y-0.5 text-white font-black shadow-[0_3px_0_#388E00] cursor-pointer"
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold shadow-2xs cursor-pointer"
                       >
                         <span>第{nextLesson.number}課へ進む</span>
-                        <ChevronRight className="w-4 h-4 stroke-[2.5]" />
+                        <ChevronRight className="w-4 h-4 stroke-[2]" />
                       </button>
                     ) : (
                       <div />
@@ -2573,46 +2565,40 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
               </div>
             ) : (
               <div className="space-y-4">
-                {/* 🐯 ホランイの教科書ウェルカムバナー */}
-                <div className={`border-2 rounded-3xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 shadow-[0_3px_0_#E5E7EB] transition-all ${
-                  levelMode === 'advanced'
-                    ? 'bg-gradient-to-r from-rose-50 via-amber-50 to-orange-50 border-rose-300'
-                    : levelMode === 'intermediate'
-                    ? 'bg-gradient-to-r from-purple-50 via-indigo-50 to-sky-50 border-purple-300'
-                    : 'bg-gradient-to-r from-emerald-50 via-teal-50 to-green-50 border-emerald-300'
-                }`}>
+                {/* 教科書ヘッダー要約 */}
+                <div className="border border-slate-200/90 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 bg-white shadow-2xs transition-all">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-white text-2xl flex items-center justify-center shrink-0 shadow-xs border-2 border-stone-200">
-                      {levelMode === 'advanced' ? '🏛️' : levelMode === 'intermediate' ? '⚡' : '🐯'}
+                    <div className="w-11 h-11 rounded-xl bg-slate-100 text-xl flex items-center justify-center shrink-0 border border-slate-200/70">
+                      {levelMode === 'advanced' ? '🏛️' : levelMode === 'intermediate' ? '⚡' : '📚'}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <span className={`text-xs font-black px-2.5 py-0.5 rounded-full border ${
+                        <span className={`text-[11px] font-bold px-2 py-0.5 rounded-md border ${
                           levelMode === 'advanced'
-                            ? 'bg-rose-100 text-rose-800 border-rose-300'
+                            ? 'bg-rose-50 text-rose-800 border-rose-200'
                             : levelMode === 'intermediate'
-                            ? 'bg-purple-100 text-purple-800 border-purple-300'
-                            : 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                            ? 'bg-purple-50 text-purple-800 border-purple-200'
+                            : 'bg-emerald-50 text-emerald-800 border-emerald-200'
                         }`}>
-                          {levelMode === 'advanced' ? '🏆 上級・最高峰マスター' : levelMode === 'intermediate' ? '⚡ 中級突破・実戦会話' : '入門・初級マスター'}
+                          {levelMode === 'advanced' ? '上級・最高峰マスター' : levelMode === 'intermediate' ? '中級突破・実戦会話' : '入門・初級マスター'}
                         </span>
-                        <span className="text-[11px] font-black text-stone-500 font-mono">
+                        <span className="text-[11px] font-semibold text-slate-400 font-mono">
                           {displayedLessons.length} 課を表示中
                         </span>
                       </div>
-                      <h3 className="text-sm sm:text-base font-black text-stone-900 mt-1 leading-snug">
+                      <h3 className="text-sm sm:text-base font-bold text-slate-900 mt-1 leading-snug">
                         {levelMode === 'advanced'
                           ? 'TOPIK II 5〜6級・ハン検2〜1級対応 高級論述＆表現'
                           : levelMode === 'intermediate'
                           ? '使役・受身・間接話法短縮形・論理複文を完全マスター！'
-                          : '教科書で文法のルールをサクッと確認しよう！'}
+                          : '体系的カリキュラムで文法と表現を確実にマスター'}
                       </h3>
-                      <p className="text-xs text-stone-600 font-medium mt-0.5">
+                      <p className="text-xs text-slate-500 font-normal mt-0.5">
                         {levelMode === 'advanced'
-                          ? '第36〜40課の高級論述に加え、四字熟語50選・高級エッセイ執筆プロトコルも完全連動！'
+                          ? '第36〜40課の高級論述に加え、四字熟語50選・高級エッセイ執筆プロトコルも完全連動。'
                           : levelMode === 'intermediate'
                           ? '日常会話からビジネス実務まで、ネイティブが多用する複文を完全網羅。'
-                          : 'クエストと連動しているよ。気になるところから自由にタップして読んでみてね 📖'}
+                          : '基礎から応用まで、1課3分で読める実践文法バイブル。気になるところから確認できます。'}
                       </p>
                     </div>
                   </div>
@@ -2626,7 +2612,7 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                           setActiveTab('reference');
                           setRefSubTab('hanja');
                         }}
-                        className="px-2.5 py-1.5 rounded-xl bg-white border-2 border-rose-200 text-rose-800 font-black text-xs shadow-2xs hover:bg-rose-50 cursor-pointer"
+                        className="px-2.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 font-bold text-xs shadow-2xs hover:bg-slate-100 cursor-pointer"
                       >
                         🏛️ 四字熟語50選 ➔
                       </button>
@@ -2637,7 +2623,7 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                           setActiveTab('reference');
                           setRefSubTab('columns');
                         }}
-                        className="px-2.5 py-1.5 rounded-xl bg-white border-2 border-amber-200 text-amber-800 font-black text-xs shadow-2xs hover:bg-amber-50 cursor-pointer"
+                        className="px-2.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 font-bold text-xs shadow-2xs hover:bg-slate-100 cursor-pointer"
                       >
                         📰 時事コラム ➔
                       </button>
@@ -2645,41 +2631,39 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                   )}
                 </div>
 
-                {/* 📚 Duolingo風 3Dレッスンカードリスト */}
-                <div className="space-y-3">
+                {/* 📚 Speak風 ミニマル・エディトリアル レッスンカードリスト */}
+                <div className="space-y-2.5">
                   {displayedLessons.map((lesson) => {
                     const isOpen = !!openLessons[lesson.id];
 
                     // 章の区切りバナー判定
-                    let stageHeader: { title: string; unit: string; range: string; color: string; shadow: string; badge: string } | null = null;
+                    let stageHeader: { title: string; unit: string; range: string; badge: string } | null = null;
                     if (lessonRange === 'all' || lesson.number === 1 || lesson.number === 11 || lesson.number === 21 || lesson.number === 31 || lesson.number === 36) {
-                      if (lesson.number === 1) stageHeader = { title: 'ハングルと基本助詞の土台', unit: 'UNIT 1', range: '1-10課', color: 'from-emerald-500 to-green-600', shadow: '#2E7D32', badge: '入門・基礎' };
-                      else if (lesson.number === 11) stageHeader = { title: '日常表現の拡大と重要活用', unit: 'UNIT 2', range: '11-20課', color: 'from-sky-500 to-blue-600', shadow: '#1E40AF', badge: '初級前半' };
-                      else if (lesson.number === 21) stageHeader = { title: '複文・応用と間接話法', unit: 'UNIT 3', range: '21-30課', color: 'from-amber-500 to-orange-600', shadow: '#C2410C', badge: '初級総決算' };
-                      else if (lesson.number === 31) stageHeader = { title: '実戦会話・使役受身・論理複文', unit: 'UNIT 4', range: '31-35課', color: 'from-purple-500 to-indigo-600', shadow: '#4338CA', badge: '中級' };
-                      else if (lesson.number === 36) stageHeader = { title: '推量・状態・口語感情・高級論述', unit: 'UNIT 5', range: '36-40課', color: 'from-rose-500 to-pink-600', shadow: '#BE123C', badge: '上級' };
+                      if (lesson.number === 1) stageHeader = { title: 'ハングルと基本助詞の土台', unit: 'UNIT 1', range: '1-10課', badge: '入門・基礎' };
+                      else if (lesson.number === 11) stageHeader = { title: '日常表現の拡大と重要活用', unit: 'UNIT 2', range: '11-20課', badge: '初級前半' };
+                      else if (lesson.number === 21) stageHeader = { title: '複文・応用と間接話法', unit: 'UNIT 3', range: '21-30課', badge: '初級総決算' };
+                      else if (lesson.number === 31) stageHeader = { title: '実戦会話・使役受身・論理複文', unit: 'UNIT 4', range: '31-35課', badge: '中級' };
+                      else if (lesson.number === 36) stageHeader = { title: '推量・状態・口語感情・高級論述', unit: 'UNIT 5', range: '36-40課', badge: '上級' };
                     }
 
                     return (
                       <React.Fragment key={lesson.id}>
                         {stageHeader && (
-                          <div
-                            className={`p-3.5 sm:p-4 rounded-2xl sm:rounded-3xl bg-gradient-to-r ${stageHeader.color} text-white shadow-[0_4px_0_${stageHeader.shadow}] flex items-center justify-between gap-3 mt-4 first:mt-0`}
-                          >
-                            <div className="min-w-0">
+                          <div className="bg-slate-900 text-white p-3.5 sm:p-4 rounded-2xl flex items-center justify-between gap-3 mt-6 first:mt-1 shadow-xs">
+                            <div className="min-w-0 space-y-0.5">
                               <div className="flex items-center gap-2">
-                                <span className="text-[10px] font-black uppercase tracking-wider bg-white/25 px-2 py-0.5 rounded-full">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded-md border border-emerald-800/60">
                                   {stageHeader.unit}
                                 </span>
-                                <span className="text-[10px] font-black bg-white/20 px-2 py-0.5 rounded-full">
+                                <span className="text-[10px] font-semibold text-slate-300 bg-slate-800 px-2 py-0.5 rounded-md">
                                   {stageHeader.badge}
                                 </span>
                               </div>
-                              <h3 className="text-sm sm:text-base font-black mt-1 leading-snug">
+                              <h3 className="text-sm sm:text-base font-bold text-white leading-snug">
                                 {stageHeader.title}
                               </h3>
                             </div>
-                            <span className="text-xs font-black bg-white/20 px-2.5 py-1 rounded-xl shrink-0">
+                            <span className="text-xs font-medium text-slate-400 bg-slate-800/80 px-2.5 py-1 rounded-lg shrink-0 border border-slate-700/60 font-mono">
                               {stageHeader.range}
                             </span>
                           </div>
@@ -2688,51 +2672,39 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                         <div
                           id={lesson.id}
                           onClick={() => setReadingLessonId(lesson.id)}
-                          className="bg-white border-2 border-stone-200/90 hover:border-emerald-400 rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 shadow-[0_3px_0_#E5E7EB] hover:shadow-[0_4px_0_#34D399] transition-all cursor-pointer group flex items-center justify-between gap-2.5 sm:gap-3"
+                          className="bg-white border border-slate-200/90 hover:border-slate-400 rounded-2xl p-3.5 sm:p-4 shadow-2xs hover:shadow-xs transition-all cursor-pointer group flex items-center justify-between gap-3"
                         >
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
-                            {/* 3D レッスンコインバッジ */}
-                            <div
-                              className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex flex-col items-center justify-center shrink-0 font-black transition-transform group-hover:scale-105 shadow-xs ${
-                                lesson.number <= 10
-                                  ? 'bg-[#58CC02] text-white shadow-[0_3px_0_#388E00]'
-                                  : lesson.number <= 20
-                                  ? 'bg-[#1CB0F6] text-white shadow-[0_3px_0_#1899D6]'
-                                  : lesson.number <= 30
-                                  ? 'bg-[#FF9600] text-white shadow-[0_3px_0_#CC7A00]'
-                                  : lesson.number <= 35
-                                  ? 'bg-[#CE82FF] text-white shadow-[0_3px_0_#A855F7]'
-                                  : 'bg-[#FF4B4B] text-white shadow-[0_3px_0_#D32F2F]'
-                              }`}
-                            >
-                              <span className="text-[8px] sm:text-[9px] uppercase tracking-tighter opacity-90 leading-none">LESSON</span>
-                              <span className="text-base sm:text-lg font-black leading-tight">{lesson.number}</span>
+                          <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                            {/* ミニマル・レッスンインデックス */}
+                            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-slate-100 group-hover:bg-emerald-50 text-slate-700 group-hover:text-emerald-800 border border-slate-200/80 group-hover:border-emerald-200/80 flex flex-col items-center justify-center shrink-0 transition-colors">
+                              <span className="text-[8px] uppercase tracking-wider text-slate-500 font-semibold leading-none">NO.</span>
+                              <span className="text-base sm:text-lg font-bold leading-tight font-mono">{lesson.number}</span>
                             </div>
 
                             {/* タイトルとサブタイトル */}
-                            <div className="min-w-0 flex-1 space-y-1">
+                            <div className="min-w-0 flex-1 space-y-0.5">
                               <div className="flex items-center gap-2 flex-wrap">
-                                <h2 className="font-black text-[#1B2A38] group-hover:text-emerald-700 transition-colors text-sm sm:text-base leading-snug">
+                                <h2 className="font-bold text-slate-900 group-hover:text-emerald-800 transition-colors text-sm sm:text-base leading-snug">
                                   {lesson.title}
                                 </h2>
-                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${
+                                <span className={`text-[10px] font-medium px-2 py-0.5 rounded-md border shrink-0 ${
                                   lesson.number <= 30
-                                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                    ? 'bg-slate-50 text-slate-600 border-slate-200'
                                     : lesson.number <= 35
-                                    ? 'bg-purple-50 text-purple-800 border-purple-200'
-                                    : 'bg-rose-50 text-rose-800 border-rose-200'
+                                    ? 'bg-purple-50 text-purple-700 border-purple-200'
+                                    : 'bg-amber-50 text-amber-800 border-amber-200'
                                 }`}>
                                   {lesson.number <= 30 ? '初級' : lesson.number <= 35 ? '中級' : '上級'}
                                 </span>
                               </div>
-                              <p className="text-xs text-stone-600 font-medium leading-relaxed">
+                              <p className="text-xs text-slate-500 font-normal leading-relaxed truncate">
                                 {lesson.subtitle}
                               </p>
                             </div>
                           </div>
 
                           {/* アクション ＆ ステータス */}
-                          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                          <div className="flex items-center gap-2 shrink-0">
                             {renderItemStatusBadgeAndPin(lesson.id)}
                             <button
                               type="button"
@@ -2740,11 +2712,11 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                                 e.stopPropagation();
                                 setReadingLessonId(lesson.id);
                               }}
-                              className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-[#58CC02] hover:bg-[#46A302] active:translate-y-0.5 active:shadow-[0_1px_0_#388E00] text-white font-black text-xs shadow-[0_2.5px_0_#388E00] transition-all flex items-center gap-1 cursor-pointer"
+                              className="px-3 py-1.5 sm:px-3.5 sm:py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs shadow-2xs transition-all flex items-center gap-1 cursor-pointer"
                               aria-label={`第${lesson.number}課を読む`}
                             >
                               <span>読む</span>
-                              <ChevronRight className="w-3.5 h-3.5 stroke-[2.5]" />
+                              <ChevronRight className="w-3.5 h-3.5" />
                             </button>
                           </div>
                         </div>
