@@ -1247,18 +1247,18 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
       {/* セクション別 正答率ブレイクダウン */}
       <div className="bg-white border border-stone-200 rounded-3xl p-5 sm:p-7 shadow-xs space-y-4">
         <h3 className="text-sm font-bold text-[#0F172A] flex items-center gap-2">
-          <FileText className="w-4 h-4 text-[#58CC02]" /> 分野別 正答率・分析
+          <FileText className="w-4 h-4 text-emerald-600" /> 分野別 正答率・分析
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           {evaluation.sectionBreakdowns.map((sec, i) => (
             <div key={i} className="p-3.5 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0]/70 space-y-2">
               <div className="flex items-center justify-between text-xs font-bold">
                 <span className="text-[#0F172A]">{sec.label}</span>
-                <span className="text-[#58CC02]">{sec.earned} / {sec.total}点 ({sec.percentage}%)</span>
+                <span className="text-emerald-700">{sec.earned} / {sec.total}点 ({sec.percentage}%)</span>
               </div>
               <div className="w-full bg-stone-200 rounded-full h-2 overflow-hidden">
                 <div
-                  className="bg-[#58CC02] h-full rounded-full transition-all duration-500"
+                  className="bg-emerald-600 h-full rounded-full transition-all duration-500"
                   style={{ width: `${sec.percentage}%` }}
                 />
               </div>
@@ -1382,7 +1382,7 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
                           onNavigateToDictionary(q.linkReview.id);
                         }
                       }}
-                      className="inline-flex items-center gap-1.5 text-xs font-bold text-[#58CC02] hover:text-[#388E00] hover:underline cursor-pointer"
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 hover:text-emerald-800 hover:underline cursor-pointer"
                     >
                       <BookOpen className="w-3.5 h-3.5" />
                       <span>教科書・辞書で復習する（{q.linkReview.label}）➔</span>
