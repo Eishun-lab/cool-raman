@@ -146,7 +146,7 @@ export const DuolingoDrillSession: React.FC<DuolingoDrillSessionProps> = ({
   }, [isAnswered, isFinished, selectedOption, currentQ.options.length, handleCheck, handleNext]);
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#FAF7F2] text-[#1B2A38] flex flex-col justify-between overflow-hidden select-none animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[100] bg-[#F8FAFC] text-slate-800 flex flex-col justify-between overflow-hidden select-none animate-in fade-in duration-200">
       {/* ===================================================================== */}
       {/* 🌟 1. 上部ナビゲーションバー（プログレスバー ＆ ストリーク ＆ 音量）   */}
       {/* ===================================================================== */}
@@ -180,7 +180,7 @@ export const DuolingoDrillSession: React.FC<DuolingoDrillSessionProps> = ({
             type="button"
             onClick={toggleMute}
             className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
-              isMuted ? 'text-stone-400 bg-stone-100' : 'text-[#B84E34] bg-[#FAF0EC]'
+              isMuted ? 'text-stone-400 bg-stone-100' : 'text-[#58CC02] bg-[#F0FDF4]'
             }`}
             title={isMuted ? '効果音をONにする' : '効果音をOFFにする'}
           >
@@ -233,7 +233,7 @@ export const DuolingoDrillSession: React.FC<DuolingoDrillSessionProps> = ({
           {/* 問題文カード */}
           <div className="bg-white border-2 border-stone-200/90 rounded-3xl p-4 sm:p-6 shadow-xs space-y-2.5">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-[10px] sm:text-[11px] font-black uppercase text-[#B84E34] tracking-wider px-2.5 py-0.5 rounded-full bg-[#FAF0EC] border border-[#F0D5CD]">
+              <span className="text-[10px] sm:text-[11px] font-black uppercase text-[#58CC02] tracking-wider px-2.5 py-0.5 rounded-full bg-[#F0FDF4] border border-[#BBF7D0]">
                 {drill.targetSkill}
               </span>
               <span className="text-xs font-mono font-bold text-stone-400">
@@ -241,7 +241,7 @@ export const DuolingoDrillSession: React.FC<DuolingoDrillSessionProps> = ({
               </span>
             </div>
 
-            <p className="text-base sm:text-xl font-black text-[#1B2A38] leading-snug">
+            <p className="text-base sm:text-xl font-black text-[#0F172A] leading-snug">
               {currentQ.question}
             </p>
 
@@ -268,7 +268,7 @@ export const DuolingoDrillSession: React.FC<DuolingoDrillSessionProps> = ({
 
               if (isSelected && !isAnswered) {
                 tileClass =
-                  'bg-[#FAF0EC] border-2 border-b-4 border-[#B84E34] text-[#B84E34] shadow-xs';
+                  'bg-[#F0FDF4] border-2 border-b-4 border-[#58CC02] text-[#58CC02] shadow-xs';
               } else if (isAnswered) {
                 if (isCorrectOpt) {
                   tileClass =
@@ -294,7 +294,7 @@ export const DuolingoDrillSession: React.FC<DuolingoDrillSessionProps> = ({
                     <span
                       className={`w-6 h-6 rounded-lg text-xs font-black flex items-center justify-center shrink-0 border ${
                         isSelected && !isAnswered
-                          ? 'bg-[#B84E34] text-white border-[#B84E34]'
+                          ? 'bg-[#58CC02] text-white border-[#58CC02]'
                           : 'bg-stone-100 text-stone-600 border-stone-200'
                       }`}
                     >
@@ -330,7 +330,7 @@ export const DuolingoDrillSession: React.FC<DuolingoDrillSessionProps> = ({
           />
 
           <div className="text-center space-y-1.5">
-            <h2 className="text-2xl sm:text-3xl font-black text-[#1B2A38]">
+            <h2 className="text-2xl sm:text-3xl font-black text-[#0F172A]">
               クエスト達成！
             </h2>
             <p className="text-xs sm:text-sm text-stone-500 font-bold">
@@ -351,7 +351,7 @@ export const DuolingoDrillSession: React.FC<DuolingoDrillSessionProps> = ({
             {/* 獲得XP（ロールアップアニメーション） */}
             <div className="bg-white border border-stone-200 rounded-2xl p-4 text-center shadow-2xs">
               <span className="text-[11px] font-bold text-stone-400 block mb-1">獲得経験値</span>
-              <span className="text-xl sm:text-2xl font-black text-[#B84E34] font-mono flex items-center justify-center gap-1">
+              <span className="text-xl sm:text-2xl font-black text-[#58CC02] font-mono flex items-center justify-center gap-1">
                 <Zap className="w-5 h-5 fill-amber-400 text-amber-400" />
                 +{animatedXp} XP
               </span>
@@ -419,7 +419,7 @@ export const DuolingoDrillSession: React.FC<DuolingoDrillSessionProps> = ({
                   onClick={handleCheck}
                   className={`w-full sm:w-44 py-3.5 px-6 rounded-2xl font-black text-sm transition-all cursor-pointer ${
                     selectedOption !== null
-                      ? 'bg-[#B84E34] hover:bg-[#a2432c] text-white shadow-[0_5px_0_#853420] active:translate-y-1 active:shadow-[0_1px_0_#853420]'
+                      ? 'bg-[#58CC02] hover:bg-[#46A302] text-white shadow-[0_5px_0_#388E00] active:translate-y-1 active:shadow-[0_1px_0_#388E00]'
                       : 'bg-stone-200 text-stone-400 cursor-not-allowed'
                   }`}
                 >
@@ -449,7 +449,7 @@ export const DuolingoDrillSession: React.FC<DuolingoDrillSessionProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="w-full py-4 px-6 rounded-2xl bg-[#B84E34] hover:bg-[#a2432c] text-white font-black text-sm sm:text-base shadow-[0_5px_0_#853420] active:translate-y-1 active:shadow-[0_1px_0_#853420] transition-all cursor-pointer flex items-center justify-center gap-2"
+              className="w-full py-4 px-6 rounded-2xl bg-[#58CC02] hover:bg-[#46A302] text-white font-black text-sm sm:text-base shadow-[0_5px_0_#388E00] active:translate-y-1 active:shadow-[0_1px_0_#388E00] transition-all cursor-pointer flex items-center justify-center gap-2"
             >
               <span>冒険マップに戻る ➔</span>
             </button>

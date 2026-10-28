@@ -38,7 +38,7 @@ export const LibraryHubView: React.FC<LibraryHubViewProps> = ({
     <div className="w-full space-y-3 sm:space-y-4">
       {/* 📚 ライブラリ 統合トップカテゴリーバー（Duolingo 3Dキャンディタブ） */}
       <div className="bg-white border-2 border-stone-200/90 rounded-3xl p-2.5 sm:p-3 shadow-[0_3px_0_#E5E7EB]">
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-0.5 pr-2">
           {[
             { id: 'textbook' as const, label: '教科書40課', icon: BookOpen, color: '#58CC02', shadow: '#388E00' },
             { id: 'dictionary' as const, label: '文法辞典250', icon: Bookmark, color: '#1CB0F6', shadow: '#1899D6' },
@@ -56,7 +56,7 @@ export const LibraryHubView: React.FC<LibraryHubViewProps> = ({
                   sound.playTap();
                   setActiveSubTab(tab.id);
                 }}
-                className={`px-3.5 py-2 rounded-2xl text-xs font-black transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+                className={`px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-2xl text-xs font-black transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
                   isActive
                     ? 'text-white -translate-y-0.5'
                     : 'bg-white border-2 border-stone-200 text-stone-600 shadow-[0_2px_0_#E5E7EB] hover:bg-stone-50'

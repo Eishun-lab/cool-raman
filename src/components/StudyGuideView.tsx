@@ -30,6 +30,7 @@ import {
   Award,
   AlertCircle,
 } from 'lucide-react';
+import { HorangiMascot } from './mascot/HorangiMascot';
 import { GuideTab, GuideProgressState, ItemManualStatus, LevelMode } from '../types/guide';
 import {
   GUIDE_INDEX,
@@ -1737,18 +1738,28 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
     const firstEx = lesson.examples[0];
     return (
       <div className="space-y-4">
-        {/* ① 本課のコアコンセプト（Duolingo 3Dヒントカード） */}
+        {/* ① 本課のコアコンセプト（Duolingo 3Dヒントカード ＆ ホランイ解説） */}
         {(stepTab === 'all' || stepTab === 'concept') && (
-          <div className="p-4 bg-gradient-to-r from-emerald-50 via-teal-50/50 to-white rounded-2xl border-2 border-emerald-200/90 shadow-[0_2.5px_0_#A7F3D0] space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="p-1 rounded-xl bg-[#58CC02] text-white shadow-xs">
+          <div className="p-4 sm:p-5 bg-gradient-to-r from-emerald-50 via-teal-50 to-white rounded-3xl border-2 border-emerald-300/90 shadow-[0_3.5px_0_#A7F3D0] space-y-3">
+            <div className="flex items-center gap-2.5">
+              <span className="w-8 h-8 rounded-xl bg-[#58CC02] text-white flex items-center justify-center shadow-[0_2px_0_#388E00] shrink-0">
                 <Sparkles className="w-4 h-4 stroke-[2.5]" />
               </span>
               <div className={`font-black text-emerald-950 ${isLargeFont ? 'text-base sm:text-lg' : 'text-sm sm:text-base'}`}>
                 {lesson.concept.title}
               </div>
             </div>
-            <p className={`whitespace-pre-line text-slate-700 leading-relaxed font-medium pl-1 ${isLargeFont ? 'text-base sm:text-lg' : 'text-sm sm:text-base'}`}>
+
+            {/* 🐯 ホランイのマスコット応援スピーチバブル */}
+            <div className="flex items-center gap-3 bg-white/90 rounded-2xl p-3 border-2 border-emerald-200/70 shadow-2xs">
+              <HorangiMascot size="sm" mood="cheering" showMessage={false} interactive={false} />
+              <div className="text-xs text-emerald-950 font-bold leading-relaxed">
+                <span className="font-black text-[#58CC02] block mb-0.5">💬 ホランイのDuolingoワンポイント！</span>
+                <span>{lesson.title}の重要ルール！まずは声に出して発音のリズムを掴もう！</span>
+              </div>
+            </div>
+
+            <p className={`whitespace-pre-line text-slate-800 leading-relaxed font-bold pl-1 ${isLargeFont ? 'text-base sm:text-lg' : 'text-xs sm:text-sm'}`}>
               {lesson.concept.description}
             </p>
           </div>
@@ -2479,7 +2490,7 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                     </p>
 
                     {/* ステップ切り替えタブ（仕組み・公式・例文・落とし穴） */}
-                    <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pt-3.5">
+                    <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar pt-3.5 pb-1 pr-4">
                       {[
                         { id: 'all', label: 'すべて表示' },
                         { id: 'concept', label: '① 仕組み' },
@@ -2490,8 +2501,11 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
                         <button
                           key={tab.id}
                           type="button"
-                          onClick={() => setLessonStepTab(tab.id as any)}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all whitespace-nowrap cursor-pointer shrink-0 ${
+                          onClick={() => {
+                            sound.playTap();
+                            setLessonStepTab(tab.id as any);
+                          }}
+                          className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-black transition-all whitespace-nowrap cursor-pointer shrink-0 ${
                             lessonStepTab === tab.id
                               ? 'bg-[#58CC02] text-white shadow-[0_2.5px_0_#388E00] -translate-y-0.5'
                               : 'bg-white text-stone-600 hover:text-stone-900 border-2 border-stone-200 shadow-[0_2px_0_#E5E7EB]'
@@ -4957,9 +4971,7 @@ export const StudyGuideView: React.FC<StudyGuideViewProps> = ({
       <button
         type="button"
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        className={`fixed right-4 sm:right-6 z-30 p-2.5 rounded-full bg-white/95 backdrop-blur-md border border-[#E8E2D5] text-[#756D63] hover:text-[#B84E34] hover:border-[#B84E34] shadow-md transition-all duration-300 cursor-pointer active:scale-90 ${
-          hideBottomNav ? 'bottom-20' : showBars ? 'bottom-16 sm:bottom-20' : 'bottom-4'
-        }`}
+        className="fixed right-4 sm:right-6 z-30 p-2.5 rounded-2xl bg-white/95 backdrop-blur-md border-2 border-stone-200 text-stone-600 hover:text-[#58CC02] hover:border-[#58CC02] shadow-[0_3px_0_#E5E7EB] transition-all duration-300 cursor-pointer active:scale-90 bottom-24 sm:bottom-8"
         style={{
           transform: 'translateZ(0)',
           WebkitTransform: 'translateZ(0)',

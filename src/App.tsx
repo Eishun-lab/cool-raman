@@ -165,7 +165,7 @@ export const App: React.FC = () => {
       </header>
 
       {/* メインコンテンツ */}
-      <main className="flex-1 pb-24 sm:pb-8">
+      <main className="flex-1 pb-32 sm:pb-12">
         {activeTab === 'dashboard' ? (
           <div className="max-w-6xl mx-auto px-3 sm:px-6 py-4 sm:py-8">
             {/* 🐯 Duolingo風 ウェルカムバナー */}
@@ -359,7 +359,7 @@ export const App: React.FC = () => {
       </main>
 
       {/* 📱 Duolingo風 モバイル下部固定ナビゲーションバー（親指で届く快適タブ） */}
-      <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t-2 border-stone-200/90 py-1.5 px-3 flex items-center justify-around shadow-[0_-4px_16px_rgba(0,0,0,0.06)] pb-[env(safe-area-inset-bottom)]">
+      <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t-2 border-stone-200/90 py-1.5 px-3 flex items-center justify-around shadow-[0_-4px_16px_rgba(0,0,0,0.06)] pb-[env(safe-area-inset-bottom)]">
         {[
           { id: 'roadmap' as const, label: 'クエスト', icon: Compass, color: '#58CC02', shadow: '#388E00' },
           { id: 'exam' as const, label: '模試', icon: GraduationCap, color: '#FF9600', shadow: '#CC7A00' },

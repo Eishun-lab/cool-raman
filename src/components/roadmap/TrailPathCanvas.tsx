@@ -550,23 +550,26 @@ export const TrailPathCanvas: React.FC<TrailPathCanvasProps> = ({
 
       {/* 🌟 5. Duolingo風：ノードタップ時に下からスッと開く特訓プレビュー・モーダル */}
       {previewTaskIdx !== null && activeTask && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in">
+        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in">
           <div
-            className="w-full sm:max-w-md bg-white rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 shadow-2xl border border-slate-200 animate-in slide-in-from-bottom-6 sm:zoom-in-95 space-y-4"
+            className="w-full sm:max-w-md bg-white rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 pb-12 sm:pb-6 shadow-2xl border-2 border-stone-200 animate-in slide-in-from-bottom-6 sm:zoom-in-95 space-y-4"
             onClick={(e) => e.stopPropagation()}
           >
             {/* 上部バー */}
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-xs font-black text-[#B84E34]">
-                <Zap className="w-4 h-4 fill-[#B84E34]" />
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-900 border border-amber-200 text-xs font-black shadow-2xs">
+                <Zap className="w-4 h-4 fill-amber-500 text-amber-500" />
                 <span>Area {step.step} : 第 {previewTaskIdx + 1} 問</span>
               </div>
               <button
                 type="button"
-                onClick={() => setPreviewTaskIdx(null)}
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center cursor-pointer transition-all"
+                onClick={() => {
+                  sound.playTap();
+                  setPreviewTaskIdx(null);
+                }}
+                className="w-9 h-9 rounded-2xl bg-stone-100 hover:bg-stone-200 text-stone-600 flex items-center justify-center cursor-pointer transition-all active:scale-95"
               >
-                <X className="w-4 h-4" />
+                <X className="w-4 h-4 stroke-[2.5]" />
               </button>
             </div>
 
@@ -581,14 +584,14 @@ export const TrailPathCanvas: React.FC<TrailPathCanvasProps> = ({
             </div>
 
             {/* ホランイ応援メッセージ */}
-            <div className="bg-slate-50 rounded-2xl p-3 flex items-center gap-3 border border-slate-100">
+            <div className="bg-gradient-to-r from-amber-50 via-yellow-50 to-orange-50 rounded-2xl p-3.5 flex items-center gap-3 border-2 border-amber-200/90 shadow-2xs">
               <HorangiMascot size="sm" mood={isPreviewDone ? 'trophy' : 'cheering'} showMessage={false} interactive={false} />
-              <div className="text-xs text-slate-700">
-                <span className="font-bold block">
-                  {isPreviewDone ? 'クリア済み！何度でも復習できます' : '30秒で集中特訓！'}
+              <div className="text-xs text-amber-950">
+                <span className="font-black text-sm block">
+                  {isPreviewDone ? '🏆 復習ステージ！何度でも挑戦できます' : '🔥 30秒で集中特訓！'}
                 </span>
-                <span className="text-[11px] text-slate-400">
-                  即答クイズで知識を定着させよう (+60 XP)
+                <span className="text-[11px] text-amber-800 font-bold">
+                  {isPreviewDone ? '満点を目指して即答スピードを鍛えよう (+60 XP)' : '即答クイズで知識を定着させよう (+60 XP)'}
                 </span>
               </div>
             </div>
@@ -597,11 +600,12 @@ export const TrailPathCanvas: React.FC<TrailPathCanvasProps> = ({
             <button
               type="button"
               onClick={() => {
+                sound.playTap();
                 const targetIdx = previewTaskIdx;
                 setPreviewTaskIdx(null);
                 onStartDrill(step.step, targetIdx);
               }}
-              className="w-full py-4 rounded-2xl bg-[#58CC02] hover:bg-[#46A302] text-white font-black text-base sm:text-lg shadow-[0_6px_0_#388E00] active:translate-y-[4px] active:shadow-[0_2px_0_#388E00] transition-all flex items-center justify-center gap-2 cursor-pointer tracking-wide uppercase"
+              className="w-full py-4 rounded-2xl bg-[#58CC02] hover:bg-[#46A302] text-white font-black text-base sm:text-lg shadow-[0_5px_0_#388E00] active:translate-y-[4px] active:shadow-[0_1px_0_#388E00] border-b-4 border-[#388E00] transition-all flex items-center justify-center gap-2 cursor-pointer tracking-wide uppercase"
             >
               <Zap className="w-5 h-5 fill-white text-white drop-shadow-xs" />
               <span>{isPreviewDone ? 'もう一度特訓する (+60 XP)' : '特訓スタート (+60 XP)'}</span>
