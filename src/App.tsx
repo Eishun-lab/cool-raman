@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   Flame,
   Zap,
-  ArrowLeft,
+  ChevronLeft,
 } from 'lucide-react';
 import { HankenHomeScreen } from './components/home/HankenHomeScreen';
 import { HankenTextbookView } from './components/textbook/HankenTextbookView';
@@ -101,11 +101,11 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#FAF7F2] text-[#2A2421] font-sans flex flex-col antialiased selection:bg-[#FAF0EC] selection:text-[#B84E34]">
-      {/* 🌟 アイコンの伝統・温かみに調和した上質ヘッダー */}
+      {/* 🌟 伝統工芸の余白・品格に調和した大人のヘッダー */}
       <header className="sticky top-0 z-40 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#EAE4DA] px-3.5 sm:px-6 h-14 flex items-center">
         <div className="max-w-xl mx-auto w-full flex items-center justify-between gap-2">
-          {/* 左側：ロゴ ＆ アプリ名 ＆ 5級チャレンジバッジ（または戻るボタン） */}
-          <div className="flex items-center gap-2.5 select-none">
+          {/* 左側：ロゴ ＆ アプリ名（または戻るボタン） */}
+          <div className="flex items-center gap-2 select-none min-w-0">
             {activeView !== 'home' ? (
               <button
                 type="button"
@@ -113,10 +113,10 @@ export const App: React.FC = () => {
                   sound.playTap();
                   setActiveView('home');
                 }}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white border border-[#EAE4DA] text-xs font-bold text-stone-700 hover:text-[#B84E34] transition-all cursor-pointer shadow-2xs"
+                className="flex items-center gap-1 py-1.5 px-3 rounded-xl bg-white border border-[#EAE4DA] text-xs font-bold text-stone-700 hover:text-[#B84E34] transition-all cursor-pointer shadow-2xs shrink-0"
               >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span>戻る</span>
+                <ChevronLeft className="w-4 h-4 text-stone-500" />
+                <span>ホーム</span>
               </button>
             ) : null}
 
@@ -125,7 +125,7 @@ export const App: React.FC = () => {
                 sound.playTap();
                 setActiveView('home');
               }}
-              className="flex items-center gap-2 cursor-pointer group"
+              className="flex items-center gap-2 cursor-pointer group min-w-0"
             >
               <div className="w-8 h-8 rounded-xl overflow-hidden border border-[#EAE4DA] shadow-2xs group-hover:scale-105 transition-all shrink-0 bg-white">
                 <img
@@ -134,41 +134,47 @@ export const App: React.FC = () => {
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-bold text-base sm:text-lg tracking-tight text-[#2A2421]">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="font-serif-title font-bold text-lg tracking-tight text-[#2A2421] shrink-0">
                   HanMoa
                 </span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD]">
-                  ハン検 5・4・3級
-                </span>
+                {activeView === 'home' && (
+                  <span className="hidden sm:inline-block text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD] whitespace-nowrap">
+                    ハン検 特化
+                  </span>
+                )}
               </div>
             </div>
           </div>
 
-          {/* 右側：ストリーク（炎） ＆ XP（稲妻） */}
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 select-none">
-            {/* ストリーク（炎） */}
+          {/* 右側：ストリーク ＆ XP（洗練されたインジケータ） */}
+          <div className="flex items-center gap-2 shrink-0 select-none">
+            {/* ストリーク（細線・落ち着いた朱色） */}
             <div
-              className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white border border-[#EAE4DA] text-stone-800 font-bold text-xs shadow-2xs"
-              title={`${studyProgress.streakDays}日連続学習中！`}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white border border-[#EAE4DA] text-stone-800 text-xs shadow-2xs"
+              title={`${studyProgress.streakDays}日連続学習中`}
             >
-              <Flame className="w-3.5 h-3.5 text-[#B84E34] fill-[#B84E34]" />
-              <span className="font-mono">{studyProgress.streakDays}日</span>
+              <Flame className="w-3.5 h-3.5 text-[#B84E34]" />
+              <span className="font-mono font-bold text-[11px] text-stone-700">
+                {studyProgress.streakDays}日
+              </span>
             </div>
 
-            {/* XP（稲妻） */}
+            {/* XP（落ち着いたアンバーゴールド） */}
             <div
-              className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white border border-[#EAE4DA] text-stone-800 font-bold text-xs shadow-2xs"
-              title={`累計獲得経験値: ${studyProgress.xp} XP`}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white border border-[#EAE4DA] text-stone-800 text-xs shadow-2xs"
+              title={`累計経験値: ${studyProgress.xp} XP`}
             >
-              <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-              <span className="font-mono">{studyProgress.xp} XP</span>
+              <Zap className="w-3.5 h-3.5 text-amber-600" />
+              <span className="font-mono font-bold text-[11px] text-stone-700">
+                {studyProgress.xp} XP
+              </span>
             </div>
           </div>
         </div>
       </header>
 
-      {/* メインコンテンツ（下部メニューバー全廃・ユーザーの1点集中体験） */}
+      {/* メインコンテンツ */}
       <main className="flex-1 w-full max-w-xl mx-auto px-3.5 sm:px-6 py-4 sm:py-6">
         {activeView === 'home' && (
           <HankenHomeScreen

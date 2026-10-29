@@ -137,7 +137,7 @@ export const HankenHomeScreen: React.FC<HankenHomeScreenProps> = ({
 
         {/* 核心タイトル ＆ 合格指標 */}
         <div className="space-y-1">
-          <h2 className="text-2xl font-black text-[#2A2421] tracking-tight">
+          <h2 className="font-serif-title text-2xl font-bold text-[#2A2421] tracking-tight">
             {spec.name}
           </h2>
           <div className="flex items-center gap-3 text-xs text-stone-500 font-medium">
@@ -213,7 +213,7 @@ export const HankenHomeScreen: React.FC<HankenHomeScreenProps> = ({
             <Award className="w-3 h-3" />
             <span>{spec.levelShort} 公式CBT模試</span>
           </div>
-          <h3 className="text-base sm:text-lg font-bold text-white">
+          <h3 className="font-serif-title text-base sm:text-lg font-bold text-white">
             本番形式 模擬試験（25問・100点）
           </h3>
           <p className="text-xs text-stone-300 font-normal">
@@ -240,7 +240,7 @@ export const HankenHomeScreen: React.FC<HankenHomeScreenProps> = ({
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[#B84E34]" />
-            <h3 className="text-sm font-bold text-[#2A2421]">
+            <h3 className="font-serif-title text-sm font-bold text-[#2A2421]">
               {spec.levelShort} 出題カリキュラム（全{currentGradeLessons.length}課）
             </h3>
           </div>
