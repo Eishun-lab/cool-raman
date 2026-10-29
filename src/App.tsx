@@ -94,7 +94,7 @@ export const App: React.FC = () => {
   };
 
   // 模試開始
-  const handleStartMockExam = (examId: 'hanken_5') => {
+  const handleStartMockExam = (examId: 'hanken_5' | 'hanken_4' | 'hanken_3') => {
     setTargetExamId(examId);
     setActiveView('exam');
   };
@@ -139,7 +139,7 @@ export const App: React.FC = () => {
                   HanMoa
                 </span>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD]">
-                  5級 チャレンジ
+                  ハン検 5・4・3級
                 </span>
               </div>
             </div>

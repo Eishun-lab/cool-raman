@@ -397,7 +397,7 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
   // ① 模擬試験 選択画面（5級 合格チャレンジ特化）
   // ==========================================================================
   if (viewState === 'list') {
-    const exam5 = ALL_MOCK_EXAMS.find((e) => e.id === 'hanken_5') || ALL_MOCK_EXAMS[0];
+    const currentTargetExam = ALL_MOCK_EXAMS.find((e) => e.id === selectedExamId) || ALL_MOCK_EXAMS[0];
 
     return (
       <div className="w-full max-w-xl mx-auto space-y-5 animate-fadeIn font-sans pb-16">
@@ -412,40 +412,40 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
             className="px-3 py-1.5 rounded-xl bg-white border border-[#EAE4DA] text-stone-700 hover:text-[#B84E34] text-xs font-bold transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>5級ホームに戻る</span>
+            <span>ホームに戻る</span>
           </button>
           <span className="text-[11px] font-bold text-[#B84E34] bg-[#FAF0EC] px-2.5 py-0.5 rounded-full border border-[#F0D5CD]">
-            5級 チャレンジ
+            {currentTargetExam.levelName} 公式CBT
           </span>
         </div>
 
-        {/* 5級 本番模試カード（ユーザーが迷わない1つの主選択肢） */}
+        {/* 選択中の本番模試カード（ユーザーが迷わない1つの主選択肢） */}
         <section className="bg-white border border-[#EAE4DA] rounded-3xl p-5 sm:p-6 shadow-[0_2px_12px_rgba(42,36,33,0.04)] space-y-4">
           <div className="flex items-center justify-between gap-2">
             <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD]">
-              5級 入門・基礎
+              {currentTargetExam.badge}
             </span>
             <span className="text-xs font-bold text-stone-600 font-mono">
-              合格ライン: 60点 / 100点
+              合格ライン: {currentTargetExam.passScore}点 / {currentTargetExam.totalScore}点
             </span>
           </div>
 
           <div className="space-y-1">
             <h2 className="text-xl sm:text-2xl font-black text-[#2A2421] tracking-tight">
-              {exam5.title}
+              {currentTargetExam.title}
             </h2>
             <p className="text-xs text-stone-500 font-normal">
-              文字・発音・基本助詞・用言現在形・聞き取り（全25問・各4点）
+              {currentTargetExam.subtitle}（全{currentTargetExam.questionCount}問・各4点）
             </p>
           </div>
 
           <div className="flex items-center gap-3 text-xs text-stone-500 font-mono py-1 border-y border-[#EAE4DA]/60">
             <div className="flex items-center gap-1">
               <Clock className="w-3.5 h-3.5 text-stone-400" />
-              <span>制限時間 20分</span>
+              <span>制限時間 {Math.round(currentTargetExam.timeLimitSeconds / 60)}分</span>
             </div>
             <span>•</span>
-            <div>出題数 25問</div>
+            <div>出題数 {currentTargetExam.questionCount}問</div>
             <span>•</span>
             <div>配点 100点</div>
           </div>
@@ -454,17 +454,15 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
           <div className="bg-[#FAF7F2] rounded-2xl p-3.5 border border-[#EAE4DA] space-y-1.5">
             <div className="text-[11px] font-bold text-[#2A2421] flex items-center gap-1">
               <Target className="w-3.5 h-3.5 text-[#B84E34]" />
-              <span>この模試で測定できること</span>
+              <span>この模試で測定できる到達目標</span>
             </div>
             <ul className="space-y-1">
-              <li className="text-[11px] text-stone-600 flex items-start gap-1.5">
-                <span className="text-[#B84E34] font-bold">✓</span>
-                <span>ハングルの母音・子音・パッチム・連音化を正しく聞き分けられる</span>
-              </li>
-              <li className="text-[11px] text-stone-600 flex items-start gap-1.5">
-                <span className="text-[#B84E34] font-bold">✓</span>
-                <span>基本助詞とヘヨ体・ハムニダ体の日常会話を即答できる</span>
-              </li>
+              {currentTargetExam.canDoList.slice(0, 2).map((canDo, idx) => (
+                <li key={idx} className="text-[11px] text-stone-600 flex items-start gap-1.5">
+                  <span className="text-[#B84E34] font-bold">✓</span>
+                  <span>{canDo}</span>
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -474,52 +472,51 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
               type="button"
               onClick={() => {
                 sound.playTap();
-                startExam(exam5.id);
+                startExam(currentTargetExam.id);
               }}
               className="w-full py-4 rounded-2xl bg-[#B84E34] hover:bg-[#9E3B21] text-white font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
             >
               <Award className="w-4 h-4" />
-              <span>5級 模擬試験を開始する</span>
+              <span>{currentTargetExam.levelName} 模擬試験を開始する</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         </section>
 
-        {/* ロック中の級（4級・3級） */}
+        {/* 他の級の模擬試験（ワンタップ切り替え） */}
         <section className="space-y-2 pt-2 border-t border-[#EAE4DA]">
           <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider px-1">
-            次の試験（ロック中）
+            他の級の公式模試（ワンタップで切り替え）
           </div>
 
-          <div className="p-4 rounded-2xl bg-stone-100/60 border border-dashed border-stone-300 flex items-center justify-between opacity-75">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl bg-stone-200 flex items-center justify-center text-stone-400">
-                <Lock className="w-4 h-4" />
+          {ALL_MOCK_EXAMS.filter((e) => e.id !== currentTargetExam.id).map((otherExam) => (
+            <div
+              key={otherExam.id}
+              onClick={() => {
+                sound.playTap();
+                setSelectedExamId(otherExam.id);
+              }}
+              className="p-4 rounded-2xl bg-white border border-[#EAE4DA] hover:border-[#B84E34]/50 hover:bg-[#FAF0EC]/20 transition-all cursor-pointer flex items-center justify-between"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-[#FAF0EC] text-[#B84E34] flex items-center justify-center font-bold text-xs font-mono border border-[#F0D5CD]">
+                  {otherExam.levelName}
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-stone-800">
+                    {otherExam.title}
+                  </div>
+                  <div className="text-[10px] text-stone-400">
+                    合格ライン: {otherExam.passScore}点 • 全{otherExam.questionCount}問
+                  </div>
+                </div>
               </div>
-              <div>
-                <div className="text-xs font-bold text-stone-700">ハングル検定 4級 模擬試験</div>
-                <div className="text-[10px] text-stone-400">不規則活用・過去形 • 5級合格後に解放</div>
-              </div>
-            </div>
-            <span className="text-[10px] font-mono font-bold text-stone-400 bg-white px-2 py-0.5 rounded border border-stone-200">
-              🔒 5級合格でアンロック
-            </span>
-          </div>
 
-          <div className="p-4 rounded-2xl bg-stone-100/40 border border-dashed border-stone-200 flex items-center justify-between opacity-50">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl bg-stone-200 flex items-center justify-center text-stone-400">
-                <Lock className="w-4 h-4" />
-              </div>
-              <div>
-                <div className="text-xs font-bold text-stone-600">ハングル検定 3級 模擬試験</div>
-                <div className="text-[10px] text-stone-400">実戦・長文読解 • 4級合格後に解放</div>
-              </div>
+              <span className="text-[11px] font-bold text-[#B84E34] bg-[#FAF0EC] px-3 py-1.5 rounded-xl border border-[#F0D5CD]">
+                {otherExam.levelName}を受験 ➔
+              </span>
             </div>
-            <span className="text-[10px] font-mono font-bold text-stone-400 bg-white px-2 py-0.5 rounded border border-stone-200">
-              🔒 4級合格でアンロック
-            </span>
-          </div>
+          ))}
         </section>
       </div>
     );

@@ -7,7 +7,6 @@ import {
   Zap,
   CheckCircle2,
   ArrowLeft,
-  Sparkles,
   BookOpen,
 } from 'lucide-react';
 import { LessonData } from '../../types';
@@ -37,20 +36,29 @@ export const HankenTextbookView: React.FC<HankenTextbookViewProps> = ({
     }
   }, [initialLessonId]);
 
-  // 5級の対象範囲：第1課〜第15課（全15課）
-  const grade5Lessons = useMemo(() => {
-    return LESSONS_DATA.filter((l) => l.number >= 1 && l.number <= 15);
+  // 5級〜3級（全35課）に対象を限定
+  const allHankenLessons = useMemo(() => {
+    return LESSONS_DATA.filter((l) => l.number >= 1 && l.number <= 35);
   }, []);
 
   const currentLessonIndex = useMemo(() => {
-    const idx = grade5Lessons.findIndex((l) => l.id === selectedLessonId);
+    const idx = allHankenLessons.findIndex((l) => l.id === selectedLessonId);
     return idx >= 0 ? idx : 0;
-  }, [selectedLessonId, grade5Lessons]);
+  }, [selectedLessonId, allHankenLessons]);
 
-  const currentLesson = grade5Lessons[currentLessonIndex] || grade5Lessons[0];
-  const prevLesson = currentLessonIndex > 0 ? grade5Lessons[currentLessonIndex - 1] : null;
+  const currentLesson = allHankenLessons[currentLessonIndex] || allHankenLessons[0];
+  const prevLesson = currentLessonIndex > 0 ? allHankenLessons[currentLessonIndex - 1] : null;
   const nextLesson =
-    currentLessonIndex < grade5Lessons.length - 1 ? grade5Lessons[currentLessonIndex + 1] : null;
+    currentLessonIndex < allHankenLessons.length - 1
+      ? allHankenLessons[currentLessonIndex + 1]
+      : null;
+
+  // 級の判定
+  const gradeLabel = useMemo(() => {
+    if (currentLesson.number <= 15) return '5級 必修';
+    if (currentLesson.number <= 28) return '4級 必修';
+    return '3級 必修';
+  }, [currentLesson.number]);
 
   const handleSelectLesson = (lessonId: string) => {
     sound.playTap();
@@ -75,7 +83,7 @@ export const HankenTextbookView: React.FC<HankenTextbookViewProps> = ({
           className="px-3 py-1.5 rounded-xl bg-white border border-[#EAE4DA] text-stone-700 hover:text-[#B84E34] text-xs font-bold transition-all cursor-pointer flex items-center gap-1 shadow-2xs"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          <span>5級ホームに戻る</span>
+          <span>ホームに戻る</span>
         </button>
 
         {/* 課選択ドロップダウン */}
@@ -88,25 +96,25 @@ export const HankenTextbookView: React.FC<HankenTextbookViewProps> = ({
           className="px-3 py-1.5 rounded-xl bg-white border border-[#EAE4DA] text-stone-800 text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
         >
           <span className="font-mono text-[#B84E34]">
-            {String(currentLesson.number).padStart(2, '0')} / 15課
+            第{currentLesson.number}課 ({gradeLabel})
           </span>
           <ChevronDown className="w-3.5 h-3.5 text-stone-400" />
         </button>
       </div>
 
-      {/* 目次ドロワーモーダル */}
+      {/* 目次ドロワーモーダル（5級・4級・3級 グループ別） */}
       {isDrawerOpen && (
         <div
           className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn"
           onClick={() => setIsDrawerOpen(false)}
         >
           <div
-            className="w-full max-w-md bg-white rounded-3xl p-5 space-y-3 max-h-[80vh] flex flex-col shadow-xl"
+            className="w-full max-w-md bg-white rounded-3xl p-5 space-y-3 max-h-[82vh] flex flex-col shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-[#EAE4DA] pb-2">
               <h3 className="text-sm font-bold text-[#2A2421]">
-                5級 出題カリキュラム（全15課）
+                ハン検 出題カリキュラム目次（全35課）
               </h3>
               <button
                 type="button"
@@ -117,30 +125,48 @@ export const HankenTextbookView: React.FC<HankenTextbookViewProps> = ({
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto space-y-1.5 pr-1">
-              {grade5Lessons.map((lesson) => {
-                const isSelected = lesson.id === currentLesson.id;
+            <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+              {[
+                { title: '🇰🇷 5級 入門範囲（第1〜15課）', range: [1, 15] },
+                { title: '🇰🇷 4級 初級範囲（第16〜28課）', range: [16, 28] },
+                { title: '🇰🇷 3級 実戦範囲（第29〜35課）', range: [29, 35] },
+              ].map((grp) => {
+                const lessons = allHankenLessons.filter(
+                  (l) => l.number >= grp.range[0] && l.number <= grp.range[1]
+                );
                 return (
-                  <button
-                    key={lesson.id}
-                    type="button"
-                    onClick={() => handleSelectLesson(lesson.id)}
-                    className={`w-full text-left p-3 rounded-xl transition-all cursor-pointer flex items-center justify-between gap-2 ${
-                      isSelected
-                        ? 'bg-[#FAF0EC] text-[#B84E34] font-bold border border-[#F0D5CD]'
-                        : 'hover:bg-stone-50 text-stone-700 border border-transparent'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <span className="font-mono text-xs text-stone-400 font-bold shrink-0">
-                        {String(lesson.number).padStart(2, '0')}
-                      </span>
-                      <span className="text-xs truncate">
-                        {lesson.title.replace(/^第\d+課：/, '')}
-                      </span>
+                  <div key={grp.title} className="space-y-1">
+                    <div className="text-[11px] font-bold text-stone-500 uppercase tracking-wider px-1 pt-1">
+                      {grp.title}
                     </div>
-                    {isSelected && <CheckCircle2 className="w-4 h-4 text-[#B84E34] shrink-0" />}
-                  </button>
+                    {lessons.map((lesson) => {
+                      const isSelected = lesson.id === currentLesson.id;
+                      return (
+                        <button
+                          key={lesson.id}
+                          type="button"
+                          onClick={() => handleSelectLesson(lesson.id)}
+                          className={`w-full text-left p-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-between gap-2 ${
+                            isSelected
+                              ? 'bg-[#FAF0EC] text-[#B84E34] font-bold border border-[#F0D5CD]'
+                              : 'hover:bg-stone-50 text-stone-700 border border-transparent'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="font-mono text-xs text-stone-400 font-bold shrink-0">
+                              {String(lesson.number).padStart(2, '0')}
+                            </span>
+                            <span className="text-xs truncate">
+                              {lesson.title.replace(/^第\d+課：/, '')}
+                            </span>
+                          </div>
+                          {isSelected && (
+                            <CheckCircle2 className="w-4 h-4 text-[#B84E34] shrink-0" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
                 );
               })}
             </div>
@@ -156,10 +182,10 @@ export const HankenTextbookView: React.FC<HankenTextbookViewProps> = ({
         <div className="space-y-1 border-b border-[#EAE4DA] pb-4">
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD]">
-              5級 必修
+              {gradeLabel}
             </span>
             <span className="text-[11px] font-mono font-bold text-stone-500">
-              第{currentLesson.number}課 / 全15課
+              第{currentLesson.number}課 / 全35課
             </span>
           </div>
           <h1 className="text-lg sm:text-xl font-bold text-[#2A2421] tracking-tight pt-1 leading-snug">
@@ -206,13 +232,13 @@ export const HankenTextbookView: React.FC<HankenTextbookViewProps> = ({
           </section>
         )}
 
-        {/* ③ 5級 必須単語リスト（タップで音声再生） */}
+        {/* ③ 必須単語リスト（タップで音声再生） */}
         {currentLesson.vocabList && currentLesson.vocabList.length > 0 && (
           <section className="space-y-2">
             <div className="flex items-center justify-between text-xs font-bold text-[#2A2421]">
               <div className="flex items-center gap-1.5">
                 <span className="text-sm">📝</span>
-                <span>5級 必須単語（タップでネイティブ音声）</span>
+                <span>{gradeLabel.replace(' 必修', '')} 必須単語（タップでネイティブ音声）</span>
               </div>
               <span className="text-[10px] text-stone-400 font-normal">タップで再生</span>
             </div>
@@ -289,12 +315,12 @@ export const HankenTextbookView: React.FC<HankenTextbookViewProps> = ({
           </section>
         )}
 
-        {/* ⑤ ハン検5級 出題の罠・落とし穴 */}
+        {/* ⑤ 出題の罠・落とし穴 */}
         {currentLesson.pitfall && (
           <section className="space-y-2">
             <div className="flex items-center gap-1.5 text-xs font-bold text-[#2A2421]">
               <span className="text-sm">⚠️</span>
-              <span>{currentLesson.pitfall.title || 'ハン検5級 頻出トラップ'}</span>
+              <span>{currentLesson.pitfall.title || '出題の罠・落とし穴'}</span>
             </div>
             <div className="p-4 rounded-2xl bg-[#FAF0EC] border-l-4 border-[#B84E34] text-stone-800 text-xs sm:text-sm leading-relaxed">
               {currentLesson.pitfall.content}
@@ -342,7 +368,7 @@ export const HankenTextbookView: React.FC<HankenTextbookViewProps> = ({
           }}
           className="text-xs text-stone-500 hover:text-[#B84E34] font-medium underline cursor-pointer"
         >
-          5級ホームに戻る
+          ホームに戻る
         </button>
 
         {nextLesson ? (
