@@ -9,6 +9,7 @@ import {
   ArrowRight,
   ArrowLeft,
   ChevronRight,
+  ChevronLeft,
   AlertCircle,
   Sparkles,
   BookOpen,
@@ -80,7 +81,28 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [showFinishConfirm, setShowFinishConfirm] = useState(false);
+  const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [activeReportTab, setActiveReportTab] = useState<'prescription' | 'strengths' | 'weaknesses'>('prescription');
+
+  // HTMLタグ (<u>...</u>) をアンダーライン付きの美しいタイポグラフィに変換
+  const renderFormattedText = (text?: string) => {
+    if (!text) return null;
+    const parts = text.split(/(<u>.*?<\/u>)/g);
+    return parts.map((part, i) => {
+      if (part.startsWith('<u>') && part.endsWith('</u>')) {
+        const inner = part.slice(3, -4);
+        return (
+          <span
+            key={i}
+            className="font-serif-kr font-bold underline underline-offset-4 decoration-[#B84E34] decoration-2 text-[#2A2421] mx-0.5"
+          >
+            {inner}
+          </span>
+        );
+      }
+      return <span key={i}>{part}</span>;
+    });
+  };
 
   // initialExamIdが変更された場合の同期
   useEffect(() => {
@@ -520,139 +542,142 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
   }
 
   // ==========================================================================
-  // ② 模擬試験 実施中画面（試験中）
+  // ② 模擬試験 実施中画面（全画面・スクロール不要のスッキリQuiet Luxury設計）
   // ==========================================================================
   if (viewState === 'exam' && currentQuestion) {
     const isAnswered = userAnswers[currentQuestion.id] !== undefined;
+    const progressPercent = Math.round(((currentQuestionIndex + 1) / activeExam.questionCount) * 100);
 
     return (
-      <div className="min-h-screen bg-[#FAF7F2] pb-24">
-        {/* 固定上部コントロールバー */}
-        <header className="sticky top-14 z-30 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#EAE4DA] px-3 sm:px-6 py-2.5">
-          <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
-            {/* 試験タイトルと進捗 */}
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="text-xs font-bold px-2 py-0.5 rounded-lg bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD] shrink-0 font-mono">
-                {activeExam.badge}
-              </span>
-              <span className="text-xs sm:text-sm font-bold text-[#2A2421] truncate">
-                第 {currentQuestionIndex + 1} / {activeExam.questionCount} 問
-              </span>
-            </div>
-
-            {/* カウントダウンタイマー */}
-            <div
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-xl font-mono font-bold text-sm transition-colors ${
-                timeLeftSeconds <= 180
-                  ? 'bg-rose-100 text-rose-700 animate-pulse'
-                  : 'bg-white border border-[#EAE4DA] text-stone-800'
-              }`}
-            >
-              <Clock className="w-3.5 h-3.5 text-stone-500" />
-              <span>{formatTime(timeLeftSeconds)}</span>
-            </div>
-
-            {/* 終了・採点ボタン */}
+      <div className="fixed inset-0 z-50 bg-[#FAF7F2] text-[#2A2421] flex flex-col justify-between overflow-hidden animate-fadeIn select-none font-sans">
+        {/* 1. ミニマル統合ヘッダー（二重ヘッダーを排し、1段で極めてスッキリ） */}
+        <header className="bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#EAE4DA] px-3.5 sm:px-6 h-14 flex items-center justify-between gap-3 shrink-0">
+          <div className="max-w-xl w-full mx-auto flex items-center justify-between gap-3">
+            {/* 左側：中断ボタン */}
             <button
               type="button"
-              onClick={() => setShowFinishConfirm(true)}
-              className="text-xs font-serif-title px-3.5 py-1.5 rounded-lg bg-[#1F1A17] hover:bg-[#342D28] text-white shadow-2xs transition-all cursor-pointer shrink-0"
+              onClick={() => setShowExitConfirm(true)}
+              className="flex items-center gap-1 py-1 px-2.5 rounded-lg bg-white border border-[#EAE4DA] text-xs font-medium text-stone-600 hover:text-[#2A2421] transition-all cursor-pointer shadow-2xs shrink-0"
+              title="試験を中断する"
             >
-              採点する
+              <ChevronLeft className="w-4 h-4 text-stone-400" />
+              <span>中断</span>
             </button>
+
+            {/* 中央：第○問 ＆ 極細ヘアラインプログレス */}
+            <div className="flex-1 max-w-xs mx-2 flex flex-col items-center gap-1">
+              <span className="text-xs font-serif-title text-[#2A2421] tracking-wider font-bold">
+                第 {currentQuestionIndex + 1} / {activeExam.questionCount} 問
+              </span>
+              <div className="w-full bg-[#EAE4DA] h-[2.5px] rounded-full overflow-hidden">
+                <div
+                  className="bg-[#2A2421] h-full rounded-full transition-all duration-300"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+            </div>
+
+            {/* 右側：タイマー ＆ 採点ボタン */}
+            <div className="flex items-center gap-2 shrink-0">
+              <div
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg font-mono text-xs font-medium transition-colors ${
+                  timeLeftSeconds <= 180
+                    ? 'bg-rose-100 text-rose-700 animate-pulse'
+                    : 'bg-white border border-[#EAE4DA] text-stone-700'
+                }`}
+              >
+                <Clock className="w-3.5 h-3.5 text-stone-400" />
+                <span>{formatTime(timeLeftSeconds)}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowFinishConfirm(true)}
+                className="text-xs font-serif-title px-3 py-1 rounded-lg bg-[#1F1A17] hover:bg-[#342D28] text-white shadow-2xs transition-all cursor-pointer"
+              >
+                採点
+              </button>
+            </div>
           </div>
         </header>
 
-        {/* メイン問題カード領域 */}
-        <main className="max-w-3xl mx-auto px-3 sm:px-6 pt-4 sm:pt-6">
-          <div className="bg-white border border-[#EAE4DA] rounded-2xl p-5 sm:p-8 shadow-[0_2px_12px_rgba(42,36,33,0.03)] space-y-6">
-            {/* 問題ヘッダー */}
-            <div className="flex items-center justify-between gap-2 pb-3 border-b border-[#EAE4DA]/60">
-              <div className="flex items-center gap-2">
-                <span className="w-7 h-7 rounded-lg bg-[#FAF7F2] text-[#2A2421] font-bold text-xs flex items-center justify-center font-mono border border-[#EAE4DA]">
-                  Q{currentQuestionIndex + 1}
-                </span>
-                <span className="text-xs font-bold text-[#B84E34] bg-[#FAF0EC] px-2 py-0.5 rounded-md border border-[#F0D5CD]">
-                  {currentQuestion.sectionLabel}
-                </span>
-              </div>
-              <span className="text-xs text-stone-400 font-medium font-mono">配点: {currentQuestion.score}点</span>
+        {/* 2. メイン問題領域（スクロール不要で1画面に美しく収まる） */}
+        <main className="flex-1 overflow-y-auto px-3.5 sm:px-6 py-4 max-w-xl w-full mx-auto flex flex-col justify-center space-y-3">
+          {/* 問題カード */}
+          <div className="bg-white border border-[#EAE4DA] rounded-2xl p-4 sm:p-6 shadow-[0_2px_12px_rgba(42,36,33,0.03)] space-y-3.5">
+            {/* セクションタグ ＆ 配点 */}
+            <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-[#EAE4DA]/50">
+              <span className="text-[10px] tracking-wider font-bold text-[#B84E34] bg-[#FAF0EC] px-2 py-0.5 rounded border border-[#F0D5CD]">
+                {currentQuestion.sectionLabel}
+              </span>
+              <span className="text-xs text-stone-400 font-mono">
+                配点 {currentQuestion.score}点
+              </span>
             </div>
 
-            {/* 指示文 */}
-            <h2 className="font-serif-title text-base sm:text-lg font-bold text-[#2A2421] leading-relaxed">
+            {/* 指示文（控えめな文字で視界を邪魔しない） */}
+            <p className="text-xs text-stone-500 font-normal leading-relaxed">
               {currentQuestion.instruction}
-            </h2>
+            </p>
 
             {/* リスニング音声再生ボタン（音声問題の場合） */}
             {currentQuestion.audioText && (
-              <div className="bg-[#FAF7F2] border border-[#EAE4DA] rounded-xl p-4 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => playAudio(currentQuestion.audioText)}
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-2xs transition-all cursor-pointer ${
-                      isAudioPlaying
-                        ? 'bg-[#B84E34] text-white animate-pulse'
-                        : 'bg-white text-stone-700 border border-[#EAE4DA] hover:bg-stone-50'
-                    }`}
-                    title="音声を再生"
-                  >
-                    <Volume2 className="w-5 h-5" />
-                  </button>
-                  <div>
-                    <div className="text-xs font-bold text-[#2A2421]">
-                      {isAudioPlaying ? '音声再生中...' : 'リスニング音声を再生'}
-                    </div>
-                    <div className="text-[10px] text-stone-500">
-                      ボタンをタップすると韓国語ネイティブ音声が流れます
-                    </div>
-                  </div>
-                </div>
+              <div className="bg-[#FAF7F2] border border-[#EAE4DA] rounded-xl p-3 flex items-center justify-between gap-3">
+                <button
+                  type="button"
+                  onClick={() => playAudio(currentQuestion.audioText)}
+                  className={`px-3 py-1.5 rounded-lg flex items-center gap-2 shadow-2xs transition-all cursor-pointer text-xs font-serif-title ${
+                    isAudioPlaying
+                      ? 'bg-[#B84E34] text-white animate-pulse'
+                      : 'bg-white text-stone-700 border border-[#EAE4DA] hover:bg-stone-50'
+                  }`}
+                >
+                  <Volume2 className="w-4 h-4 text-stone-500" />
+                  <span>{isAudioPlaying ? '再生中...' : '音声を再生'}</span>
+                </button>
+                <span className="text-[10px] text-stone-400">ネイティブ音声</span>
               </div>
             )}
 
             {/* パッセージ・対話文・案内文（ある場合） */}
             {currentQuestion.passage && (
-              <div className="bg-[#FAF7F2] border border-[#EAE4DA] rounded-xl p-4 sm:p-5 text-xs sm:text-sm text-stone-800 font-sans leading-relaxed whitespace-pre-wrap select-none font-normal">
+              <div className="bg-[#FAF7F2] border border-[#EAE4DA] rounded-xl p-3.5 sm:p-4 text-xs sm:text-sm text-stone-800 leading-relaxed whitespace-pre-wrap select-none font-serif-kr">
                 {currentQuestion.passage}
               </div>
             )}
 
-            {/* 個別の問い（ある場合） */}
+            {/* 問題本文（韓国語下線タグをパースして大きく美しく表示） */}
             {currentQuestion.questionText && (
-              <p className="text-xs sm:text-sm font-bold text-[#2A2421] pt-1">
-                {currentQuestion.questionText}
-              </p>
+              <div className="py-1 text-base sm:text-lg font-serif-kr font-medium text-[#2A2421] leading-relaxed text-center sm:text-left">
+                {renderFormattedText(currentQuestion.questionText)}
+              </div>
             )}
 
             {/* 4つの選択肢 */}
             <div className="space-y-2 pt-1">
               {currentQuestion.options.map((opt, optIdx) => {
                 const isSelected = userAnswers[currentQuestion.id] === optIdx;
-                const circleNumber = ['①', '②', '③', '④'][optIdx];
 
                 return (
                   <button
                     key={optIdx}
                     type="button"
                     onClick={() => handleSelectOption(currentQuestion.id, optIdx)}
-                    className={`w-full text-left p-3.5 sm:p-4 rounded-xl border transition-all flex items-start gap-3 cursor-pointer group active:scale-[0.99] ${
+                    className={`w-full text-left p-3 sm:p-3.5 rounded-xl border transition-all flex items-center gap-3 cursor-pointer group active:scale-[0.99] ${
                       isSelected
                         ? 'bg-[#FAF0EC] border-[#B84E34] text-[#2A2421] shadow-2xs font-bold'
-                        : 'bg-white border-[#EAE4DA] text-stone-700 hover:bg-[#FAF7F2]'
+                        : 'bg-white border-[#EAE4DA] text-stone-700 hover:border-stone-400 hover:bg-[#FAF7F2]'
                     }`}
                   >
                     <span
-                      className={`w-6 h-6 rounded-lg text-xs font-bold flex items-center justify-center shrink-0 transition-colors ${
+                      className={`w-6 h-6 rounded-lg text-xs font-mono font-medium flex items-center justify-center shrink-0 transition-colors ${
                         isSelected
                           ? 'bg-[#B84E34] text-white'
-                          : 'bg-stone-100 text-stone-600 group-hover:bg-stone-200'
+                          : 'bg-stone-100 text-stone-500 group-hover:bg-stone-200'
                       }`}
                     >
-                      {circleNumber}
+                      {optIdx + 1}
                     </span>
-                    <span className="text-xs sm:text-sm font-medium leading-normal flex-1 pt-0.5">
+                    <span className="text-xs sm:text-sm font-serif-kr leading-normal flex-1">
                       {opt}
                     </span>
                   </button>
@@ -660,92 +685,159 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
               })}
             </div>
           </div>
+        </main>
 
-          {/* 前へ・次へ ボタン */}
-          <div className="flex items-center justify-between gap-3 mt-6">
+        {/* 3. 固定ボトムナビゲーションバー（指先でスマートに前へ・次へ・パレット展開） */}
+        <footer className="bg-white/95 backdrop-blur-md border-t border-[#EAE4DA] px-3.5 sm:px-6 py-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] shrink-0">
+          <div className="max-w-xl mx-auto flex items-center justify-between gap-2.5">
+            {/* 前の問題 */}
             <button
               type="button"
               disabled={currentQuestionIndex === 0}
               onClick={() => {
                 setCurrentQuestionIndex((prev) => Math.max(0, prev - 1));
-                window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="px-4 py-2.5 rounded-xl border border-[#EAE4DA] bg-white text-xs font-bold text-stone-700 hover:bg-stone-50 disabled:opacity-30 disabled:pointer-events-none transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+              className="py-2.5 px-3.5 rounded-xl border border-[#EAE4DA] bg-white text-xs font-serif-title text-stone-600 hover:text-[#2A2421] disabled:opacity-30 disabled:pointer-events-none transition-all flex items-center gap-1 cursor-pointer shadow-2xs"
             >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>前の問題</span>
+              <ChevronLeft className="w-4 h-4" />
+              <span>前へ</span>
             </button>
 
+            {/* パレット開閉ボタン（中央） */}
+            <button
+              type="button"
+              onClick={() => setIsPaletteOpen(true)}
+              className="py-2 px-3 rounded-lg border border-[#EAE4DA] bg-[#FAF7F2] hover:bg-[#FAF0EC] text-xs font-serif-title text-stone-700 hover:text-[#B84E34] transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+            >
+              <Layers className="w-3.5 h-3.5 text-stone-400" />
+              <span>解答一覧 ({answeredCount}/{activeExam.questionCount})</span>
+            </button>
+
+            {/* 次の問題 / 採点へ */}
             {currentQuestionIndex < activeExam.questionCount - 1 ? (
               <button
                 type="button"
                 onClick={() => {
                   setCurrentQuestionIndex((prev) => prev + 1);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className="px-5 py-2.5 rounded-xl bg-[#2A2421] text-white text-xs font-bold hover:bg-stone-800 shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+                className="py-2.5 px-4 rounded-xl bg-[#1F1A17] text-white text-xs font-serif-title hover:bg-[#342D28] shadow-2xs transition-all flex items-center gap-1 cursor-pointer"
               >
-                <span>次の問題</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <span>次へ</span>
+                <ChevronRight className="w-4 h-4" />
               </button>
             ) : (
               <button
                 type="button"
                 onClick={() => setShowFinishConfirm(true)}
-                className="px-5 py-2.5 rounded-xl bg-[#1F1A17] text-[#FAF7F2] text-xs font-serif-title hover:bg-[#342D28] shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+                className="py-2.5 px-4 rounded-xl bg-[#1F1A17] text-[#FAF7F2] text-xs font-serif-title hover:bg-[#342D28] shadow-2xs transition-all flex items-center gap-1 cursor-pointer"
               >
-                <span>採点して結果を見る</span>
+                <span>採点</span>
                 <CheckCircle2 className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
+        </footer>
 
-          {/* 問題ナンバーパレット（クリックで瞬時に移動） */}
-          <div className="bg-white border border-[#EAE4DA] rounded-2xl p-4 sm:p-5 mt-6 shadow-2xs">
-            <div className="flex items-center justify-between text-xs font-medium text-stone-500 mb-3">
-              <span className="flex items-center gap-1.5 font-bold text-stone-700 font-serif-title">
-                <Layers className="w-3.5 h-3.5 text-stone-500" />
-                解答状況パレット
-              </span>
-              <span className="font-mono text-[11px]">
-                解答済: {answeredCount} / 未解答: {unansweredCount}
-              </span>
-            </div>
-            <div className="grid grid-cols-5 sm:grid-cols-10 gap-1.5 sm:gap-2">
-              {activeExam.questions.map((q, idx) => {
-                const isAns = userAnswers[q.id] !== undefined;
-                const isCurrent = currentQuestionIndex === idx;
+        {/* 4. 解答状況パレット（下部からスッと開くスマートシート） */}
+        {isPaletteOpen && (
+          <div
+            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fadeIn"
+            onClick={() => setIsPaletteOpen(false)}
+          >
+            <div
+              className="bg-white border border-[#EAE4DA] rounded-t-3xl sm:rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl animate-in slide-in-from-bottom-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between border-b border-[#EAE4DA] pb-3">
+                <div className="flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-stone-500" />
+                  <h3 className="font-serif-title font-bold text-sm text-[#2A2421]">
+                    全{activeExam.questionCount}問 解答状況パレット
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsPaletteOpen(false)}
+                  className="text-stone-400 hover:text-stone-700 text-xs font-bold cursor-pointer"
+                >
+                  閉じる
+                </button>
+              </div>
 
-                return (
-                  <button
-                    key={q.id}
-                    type="button"
-                    onClick={() => {
-                      setCurrentQuestionIndex(idx);
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }}
-                    className={`h-9 rounded-lg font-mono text-xs font-medium transition-all cursor-pointer flex items-center justify-center ${
-                      isCurrent
-                        ? 'ring-2 ring-[#2A2421] ring-offset-1 font-bold'
-                        : ''
-                    } ${
-                      isAns
-                        ? 'bg-[#2A2421] text-white shadow-2xs'
-                        : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
-                    }`}
-                  >
-                    {idx + 1}
-                  </button>
-                );
-              })}
+              <div className="flex items-center justify-between text-xs text-stone-500 font-mono">
+                <span>解答済: {answeredCount} 問</span>
+                <span className="text-[#B84E34]">未解答: {unansweredCount} 問</span>
+              </div>
+
+              <div className="grid grid-cols-5 gap-2 max-h-[50vh] overflow-y-auto py-1">
+                {activeExam.questions.map((q, idx) => {
+                  const isAns = userAnswers[q.id] !== undefined;
+                  const isCurrent = currentQuestionIndex === idx;
+
+                  return (
+                    <button
+                      key={q.id}
+                      type="button"
+                      onClick={() => {
+                        setCurrentQuestionIndex(idx);
+                        setIsPaletteOpen(false);
+                      }}
+                      className={`h-10 rounded-xl font-mono text-xs transition-all cursor-pointer flex items-center justify-center ${
+                        isCurrent
+                          ? 'ring-2 ring-[#B84E34] ring-offset-1 font-bold'
+                          : ''
+                      } ${
+                        isAns
+                          ? 'bg-[#2A2421] text-white shadow-2xs font-bold'
+                          : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                      }`}
+                    >
+                      {idx + 1}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
-        </main>
+        )}
 
-        {/* 採点確認モーダル */}
+        {/* 5. 中断確認モーダル */}
+        {showExitConfirm && (
+          <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn">
+            <div className="bg-white border border-[#EAE4DA] rounded-2xl max-w-sm w-full p-6 shadow-xl space-y-4">
+              <h3 className="font-serif-title font-bold text-base text-center text-[#2A2421]">
+                試験を中断しますか？
+              </h3>
+              <p className="text-xs text-stone-500 text-center leading-relaxed">
+                現在の解答内容は破棄されます。模擬試験トップに戻りますか？
+              </p>
+              <div className="grid grid-cols-2 gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowExitConfirm(false)}
+                  className="py-2.5 rounded-xl border border-[#EAE4DA] text-xs font-serif-title text-stone-600 hover:bg-stone-50 cursor-pointer"
+                >
+                  続ける
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowExitConfirm(false);
+                    setViewState('list');
+                  }}
+                  className="py-2.5 rounded-xl bg-stone-200 text-stone-800 text-xs font-serif-title hover:bg-stone-300 cursor-pointer"
+                >
+                  中断する
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 6. 採点確認モーダル */}
         {showFinishConfirm && (
-          <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
-            <div className="bg-white border border-[#EAE4DA] rounded-2xl max-w-sm w-full p-6 shadow-xl space-y-4 animate-fadeIn">
+          <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn">
+            <div className="bg-white border border-[#EAE4DA] rounded-2xl max-w-sm w-full p-6 shadow-xl space-y-4">
               <div className="w-12 h-12 rounded-xl bg-[#FAF0EC] text-[#B84E34] flex items-center justify-center text-xl mx-auto">
                 <AlertCircle className="w-6 h-6" />
               </div>
