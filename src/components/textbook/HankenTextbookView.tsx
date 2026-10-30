@@ -257,7 +257,7 @@ export const HankenTextbookView: React.FC<HankenTextbookViewProps> = ({
           onClick={() => setIsDrawerOpen(false)}
         >
           <div
-            className="w-full max-w-md bg-white rounded-3xl p-5 space-y-3 max-h-[82vh] flex flex-col shadow-xl border border-[#EAE4DA]"
+            className="w-full max-w-md bg-white rounded-2xl p-5 space-y-3 max-h-[82vh] flex flex-col shadow-xl border border-[#EAE4DA]"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-[#EAE4DA] pb-2.5">
@@ -325,7 +325,7 @@ export const HankenTextbookView: React.FC<HankenTextbookViewProps> = ({
       {/* ===================================================================== */}
       {/* 2. 教科書本文カード（韓紙の温もりと大人の洗練された書籍デザイン）        */}
       {/* ===================================================================== */}
-      <article className="bg-white border border-[#EAE4DA] rounded-3xl p-5 sm:p-7 shadow-[0_2px_14px_rgba(42,36,33,0.03)] space-y-6">
+      <article className="bg-white border border-[#EAE4DA] rounded-2xl p-5 sm:p-7 shadow-[0_2px_14px_rgba(42,36,33,0.03)] space-y-6">
         {/* レッスン表題 */}
         <div className="space-y-1.5 border-b border-[#EAE4DA]/70 pb-4">
           <div className="text-[11px] font-mono tracking-widest text-[#B84E34] uppercase font-bold">
@@ -516,22 +516,22 @@ export const HankenTextbookView: React.FC<HankenTextbookViewProps> = ({
           </section>
         )}
 
-        {/* ⑤ 出題の罠・落とし穴（品格ある注意書き） */}
+        {/* ⑤ 誤答を防ぐ核心の眼（品格ある注意書き） */}
         {currentLesson.pitfall && (
           <section className="space-y-2">
             <div className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-[#B84E34]" />
               <h2 className="font-serif-title text-xs sm:text-sm font-bold text-[#2A2421] tracking-wide">
-                {currentLesson.pitfall.title || '出題の罠・落とし穴'}
+                {currentLesson.pitfall.title || '誤答を防ぐ核心の眼'}
               </h2>
             </div>
-            <div className="p-4 rounded-2xl bg-[#FAF0EC] border border-[#F0D5CD] text-stone-800 text-xs sm:text-[13px] leading-relaxed font-normal">
+            <div className="p-4 rounded-xl bg-[#FAF0EC] border border-[#F0D5CD] text-stone-800 text-xs sm:text-[13px] leading-relaxed font-normal">
               {currentLesson.pitfall.content}
             </div>
           </section>
         )}
 
-        {/* ⑥ 直結特訓ドリル開始ボタン */}
+        {/* ⑥ 直結実践演習ボタン（Quiet Luxury 墨黒ボタン） */}
         <div className="pt-2 border-t border-[#EAE4DA]/70">
           <button
             type="button"
@@ -539,11 +539,10 @@ export const HankenTextbookView: React.FC<HankenTextbookViewProps> = ({
               sound.playTap();
               onStartDrillForLesson?.(currentLesson);
             }}
-            className="w-full py-3.5 px-5 rounded-2xl bg-[#B84E34] hover:bg-[#9E3B21] text-white font-bold text-xs sm:text-sm shadow-sm transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-[0.99]"
+            className="w-full py-4 px-6 rounded-xl bg-[#1F1A17] hover:bg-[#342D28] text-[#FAF7F2] font-serif-title text-sm tracking-wide shadow-[0_4px_14px_rgba(31,26,23,0.12)] transition-all cursor-pointer flex items-center justify-center gap-2.5 active:scale-[0.99] group"
           >
-            <Zap className="w-4 h-4 fill-white" />
-            <span>第{currentLesson.number}課の理解度チェック特訓を解く</span>
-            <ChevronRight className="w-4 h-4" />
+            <span>第{currentLesson.number}課の実践演習に進む</span>
+            <ChevronRight className="w-4 h-4 text-stone-400 group-hover:text-white transition-colors" />
           </button>
         </div>
       </article>

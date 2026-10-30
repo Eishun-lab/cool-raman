@@ -2,15 +2,9 @@ import React, { useState, useMemo } from 'react';
 import {
   Award,
   BookOpen,
-  Zap,
   CheckCircle2,
   ChevronRight,
   ArrowRight,
-  Flame,
-  Lock,
-  Unlock,
-  Target,
-  Sparkles,
 } from 'lucide-react';
 import { LessonData } from '../../types';
 import { LESSONS_DATA } from '../../data/lessons';
@@ -84,7 +78,6 @@ export const HankenHomeScreen: React.FC<HankenHomeScreenProps> = ({
   progressState,
   onOpenTextbook,
   onStartDrillForLesson,
-  onStartTodayDrill,
   onStartMockExam,
 }) => {
   const [activeGrade, setActiveGrade] = useState<ActiveHankenGrade>('grade_5');
@@ -117,73 +110,77 @@ export const HankenHomeScreen: React.FC<HankenHomeScreenProps> = ({
   const isAllRead = readLessons.length === currentGradeLessons.length;
 
   return (
-    <div className="w-full max-w-xl mx-auto space-y-5 pb-16 select-none animate-fadeIn font-sans">
+    <div className="w-full max-w-xl mx-auto space-y-4 pb-16 select-none animate-fadeIn font-sans">
       {/* ===================================================================== */}
-      {/* 1. チャレンジ・最優先アクションカード（ユーザーの選択肢を1つに集約）       */}
+      {/* 1. チャレンジ・最優先アクションカード（Quiet Luxury装丁）               */}
       {/* ===================================================================== */}
-      <section className="bg-white border border-[#EAE4DA] rounded-3xl p-5 sm:p-6 shadow-[0_2px_12px_rgba(42,36,33,0.04)] space-y-4">
+      <section className="bg-white border border-[#EAE4DA] rounded-2xl p-5 sm:p-7 shadow-[0_2px_14px_rgba(42,36,33,0.03)] space-y-4 sm:space-y-5">
         {/* ヘッダータグ ＆ 進捗 */}
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-[#B84E34]" />
-            <span className="text-[11px] font-bold tracking-wider text-[#B84E34] uppercase">
-              {spec.levelShort} 合格チャレンジ
+        <div className="flex items-center justify-between gap-2 border-b border-[#EAE4DA]/50 pb-3">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] tracking-wider font-bold px-2 py-0.5 rounded bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD]">
+              {spec.levelShort} 必須課程
+            </span>
+            <span className="text-xs text-stone-400 font-serif-title tracking-wider hidden sm:inline">
+              ハングル能力検定試験
             </span>
           </div>
-          <span className="text-xs font-mono font-bold text-stone-600">
-            {readLessons.length} / {currentGradeLessons.length}課 ({progressPercent}%)
+          <span className="text-xs font-mono font-medium text-stone-500">
+            {readLessons.length} / {currentGradeLessons.length} 課修了
+            <span className="text-stone-400 ml-1.5">({progressPercent}%)</span>
           </span>
         </div>
 
         {/* 核心タイトル ＆ 合格指標 */}
-        <div className="space-y-1">
-          <h2 className="font-serif-title text-2xl font-bold text-[#2A2421] tracking-tight">
+        <div className="space-y-1.5">
+          <h2 className="font-serif-title text-2xl sm:text-3xl font-bold text-[#2A2421] tracking-tight">
             {spec.name}
           </h2>
-          <div className="flex items-center gap-3 text-xs text-stone-500 font-medium">
-            <span>合格ライン {spec.passScore}点 / 100点</span>
-            <span>•</span>
+          <div className="flex items-center gap-2.5 text-xs text-stone-500 font-normal">
+            <span>合格基準 {spec.passScore}点 / 100点</span>
+            <span className="text-stone-300">|</span>
             <span>出題語彙 {spec.wordCount}</span>
-            <span>•</span>
+            <span className="text-stone-300">|</span>
             <span>全{currentGradeLessons.length}課</span>
           </div>
         </div>
 
-        {/* 進捗プログレスバー */}
-        <div className="w-full bg-[#F4EFEA] h-2.5 rounded-full overflow-hidden">
+        {/* 進捗プログレスライン（極細ヘアライン設計） */}
+        <div className="w-full bg-[#EAE4DA]/70 h-[3px] rounded-full overflow-hidden">
           <div
-            className="bg-[#B84E34] h-full rounded-full transition-all duration-700 ease-out"
-            style={{ width: `${Math.max(6, progressPercent)}%` }}
+            className="bg-[#2A2421] h-full rounded-full transition-all duration-700 ease-out"
+            style={{ width: `${Math.max(5, progressPercent)}%` }}
           />
         </div>
 
         {/* ★ ユーザーが迷わない「今やるべき1つのアクション」 */}
-        <div className="pt-2 space-y-2">
+        <div className="pt-1 space-y-3">
           {!isAllRead ? (
             <>
+              {/* メインCTA：深みのある墨黒ボタン（Quiet Luxury） */}
               <button
                 type="button"
                 onClick={() => {
                   sound.playTap();
                   onStartDrillForLesson(nextTargetLesson);
                 }}
-                className="w-full py-4 px-6 rounded-2xl bg-[#B84E34] hover:bg-[#9E3B21] text-white text-sm sm:text-base font-bold transition-all cursor-pointer flex items-center justify-center gap-2 shadow-sm hover:shadow-md active:scale-[0.99]"
+                className="w-full py-3.5 sm:py-4 px-6 rounded-xl bg-[#1F1A17] hover:bg-[#342D28] text-[#FAF7F2] text-sm sm:text-base font-serif-title tracking-wide transition-all cursor-pointer flex items-center justify-center gap-2.5 shadow-[0_4px_14px_rgba(31,26,23,0.12)] active:scale-[0.99] group"
               >
-                <Zap className="w-4 h-4 fill-white" />
-                <span>第{nextTargetLesson.number}課の特訓を始める</span>
-                <ArrowRight className="w-4 h-4 ml-1" />
+                <span>第{nextTargetLesson.number}課の実践演習に進む</span>
+                <ArrowRight className="w-4 h-4 text-stone-400 group-hover:text-white transition-colors" />
               </button>
-              <div className="text-center">
+
+              <div className="text-center pt-0.5">
                 <button
                   type="button"
                   onClick={() => {
                     sound.playTap();
                     onOpenTextbook(nextTargetLesson.id);
                   }}
-                  className="text-xs text-stone-500 hover:text-[#B84E34] font-medium transition-colors cursor-pointer inline-flex items-center gap-1"
+                  className="text-xs text-stone-500 hover:text-[#B84E34] transition-colors cursor-pointer inline-flex items-center gap-1.5 font-normal tracking-wide"
                 >
-                  <BookOpen className="w-3.5 h-3.5" />
-                  <span>第{nextTargetLesson.number}課の要点教科書を読む</span>
+                  <BookOpen className="w-3.5 h-3.5 text-stone-400" />
+                  <span>第{nextTargetLesson.number}課の教本を開く</span>
                 </button>
               </div>
             </>
@@ -194,30 +191,32 @@ export const HankenHomeScreen: React.FC<HankenHomeScreenProps> = ({
                 sound.playTap();
                 onStartMockExam(spec.examId);
               }}
-              className="w-full py-4 px-6 rounded-2xl bg-[#B84E34] hover:bg-[#9E3B21] text-white text-sm sm:text-base font-bold transition-all cursor-pointer flex items-center justify-center gap-2 shadow-sm hover:shadow-md active:scale-[0.99]"
+              className="w-full py-4 px-6 rounded-xl bg-[#1F1A17] hover:bg-[#342D28] text-[#FAF7F2] text-sm sm:text-base font-serif-title tracking-wide transition-all cursor-pointer flex items-center justify-center gap-2.5 shadow-[0_4px_14px_rgba(31,26,23,0.12)] active:scale-[0.99]"
             >
-              <Award className="w-5 h-5" />
-              <span>全課読了！{spec.levelShort} 本番模試に挑戦する</span>
-              <ArrowRight className="w-4 h-4 ml-1" />
+              <Award className="w-4 h-4 text-amber-300" />
+              <span>全課修了 — {spec.levelShort} 実戦模試へ</span>
+              <ArrowRight className="w-4 h-4" />
             </button>
           )}
         </div>
       </section>
 
       {/* ===================================================================== */}
-      {/* 2. 公式CBT模擬試験（核心カード）                                      */}
+      {/* 2. 実力測定 総合模擬試験（端正な白地と墨のカード）                      */}
       {/* ===================================================================== */}
-      <section className="bg-[#1F1A17] text-white rounded-3xl p-5 sm:p-6 shadow-sm flex items-center justify-between gap-4">
-        <div className="space-y-1">
-          <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/10 text-[#F59E0B] text-[10px] font-bold">
-            <Award className="w-3 h-3" />
-            <span>{spec.levelShort} 公式CBT模試</span>
+      <section className="bg-white border border-[#EAE4DA] rounded-2xl p-5 sm:p-6 shadow-[0_2px_12px_rgba(42,36,33,0.02)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] tracking-wider font-bold px-2 py-0.5 rounded bg-[#FAF7F2] text-stone-600 border border-[#EAE4DA]">
+              {spec.levelShort} 実戦測定
+            </span>
+            <span className="text-xs text-stone-400 font-mono">25問 / 100点満点</span>
           </div>
-          <h3 className="font-serif-title text-base sm:text-lg font-bold text-white">
-            本番形式 模擬試験（25問・100点）
+          <h3 className="font-serif-title text-base sm:text-lg font-bold text-[#2A2421]">
+            本番形式 総合模擬試験
           </h3>
-          <p className="text-xs text-stone-300 font-normal">
-            筆記・聞き取り100点満点。60点合格を即時判定。
+          <p className="text-xs text-stone-500 font-normal leading-relaxed">
+            筆記・聞き取りの到達度と合格ライン（60点）を精密測定します。
           </p>
         </div>
 
@@ -227,24 +226,24 @@ export const HankenHomeScreen: React.FC<HankenHomeScreenProps> = ({
             sound.playTap();
             onStartMockExam(spec.examId);
           }}
-          className="px-4 py-2.5 rounded-xl bg-white hover:bg-stone-100 text-[#1F1A17] font-bold text-xs shadow transition-all cursor-pointer shrink-0 whitespace-nowrap active:scale-95"
+          className="self-start sm:self-center px-5 py-2.5 rounded-xl bg-white border border-[#2A2421] text-[#2A2421] hover:bg-[#2A2421] hover:text-[#FAF7F2] font-serif-title text-xs tracking-wider transition-all cursor-pointer shrink-0 whitespace-nowrap shadow-2xs active:scale-95"
         >
-          受験する ➔
+          模試を受験する ➔
         </button>
       </section>
 
       {/* ===================================================================== */}
-      {/* 3. カリキュラム（全課・迷わない1列ロードマップ）                       */}
+      {/* 3. 履修体系（全課・目次仕立ての美しい1列構成）                          */}
       {/* ===================================================================== */}
       <section className="space-y-3 pt-2">
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#B84E34]" />
-            <h3 className="font-serif-title text-sm font-bold text-[#2A2421]">
-              {spec.levelShort} 出題カリキュラム（全{currentGradeLessons.length}課）
+            <span className="w-1.5 h-1.5 rounded-full bg-[#B84E34]" />
+            <h3 className="font-serif-title text-sm font-bold text-[#2A2421] tracking-wide">
+              {spec.levelShort} 履修体系（全{currentGradeLessons.length}課）
             </h3>
           </div>
-          <span className="text-xs font-mono font-medium text-stone-500">
+          <span className="text-xs font-mono font-normal text-stone-400">
             第{spec.startLesson}課 〜 第{spec.endLesson}課
           </span>
         </div>
@@ -262,50 +261,50 @@ export const HankenHomeScreen: React.FC<HankenHomeScreenProps> = ({
                   sound.playTap();
                   onOpenTextbook(lesson.id);
                 }}
-                className={`p-3.5 sm:p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                className={`p-3.5 sm:p-4 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
                   isNext
-                    ? 'bg-white border-[#B84E34]/80 shadow-[0_2px_8px_rgba(184,78,52,0.12)] ring-1 ring-[#B84E34]/20'
+                    ? 'bg-white border-[#B84E34] shadow-[0_2px_10px_rgba(184,78,52,0.08)] ring-1 ring-[#B84E34]/20'
                     : isRead
-                    ? 'bg-white/80 border-[#EAE4DA] hover:border-stone-400'
-                    : 'bg-white/50 border-[#EAE4DA] hover:bg-white'
+                    ? 'bg-white/90 border-[#EAE4DA] hover:border-stone-400'
+                    : 'bg-white/50 border-[#EAE4DA]/70 hover:bg-white'
                 }`}
               >
                 {/* 左側：番号 ＆ タイトル */}
                 <div className="flex items-center gap-3 min-w-0">
                   <div
-                    className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 font-mono ${
+                    className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs shrink-0 font-mono font-medium ${
                       isCleared
-                        ? 'bg-[#FAF0EC] text-[#B84E34]'
+                        ? 'bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD]'
                         : isRead
-                        ? 'bg-stone-100 text-stone-700'
-                        : 'bg-stone-100/70 text-stone-400'
+                        ? 'bg-stone-100 text-stone-600'
+                        : 'bg-stone-100/60 text-stone-400'
                     }`}
                   >
                     {isCleared ? (
-                      <CheckCircle2 className="w-4 h-4 text-[#B84E34]" />
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#B84E34]" />
                     ) : (
                       String(lesson.number).padStart(2, '0')
                     )}
                   </div>
 
                   <div className="min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs sm:text-sm font-bold text-[#2A2421] truncate">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs sm:text-sm font-bold text-[#2A2421] truncate font-serif-title">
                         {lesson.title.replace(/^第\d+課：/, '')}
                       </span>
                       {isRead && (
-                        <span className="text-[10px] text-stone-400 font-normal shrink-0">
+                        <span className="text-[10px] text-stone-400 font-serif-title shrink-0">
                           読了
                         </span>
                       )}
                     </div>
-                    <p className="text-[11px] text-stone-500 truncate font-normal">
+                    <p className="text-[11px] text-stone-500 truncate font-normal pt-0.5">
                       {lesson.subtitle}
                     </p>
                   </div>
                 </div>
 
-                {/* 右側：特訓ボタン または 矢印 */}
+                {/* 右側：演習ボタン または 矢印 */}
                 <div className="flex items-center gap-2 shrink-0">
                   <button
                     type="button"
@@ -314,16 +313,15 @@ export const HankenHomeScreen: React.FC<HankenHomeScreenProps> = ({
                       sound.playTap();
                       onStartDrillForLesson(lesson);
                     }}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                    className={`px-3 py-1 rounded-lg text-xs font-serif-title transition-all cursor-pointer flex items-center gap-1 ${
                       isCleared
-                        ? 'bg-[#FAF0EC] text-[#B84E34] hover:bg-[#F2DFD7]'
-                        : 'bg-stone-100 hover:bg-[#FAF0EC] hover:text-[#B84E34] text-stone-700'
+                        ? 'bg-[#FAF0EC] text-[#B84E34] hover:bg-[#F2DFD7] border border-[#F0D5CD]'
+                        : 'bg-stone-100 hover:bg-[#FAF7F2] text-stone-700 hover:text-[#2A2421] border border-stone-200'
                     }`}
                   >
-                    <Zap className="w-3 h-3" />
-                    <span>特訓</span>
+                    <span>演習</span>
                   </button>
-                  <ChevronRight className="w-4 h-4 text-stone-400" />
+                  <ChevronRight className="w-3.5 h-3.5 text-stone-300" />
                 </div>
               </div>
             );
@@ -332,47 +330,49 @@ export const HankenHomeScreen: React.FC<HankenHomeScreenProps> = ({
       </section>
 
       {/* ===================================================================== */}
-      {/* 4. 他の級への切り替え・アンロック                                     */}
+      {/* 4. 級の切り替え                                                       */}
       {/* ===================================================================== */}
       <section className="space-y-2 pt-4 border-t border-[#EAE4DA]">
-        <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider px-1">
-          他の級のチャレンジ（ワンタップで切り替え）
+        <div className="text-[11px] font-serif-title tracking-wider text-stone-400 uppercase px-1">
+          他の級の修練（ワンタップで切り替え）
         </div>
 
-        {(['grade_5', 'grade_4', 'grade_3'] as ActiveHankenGrade[])
-          .filter((g) => g !== activeGrade)
-          .map((g) => {
-            const otherSpec = GRADE_SPECS[g];
-            return (
-              <div
-                key={g}
-                onClick={() => {
-                  sound.playTap();
-                  setActiveGrade(g);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                className="p-4 rounded-2xl bg-white border border-[#EAE4DA] hover:border-[#B84E34]/50 hover:bg-[#FAF0EC]/20 transition-all cursor-pointer flex items-center justify-between"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-[#FAF0EC] text-[#B84E34] flex items-center justify-center font-bold text-xs font-mono border border-[#F0D5CD]">
-                    {otherSpec.levelShort}
-                  </div>
-                  <div>
-                    <div className="text-xs font-bold text-stone-800">
-                      {otherSpec.name} ({otherSpec.tag})
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {(['grade_5', 'grade_4', 'grade_3'] as ActiveHankenGrade[])
+            .filter((g) => g !== activeGrade)
+            .map((g) => {
+              const otherSpec = GRADE_SPECS[g];
+              return (
+                <div
+                  key={g}
+                  onClick={() => {
+                    sound.playTap();
+                    setActiveGrade(g);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className="p-3.5 rounded-xl bg-white border border-[#EAE4DA] hover:border-[#2A2421]/40 transition-all cursor-pointer flex items-center justify-between group shadow-2xs"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-7 h-7 rounded-lg bg-[#FAF7F2] text-stone-700 border border-[#EAE4DA] flex items-center justify-center font-bold text-xs font-mono shrink-0">
+                      {otherSpec.levelShort}
                     </div>
-                    <div className="text-[10px] text-stone-400">
-                      第{otherSpec.startLesson}〜{otherSpec.endLesson}課 • 出題語彙 {otherSpec.wordCount}
+                    <div className="min-w-0">
+                      <div className="text-xs font-bold text-stone-800 font-serif-title truncate">
+                        {otherSpec.name}
+                      </div>
+                      <div className="text-[10px] text-stone-400 truncate">
+                        全{otherSpec.endLesson - otherSpec.startLesson + 1}課 • {otherSpec.wordCount}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <span className="text-[11px] font-bold text-[#B84E34] bg-[#FAF0EC] hover:bg-[#F2DFD7] px-3 py-1.5 rounded-xl border border-[#F0D5CD] transition-colors">
-                  {otherSpec.levelShort}に挑戦 ➔
-                </span>
-              </div>
-            );
-          })}
+                  <span className="text-[11px] font-serif-title text-stone-500 group-hover:text-[#2A2421] transition-colors shrink-0">
+                    切り替え ➔
+                  </span>
+                </div>
+              );
+            })}
+        </div>
       </section>
     </div>
   );

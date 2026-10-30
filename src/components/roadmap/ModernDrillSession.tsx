@@ -5,9 +5,7 @@ import {
   CheckCircle2,
   XCircle,
   ArrowRight,
-  RotateCcw,
   Sparkles,
-  Zap,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { QuestDrillData } from '../../data/stageMicroDrills';
@@ -71,9 +69,10 @@ export const ModernDrillSession: React.FC<ModernDrillSessionProps> = ({
       setIsFinished(true);
       sound.playVictory();
       confetti({
-        particleCount: 80,
-        spread: 70,
+        particleCount: 50,
+        spread: 60,
         origin: { y: 0.6 },
+        colors: ['#B84E34', '#FAF0EC', '#2A2421', '#F0D5CD'],
       });
       onComplete(score + (isCorrect ? 1 : 0), drill.questions.length);
     }
@@ -84,30 +83,30 @@ export const ModernDrillSession: React.FC<ModernDrillSessionProps> = ({
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#F8FAFC] flex flex-col justify-between overflow-y-auto animate-fadeIn select-none">
+    <div className="fixed inset-0 z-50 bg-[#FAF7F2] text-[#2A2421] flex flex-col justify-between overflow-y-auto animate-fadeIn select-none font-sans">
       {/* 1. ミニマル・ヘッダー */}
-      <header className="bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 sm:px-6 py-3 flex items-center justify-between gap-3 shrink-0">
-        <div className="max-w-2xl w-full mx-auto flex items-center justify-between gap-3">
+      <header className="bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#EAE4DA] px-4 sm:px-6 py-3 flex items-center justify-between gap-3 shrink-0">
+        <div className="max-w-xl w-full mx-auto flex items-center justify-between gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-stone-400 hover:text-stone-800 hover:bg-stone-100 transition-colors cursor-pointer"
             title="閉じる"
           >
             <X className="w-5 h-5" />
           </button>
 
-          {/* プログレスバー */}
-          <div className="flex-1 max-w-xs mx-2">
-            <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+          {/* プログレスバー（極細ヘアライン） */}
+          <div className="flex-1 max-w-xs mx-3">
+            <div className="w-full bg-[#EAE4DA] h-[3px] rounded-full overflow-hidden">
               <div
-                className="bg-emerald-500 h-full rounded-full transition-all duration-300"
+                className="bg-[#2A2421] h-full rounded-full transition-all duration-300"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
           </div>
 
-          <span className="text-xs font-mono font-bold text-slate-500">
+          <span className="text-xs font-mono font-medium text-stone-500">
             {questionIndex + 1} / {drill.questions.length}
           </span>
         </div>
@@ -115,19 +114,19 @@ export const ModernDrillSession: React.FC<ModernDrillSessionProps> = ({
 
       {/* 2. メイン問題領域 */}
       {!isFinished ? (
-        <main className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 max-w-2xl w-full mx-auto space-y-5">
+        <main className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 max-w-xl w-full mx-auto space-y-4">
           {/* 問題カード */}
-          <div className="bg-white border border-slate-200/90 rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-xs space-y-3">
+          <div className="bg-white border border-[#EAE4DA] rounded-2xl p-5 sm:p-7 shadow-[0_2px_12px_rgba(42,36,33,0.03)] space-y-3">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-[11px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
+              <span className="text-[10px] tracking-wider font-bold text-[#B84E34] bg-[#FAF0EC] border border-[#F0D5CD] px-2 py-0.5 rounded">
                 {drill.targetSkill}
               </span>
-              <span className="text-xs text-slate-400 font-mono">
-                QUESTION {questionIndex + 1}
+              <span className="text-xs text-stone-400 font-mono tracking-widest">
+                QUESTION {String(questionIndex + 1).padStart(2, '0')}
               </span>
             </div>
 
-            <h3 className="text-base sm:text-lg font-bold text-slate-900 leading-snug pt-1">
+            <h3 className="font-serif-title text-base sm:text-lg font-bold text-[#2A2421] leading-relaxed pt-1">
               {currentQ.question}
             </h3>
 
@@ -135,10 +134,10 @@ export const ModernDrillSession: React.FC<ModernDrillSessionProps> = ({
               <button
                 type="button"
                 onClick={() => speechService.speak(currentQ.audioText!)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold transition-all cursor-pointer mt-1 shadow-2xs"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FAF7F2] hover:bg-[#FAF0EC] text-stone-700 hover:text-[#B84E34] border border-[#EAE4DA] text-xs font-serif-title transition-all cursor-pointer mt-1 shadow-2xs"
               >
-                <Volume2 className="w-3.5 h-3.5 text-slate-600" />
-                <span>韓国語の音声を聴く</span>
+                <Volume2 className="w-3.5 h-3.5 text-stone-500" />
+                <span>音声を再生する</span>
               </button>
             )}
           </div>
@@ -150,20 +149,20 @@ export const ModernDrillSession: React.FC<ModernDrillSessionProps> = ({
               const isCorrectOpt = optIdx === currentQ.correctIndex;
 
               let tileClass =
-                'bg-white border border-slate-200 text-slate-800 hover:bg-slate-50 hover:border-slate-300 shadow-2xs';
+                'bg-white border border-[#EAE4DA] text-[#2A2421] hover:border-stone-400 shadow-2xs';
 
               if (isSelected && !isAnswered) {
                 tileClass =
-                  'bg-emerald-50/80 border-2 border-emerald-600 text-emerald-950 shadow-2xs font-semibold';
+                  'bg-[#FAF0EC] border-2 border-[#B84E34] text-[#2A2421] shadow-2xs font-bold';
               } else if (isAnswered) {
                 if (isCorrectOpt) {
                   tileClass =
-                    'bg-emerald-50 border-2 border-emerald-600 text-emerald-950 font-bold';
+                    'bg-[#FAF7F2] border-2 border-stone-800 text-[#2A2421] font-bold';
                 } else if (isSelected && !isCorrectOpt) {
                   tileClass =
-                    'bg-rose-50 border-2 border-rose-400 text-rose-900 line-through opacity-80';
+                    'bg-stone-50 border-2 border-stone-300 text-stone-400 line-through opacity-75';
                 } else {
-                  tileClass = 'bg-slate-50 border border-slate-200 text-slate-400 opacity-50';
+                  tileClass = 'bg-stone-50/60 border border-[#EAE4DA] text-stone-400 opacity-50';
                 }
               }
 
@@ -177,22 +176,22 @@ export const ModernDrillSession: React.FC<ModernDrillSessionProps> = ({
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <span
-                      className={`w-6 h-6 rounded-lg text-xs font-bold flex items-center justify-center shrink-0 border ${
+                      className={`w-6 h-6 rounded-lg text-xs font-mono font-medium flex items-center justify-center shrink-0 border ${
                         isSelected && !isAnswered
-                          ? 'bg-emerald-600 text-white border-emerald-600'
-                          : 'bg-slate-100 text-slate-600 border-slate-200'
+                          ? 'bg-[#B84E34] text-white border-[#B84E34]'
+                          : 'bg-stone-100 text-stone-600 border-[#EAE4DA]'
                       }`}
                     >
                       {optIdx + 1}
                     </span>
-                    <span className="leading-relaxed">{opt}</span>
+                    <span className="leading-relaxed font-serif-kr text-sm">{opt}</span>
                   </div>
 
                   {isAnswered && isCorrectOpt && (
-                    <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 ml-2" />
+                    <CheckCircle2 className="w-5 h-5 text-stone-800 shrink-0 ml-2" />
                   )}
                   {isAnswered && isSelected && !isCorrectOpt && (
-                    <XCircle className="w-5 h-5 text-rose-600 shrink-0 ml-2" />
+                    <XCircle className="w-5 h-5 text-stone-400 shrink-0 ml-2" />
                   )}
                 </button>
               );
@@ -200,34 +199,27 @@ export const ModernDrillSession: React.FC<ModernDrillSessionProps> = ({
           </div>
         </main>
       ) : (
-        /* 終了リザルト画面 */
+        /* 終了リザルト画面（Quiet Luxury） */
         <main className="flex-1 overflow-y-auto px-4 py-8 flex flex-col items-center justify-center max-w-md w-full mx-auto space-y-6">
-          <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center">
-            <Sparkles className="w-8 h-8" />
+          <div className="w-14 h-14 rounded-2xl bg-white border border-[#EAE4DA] shadow-2xs text-[#B84E34] flex items-center justify-center">
+            <Sparkles className="w-6 h-6" />
           </div>
 
-          <div className="text-center space-y-1">
-            <h2 className="text-2xl font-bold text-slate-900">特訓完了！</h2>
-            <p className="text-xs sm:text-sm text-slate-500 font-medium">
-              {drill.title} を完了しました
+          <div className="text-center space-y-1.5">
+            <h2 className="font-serif-title text-2xl font-bold text-[#2A2421]">演習修了</h2>
+            <p className="text-xs sm:text-sm text-stone-500 font-normal">
+              {drill.title} の全問を解答しました
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 w-full">
-            <div className="bg-white border border-slate-200 rounded-xl p-4 text-center shadow-2xs">
-              <span className="text-[11px] font-medium text-slate-400 block mb-1">正解スコア</span>
-              <span className="text-2xl font-bold text-emerald-600 font-mono">
-                {score} / {drill.questions.length}
-              </span>
-            </div>
-
-            <div className="bg-white border border-slate-200 rounded-xl p-4 text-center shadow-2xs">
-              <span className="text-[11px] font-medium text-slate-400 block mb-1">獲得XP</span>
-              <span className="text-2xl font-bold text-amber-600 font-mono flex items-center justify-center gap-1">
-                <Zap className="w-4 h-4 fill-amber-500 text-amber-500" />
-                +{score * 20 + 20} XP
-              </span>
-            </div>
+          <div className="bg-white border border-[#EAE4DA] rounded-2xl p-5 w-full text-center shadow-2xs space-y-1">
+            <span className="text-[11px] font-serif-title tracking-wider text-stone-400 uppercase block">正解到達度</span>
+            <span className="text-3xl font-bold text-[#2A2421] font-mono">
+              {score} / {drill.questions.length}
+            </span>
+            <p className="text-xs text-stone-500 pt-1">
+              {score === drill.questions.length ? '完璧な理解に達しています' : '教本で復習し、確かな知識として定着させましょう'}
+            </p>
           </div>
         </main>
       )}
@@ -237,29 +229,29 @@ export const ModernDrillSession: React.FC<ModernDrillSessionProps> = ({
         <footer
           className={`w-full p-4 sm:p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] border-t transition-all shrink-0 ${
             !isAnswered
-              ? 'bg-white border-slate-200'
+              ? 'bg-white border-[#EAE4DA]'
               : isCorrect
-              ? 'bg-emerald-50/90 border-emerald-200'
-              : 'bg-rose-50/90 border-rose-200'
+              ? 'bg-[#FAF7F2] border-[#EAE4DA]'
+              : 'bg-[#FAF0EC]/60 border-[#F0D5CD]'
           }`}
         >
-          <div className="max-w-2xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="max-w-xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="min-w-0 flex-1">
               {!isAnswered ? (
-                <p className="text-xs text-slate-400 font-medium">
-                  数字キー(1〜4)またはタップで選択してください
+                <p className="text-xs text-stone-400 font-normal tracking-wide">
+                  選択肢をタップして解答してください
                 </p>
               ) : isCorrect ? (
                 <div className="space-y-0.5">
-                  <span className="text-xs font-bold text-emerald-800 block">正解！完璧です</span>
-                  <p className="text-xs text-slate-700 font-normal leading-relaxed">{currentQ.explanation}</p>
+                  <span className="text-xs font-bold text-stone-800 font-serif-title block">正解です</span>
+                  <p className="text-xs text-stone-600 font-normal leading-relaxed">{currentQ.explanation}</p>
                 </div>
               ) : (
                 <div className="space-y-0.5">
-                  <span className="text-xs font-bold text-rose-800 block">
-                    正解: {currentQ.options[currentQ.correctIndex]}
+                  <span className="text-xs font-bold text-[#B84E34] font-serif-title block">
+                    正答: {currentQ.options[currentQ.correctIndex]}
                   </span>
-                  <p className="text-xs text-slate-700 font-normal leading-relaxed">{currentQ.explanation}</p>
+                  <p className="text-xs text-stone-600 font-normal leading-relaxed">{currentQ.explanation}</p>
                 </div>
               )}
             </div>
@@ -270,10 +262,10 @@ export const ModernDrillSession: React.FC<ModernDrillSessionProps> = ({
                   type="button"
                   disabled={selectedOption === null}
                   onClick={handleCheck}
-                  className={`w-full sm:w-36 py-3 px-5 rounded-xl font-bold text-xs sm:text-sm transition-all cursor-pointer ${
+                  className={`w-full sm:w-36 py-3 px-5 rounded-xl font-serif-title text-xs sm:text-sm tracking-wide transition-all cursor-pointer ${
                     selectedOption !== null
-                      ? 'bg-slate-900 hover:bg-slate-800 text-white shadow-2xs'
-                      : 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
+                      ? 'bg-[#1F1A17] hover:bg-[#342D28] text-white shadow-2xs'
+                      : 'bg-stone-100 text-stone-400 cursor-not-allowed border border-[#EAE4DA]'
                   }`}
                 >
                   確認する
@@ -282,13 +274,9 @@ export const ModernDrillSession: React.FC<ModernDrillSessionProps> = ({
                 <button
                   type="button"
                   onClick={handleNext}
-                  className={`w-full sm:w-36 py-3 px-5 rounded-xl font-bold text-xs sm:text-sm transition-all cursor-pointer flex items-center justify-center gap-2 shadow-2xs ${
-                    isCorrect
-                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                      : 'bg-slate-900 hover:bg-slate-800 text-white'
-                  }`}
+                  className="w-full sm:w-36 py-3 px-5 rounded-xl font-serif-title text-xs sm:text-sm tracking-wide transition-all cursor-pointer flex items-center justify-center gap-2 shadow-2xs bg-[#1F1A17] hover:bg-[#342D28] text-white"
                 >
-                  <span>{questionIndex < drill.questions.length - 1 ? '次の問題' : '完了する'}</span>
+                  <span>{questionIndex < drill.questions.length - 1 ? '次の設問' : '完了する'}</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               )}
@@ -296,14 +284,14 @@ export const ModernDrillSession: React.FC<ModernDrillSessionProps> = ({
           </div>
         </footer>
       ) : (
-        <footer className="w-full p-4 sm:p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] bg-white border-t border-slate-200 shrink-0">
+        <footer className="w-full p-4 sm:p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] bg-white border-t border-[#EAE4DA] shrink-0">
           <div className="max-w-md mx-auto">
             <button
               type="button"
               onClick={onClose}
-              className="w-full py-3 px-5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm shadow-2xs transition-all cursor-pointer flex items-center justify-center gap-2"
+              className="w-full py-3.5 px-5 rounded-xl bg-[#1F1A17] hover:bg-[#342D28] text-white font-serif-title text-sm tracking-wide shadow-2xs transition-all cursor-pointer flex items-center justify-center gap-2"
             >
-              <span>学習を続ける</span>
+              <span>修練一覧に戻る</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>

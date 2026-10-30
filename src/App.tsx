@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import {
-  Flame,
-  Zap,
   ChevronLeft,
 } from 'lucide-react';
 import { HankenHomeScreen } from './components/home/HankenHomeScreen';
@@ -113,9 +111,9 @@ export const App: React.FC = () => {
                   sound.playTap();
                   setActiveView('home');
                 }}
-                className="flex items-center gap-1 py-1.5 px-3 rounded-xl bg-white border border-[#EAE4DA] text-xs font-bold text-stone-700 hover:text-[#B84E34] transition-all cursor-pointer shadow-2xs shrink-0"
+                className="flex items-center gap-1 py-1 px-2.5 rounded-lg bg-white border border-[#EAE4DA] text-xs font-medium text-stone-600 hover:text-[#2A2421] transition-all cursor-pointer shadow-2xs shrink-0"
               >
-                <ChevronLeft className="w-4 h-4 text-stone-500" />
+                <ChevronLeft className="w-4 h-4 text-stone-400" />
                 <span>ホーム</span>
               </button>
             ) : null}
@@ -125,49 +123,35 @@ export const App: React.FC = () => {
                 sound.playTap();
                 setActiveView('home');
               }}
-              className="flex items-center gap-2 cursor-pointer group min-w-0"
+              className="flex items-center gap-2.5 cursor-pointer group min-w-0"
             >
-              <div className="w-8 h-8 rounded-xl overflow-hidden border border-[#EAE4DA] shadow-2xs group-hover:scale-105 transition-all shrink-0 bg-white">
+              <div className="w-8 h-8 rounded-lg overflow-hidden border border-[#EAE4DA] shadow-2xs group-hover:scale-105 transition-all shrink-0 bg-white">
                 <img
                   src={hanmoaLogo}
                   alt="HanMoa Logo"
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div className="flex items-center gap-2 min-w-0">
-                <span className="font-serif-title font-bold text-lg tracking-tight text-[#2A2421] shrink-0">
+              <div className="flex items-baseline gap-2 min-w-0">
+                <span className="font-serif-title font-bold text-lg tracking-wider text-[#2A2421] shrink-0">
                   HanMoa
                 </span>
-                {activeView === 'home' && (
-                  <span className="hidden sm:inline-block text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD] whitespace-nowrap">
-                    ハン検 特化
-                  </span>
-                )}
+                <span className="text-[10px] font-serif-title tracking-widest text-stone-400 uppercase hidden xs:inline">
+                  한모아
+                </span>
               </div>
             </div>
           </div>
 
-          {/* 右側：ストリーク ＆ XP（洗練されたインジケータ） */}
-          <div className="flex items-center gap-2 shrink-0 select-none">
-            {/* ストリーク（細線・落ち着いた朱色） */}
+          {/* 右側：静寂な佇まいを壊さない極細インジケータ */}
+          <div className="flex items-center gap-2.5 shrink-0 select-none">
             <div
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white border border-[#EAE4DA] text-stone-800 text-xs shadow-2xs"
-              title={`${studyProgress.streakDays}日連続学習中`}
+              className="flex items-center gap-1.5 px-2.5 py-1 text-stone-600 text-xs font-serif-title"
+              title={`${studyProgress.streakDays}日連続修練中`}
             >
-              <Flame className="w-3.5 h-3.5 text-[#B84E34]" />
-              <span className="font-mono font-bold text-[11px] text-stone-700">
-                {studyProgress.streakDays}日
-              </span>
-            </div>
-
-            {/* XP（落ち着いたアンバーゴールド） */}
-            <div
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white border border-[#EAE4DA] text-stone-800 text-xs shadow-2xs"
-              title={`累計経験値: ${studyProgress.xp} XP`}
-            >
-              <Zap className="w-3.5 h-3.5 text-amber-600" />
-              <span className="font-mono font-bold text-[11px] text-stone-700">
-                {studyProgress.xp} XP
+              <span className="w-1.5 h-1.5 rounded-full bg-[#B84E34]" />
+              <span className="tracking-wide text-[11px] sm:text-xs font-medium">
+                {studyProgress.streakDays}日 修練
               </span>
             </div>
           </div>
