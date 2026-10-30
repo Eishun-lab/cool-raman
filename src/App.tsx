@@ -6,6 +6,7 @@ import { HankenHomeScreen } from './components/home/HankenHomeScreen';
 import { HankenTextbookView } from './components/textbook/HankenTextbookView';
 import { MockExamView } from './components/mockExam/MockExamView';
 import { ModernDrillSession } from './components/roadmap/ModernDrillSession';
+import { ReviewSessionModal } from './components/review/ReviewSessionModal';
 import { ExamType } from './types/mockExam';
 import { LessonData } from './types';
 import { QuestDrillData } from './data/stageMicroDrills';
@@ -34,6 +35,9 @@ export const App: React.FC = () => {
   // 実行中の特訓ドリル
   const [activeDrill, setActiveDrill] = useState<QuestDrillData | null>(null);
   const [currentDrillLessonId, setCurrentDrillLessonId] = useState<string | null>(null);
+
+  // 弱点復習モーダル
+  const [isReviewOpen, setIsReviewOpen] = useState(false);
 
   // レッスン選択・読了ハンドラ
   const handleSelectLesson = (lessonId: string) => {
@@ -167,6 +171,7 @@ export const App: React.FC = () => {
             onStartDrillForLesson={handleStartDrillForLesson}
             onStartTodayDrill={handleStartTodayDrill}
             onStartMockExam={handleStartMockExam}
+            onStartReview={() => setIsReviewOpen(true)}
           />
         )}
 
@@ -201,8 +206,23 @@ export const App: React.FC = () => {
           onClose={() => {
             setActiveDrill(null);
             setCurrentDrillLessonId(null);
+            setStudyProgress(getInitialStudyProgress());
           }}
           onComplete={handleDrillComplete}
+        />
+      )}
+
+      {/* 🎯 弱点復習セッション モーダル */}
+      {isReviewOpen && studyProgress.wrongQuestions?.length > 0 && (
+        <ReviewSessionModal
+          questions={studyProgress.wrongQuestions}
+          onClose={() => {
+            setIsReviewOpen(false);
+            setStudyProgress(getInitialStudyProgress());
+          }}
+          onRefresh={() => {
+            setStudyProgress(getInitialStudyProgress());
+          }}
         />
       )}
     </div>

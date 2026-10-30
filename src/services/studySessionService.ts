@@ -2,6 +2,19 @@
 // 📚 HanMoa 学習セッション ＆ 進捗管理サービス (SkillStackモデル準拠)
 // ==============================================================================
 
+export interface WrongQuestionRecord {
+  id: string; // 一意キー (例: `drill-lesson-1-q0` または `mock-hanken_5-q3`)
+  sourceTitle: string; // 例: "第1課 実践演習" または "5級 模擬試験"
+  question: string;
+  instruction?: string;
+  passage?: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+  audioText?: string;
+  addedAt: string; // YYYY-MM-DD
+}
+
 export interface StudyProgressState {
   lastReadLessonId: string | null;
   readLessonIds: Record<string, boolean>; // lessonId -> true
@@ -9,6 +22,7 @@ export interface StudyProgressState {
   lastActiveDate: string; // YYYY-MM-DD
   streakDays: number;
   xp: number;
+  wrongQuestions: WrongQuestionRecord[]; // 弱点復習リスト
 }
 
 const STORAGE_KEY = 'hanmoa_study_progress_v3';
@@ -47,6 +61,7 @@ export const getInitialStudyProgress = (): StudyProgressState => {
         lastActiveDate: parsed.lastActiveDate || today,
         streakDays: Math.max(1, parsed.streakDays || 1),
         xp: parsed.xp || 120,
+        wrongQuestions: parsed.wrongQuestions || [],
       };
     }
   } catch (e) {
@@ -61,6 +76,7 @@ export const getInitialStudyProgress = (): StudyProgressState => {
     lastActiveDate: today,
     streakDays: 1,
     xp: 120,
+    wrongQuestions: [],
   };
 };
 
@@ -70,4 +86,31 @@ export const saveStudyProgress = (state: StudyProgressState): void => {
   } catch (e) {
     console.error('Failed to save study progress', e);
   }
+};
+
+/**
+ * 間違えた問題を弱点リストに追加（重複は上書き更新）
+ */
+export const recordWrongQuestion = (record: WrongQuestionRecord): void => {
+  const state = getInitialStudyProgress();
+  const existingIdx = state.wrongQuestions.findIndex((q) => q.id === record.id);
+  if (existingIdx >= 0) {
+    state.wrongQuestions[existingIdx] = record;
+  } else {
+    state.wrongQuestions.unshift(record);
+  }
+  // 最大100問までに制限
+  if (state.wrongQuestions.length > 100) {
+    state.wrongQuestions = state.wrongQuestions.slice(0, 100);
+  }
+  saveStudyProgress(state);
+};
+
+/**
+ * 復習で正解した問題を弱点リストから解消
+ */
+export const resolveWrongQuestion = (questionId: string): void => {
+  const state = getInitialStudyProgress();
+  state.wrongQuestions = state.wrongQuestions.filter((q) => q.id !== questionId);
+  saveStudyProgress(state);
 };

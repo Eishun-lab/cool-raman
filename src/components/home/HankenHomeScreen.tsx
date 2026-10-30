@@ -19,6 +19,7 @@ interface HankenHomeScreenProps {
   onStartDrillForLesson: (lesson: LessonData) => void;
   onStartTodayDrill: () => void;
   onStartMockExam: (examId: 'hanken_5' | 'hanken_4' | 'hanken_3') => void;
+  onStartReview?: () => void;
 }
 
 const GRADE_SPECS: Record<
@@ -79,9 +80,12 @@ export const HankenHomeScreen: React.FC<HankenHomeScreenProps> = ({
   onOpenTextbook,
   onStartDrillForLesson,
   onStartMockExam,
+  onStartReview,
 }) => {
   const [activeGrade, setActiveGrade] = useState<ActiveHankenGrade>('grade_5');
   const spec = GRADE_SPECS[activeGrade];
+
+  const wrongCount = progressState.wrongQuestions?.length || 0;
 
   // 対象級のレッスン抽出
   const currentGradeLessons = useMemo(() => {
@@ -202,7 +206,40 @@ export const HankenHomeScreen: React.FC<HankenHomeScreenProps> = ({
       </section>
 
       {/* ===================================================================== */}
-      {/* 2. 実力測定 総合模擬試験（端正な白地と墨のカード）                      */}
+      {/* 2. 弱点復習（未習得問題がある場合のみ表示されるQuiet Luxury導線）       */}
+      {/* ===================================================================== */}
+      {wrongCount > 0 && (
+        <section className="bg-white border border-[#EAE4DA] rounded-2xl p-4 sm:p-5 shadow-[0_2px_12px_rgba(42,36,33,0.02)] flex items-center justify-between gap-3 animate-fadeIn">
+          <div className="space-y-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#B84E34]" />
+              <span className="text-[10px] tracking-wider font-bold px-2 py-0.5 rounded bg-[#FAF0EC] text-[#B84E34] border border-[#F0D5CD]">
+                弱点修練
+              </span>
+              <span className="text-xs font-mono font-medium text-stone-500">
+                未克服 {wrongCount} 問
+              </span>
+            </div>
+            <p className="text-xs text-stone-500 font-normal truncate">
+              演習・模試で間違えた設問を再度解いて克服します。
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              sound.playTap();
+              onStartReview?.();
+            }}
+            className="px-4 py-2 rounded-xl bg-white border border-[#2A2421] text-[#2A2421] hover:bg-[#2A2421] hover:text-[#FAF7F2] font-serif-title text-xs tracking-wider transition-all cursor-pointer shrink-0 whitespace-nowrap shadow-2xs active:scale-95"
+          >
+            復習する ➔
+          </button>
+        </section>
+      )}
+
+      {/* ===================================================================== */}
+      {/* 3. 実力測定 総合模擬試験（端正な白地と墨のカード）                      */}
       {/* ===================================================================== */}
       <section className="bg-white border border-[#EAE4DA] rounded-2xl p-5 sm:p-6 shadow-[0_2px_12px_rgba(42,36,33,0.02)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1.5">

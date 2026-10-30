@@ -10,14 +10,26 @@
     <meta name="description" content="ハングル能力検定試験（ハン検）5級・4級・3級に特化した大人のための洗練された韓国語修練アプリ HanMoa。" />
     <link rel="icon" type="image/jpeg" href="./logo.jpg" />
     <link rel="apple-touch-icon" href="./logo.jpg" />
-    <meta property="og:title" content="HanMoa - 韓国語 総合学習＆TOPIK・ハン検 模擬試験ハブ" />
-    <meta property="og:description" content="入門からTOPIK最上級まで。教科書・文法大辞典・模擬試験・数字攻略を完全網羅。" />
+    <link rel="manifest" href="./manifest.json" />
+    <meta name="theme-color" content="#FAF7F2" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="HanMoa" />
+    <meta property="og:title" content="HanMoa - ハングル検定 5級・4級・3級 特化修練ハブ" />
+    <meta property="og:description" content="ハングル検定に特化した洗練された大人の韓国語修練アプリ。" />
     <meta property="og:image" content="./logo.jpg" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&family=Noto+Sans+KR:wght@400;500;700;800&family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Serif+JP:wght@400;500;600;700&family=Noto+Serif+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
   </head>
-  <body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen selection:bg-amber-200 selection:text-amber-900">
+  <body class="bg-[#FAF7F2] text-[#2A2421] font-sans antialiased min-h-screen selection:bg-[#FAF0EC] selection:text-[#B84E34]">
     <div id="root"></div>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js').catch(() => {});
+        });
+      }
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -32,6 +32,7 @@ import confetti from 'canvas-confetti';
 import { HorangiMascot } from '../mascot/HorangiMascot';
 import { speechService } from '../../utils/speech';
 import { sound } from '../../utils/audioSynth';
+import { recordWrongQuestion, getTodayDateString } from '../../services/studySessionService';
 import {
   getInitialGamificationState,
   saveGamificationState,
@@ -339,6 +340,29 @@ export const MockExamView: React.FC<MockExamViewProps> = ({
     setShowFinishConfirm(false);
     setViewState('result');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // 間違えた問題を弱点復習リストに自動登録
+    try {
+      activeExam.questions.forEach((q) => {
+        const userAns = userAnswers[q.id];
+        if (userAns !== q.correctIndex) {
+          recordWrongQuestion({
+            id: `mock-${activeExam.id}-${q.id}`,
+            sourceTitle: `${activeExam.levelName} 模擬試験`,
+            question: q.questionText || q.instruction,
+            instruction: q.instruction,
+            passage: q.passage,
+            options: q.options,
+            correctIndex: q.correctIndex,
+            explanation: q.explanation,
+            audioText: q.audioText,
+            addedAt: getTodayDateString(),
+          });
+        }
+      });
+    } catch (e) {
+      console.error('Failed to record wrong questions', e);
+    }
 
     // 🎮 ゲーミフィケーション報酬の付与・ボス撃破＆アンロック判定
     try {

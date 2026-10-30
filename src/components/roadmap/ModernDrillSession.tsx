@@ -11,6 +11,7 @@ import confetti from 'canvas-confetti';
 import { QuestDrillData } from '../../data/stageMicroDrills';
 import { speechService } from '../../utils/speech';
 import { sound } from '../../utils/audioSynth';
+import { recordWrongQuestion, getTodayDateString } from '../../services/studySessionService';
 
 interface ModernDrillSessionProps {
   drill: QuestDrillData;
@@ -55,6 +56,17 @@ export const ModernDrillSession: React.FC<ModernDrillSessionProps> = ({
       }
     } else {
       sound.playIncorrect();
+      // 弱点復習リストに自動登録
+      recordWrongQuestion({
+        id: `drill-${drill.questKey || drill.title}-q${questionIndex}`,
+        sourceTitle: drill.title,
+        question: currentQ.question,
+        options: currentQ.options,
+        correctIndex: currentQ.correctIndex,
+        explanation: currentQ.explanation,
+        audioText: currentQ.audioText,
+        addedAt: getTodayDateString(),
+      });
     }
   }, [selectedOption, isAnswered, currentQ]);
 
